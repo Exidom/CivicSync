@@ -1,16 +1,23 @@
-// testConnection.js
+require("dotenv").config();
+
+const express = require("express");
 const { Pool } = require("pg");
 
+const app = express();
+app.use(express.json());
+
 const pool = new Pool({
-  connectionString: "postgresql://neondb_owner:npg_FYO6tAojfEI5@ep-lively-lab-ailgp1oq-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-  ssl: { rejectUnauthorized: false },
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: true }
 });
 
-pool.query("SELECT NOW()", (err, res) => {
-  if (err) {
-    console.error(err);
-  } else {
-    console.log(res.rows);
-  }
-  pool.end();
+// Test route
+app.get("/", async (req, res) => {
+  const result = await pool.query("SELECT NOW()");
+  res.json(result.rows);
+});
+
+// Start server
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
 });
