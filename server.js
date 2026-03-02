@@ -16,6 +16,11 @@ app.set("view engine", "ejs");
 const cors = require('cors');
 app.use(cors());
 
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send('Something broke!');
+});
+
 app.get("/login", (req, res) => {
   res.render("login"); 
 });
@@ -23,43 +28,60 @@ app.get("/login", (req, res) => {
 
 
 const checkAuth = async (req, res, next) => {
-    const token = req.headers.authorization?.split('Bearer ')[1];
-    
-    if (!token) return res.status(401).json({ error: "bad token" });
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: "Missing or invalid token format" });
+    }
+
+    const token = authHeader.split('Bearer ')[1];
 
     try {
-        const decodedToken = await admin.auth().verifyIdToken(token);
+        const checkRevoked = false;//true for data clear?
+        const decodedToken = await admin.auth().verifyIdToken(token, checkRevoked);
         req.user = decodedToken;
         next();
     } catch (error) {
-        console.error("Auth Error Code:", error.code);
+        console.error("Auth Error:", error.code); 
 
-        if (error.code === 'auth/id-token-expired') {
-            return res.status(401).json({ error: "bad token" });
-        } else if (error.code === 'auth/argument-error') {
-            return res.status(401).json({ error: "bad token" });
+        if (error.code === 'auth/id-token-revoked') {
+            return res.status(401).json({ error: "Session revoked. Please login again." });
         }
-        return res.status(403).json({ error: "invalid permissions" });
+        
+        if (error.code === 'auth/id-token-expired') {
+            return res.status(401).json({ error: "Session expired." });
+        }
+
+        return res.status(401).json({ error: "Authentication failed" });
     }
 };
 
-
 app.get("/time", checkAuth, async (req, res) => {
-  const result = await db.query("SELECT NOW()");
-  res.json({
-    time: result.rows,
-    user: req.user.email
-  });
+  try {
+    const result = await db.query("SELECT NOW()");
+    res.json({
+      time: result.rows,
+      user: req.user.email
+    });
+  } catch (dbError) {
+    console.error("Database failure:", dbError);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 app.post("/update-profile", checkAuth, async (req, res) => {
-
+  try{
     const { username, picture } = req.body;
     const uid = req.user.uid;
 
-    console.log(`User ${uid} wants to change theme to ${picture}`);
+    console.log(`User ${req.user.email} wants to change theme to ${picture}`);
 
-    res.json({ status: "Profile updated for " + req.user.email });
+    res.json({ 
+      status: "Profile updated for " + req.user.email 
+    });
+  } catch (dbError) {
+    console.error("Database failure:", dbError);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 

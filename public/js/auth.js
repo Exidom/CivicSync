@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onIdTokenChanged, signOut} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBEOnJWtZyxaYacVuzp7D-JYgekrtgOUGU",
@@ -11,77 +11,64 @@ const firebaseConfig = {
     measurementId: "G-YNM99SDCLL"
 };
 
-
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
+const getAuthenticatedUser = () => {
+    return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+        });
+    });
+};
+
 export async function handleGoogleLogin() {
     try {
         const result = await signInWithPopup(auth, provider);
-        const idToken = await result.user.getIdToken();
-        
-        //(Safe for browser-only use)
-        localStorage.setItem("firebaseToken", idToken);
-        localStorage.setItem("userEmail", result.user.email);
-        return result.user;
+        return result;
 
     } catch (error) {
         throw error;
     }
 }
 
+const getRequestOptions = (token, method, body) => ({
+    method: method,
+    headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    },
+    ...(body && { body: JSON.stringify(body) })
+});
+
 export async function fetchWithAuth(url, method = "GET", body = null) {
 
-    const token = localStorage.getItem("firebaseToken");
-    if (!token) {
+    let user = auth.currentUser;
+    if (!user) user = await getAuthenticatedUser();
+    if (!user) {
         window.location.href = "/login";
         return;
     }
 
-    const options = {
-        method: method,
-        headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json"
-        }
-    };
-    if (body) options.body = JSON.stringify(body);
-
     try {
-        const response = await fetch(url, options);
+        let token = await user.getIdToken();
+        let response = await fetch(url, getRequestOptions(token, method, body));      
 
         if (response.status === 401) {
-            localStorage.removeItem("firebaseToken");
+            await signOut(auth);
             window.location.href = "/login";
-            return;
+            return;//nothing
         }
 
-        if (response.status === 403) {
-            throw new Error("Permission Denied");
-        }
-
+        if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
         return await response.json();
-    } catch (err) {
-        throw err;
+    } catch (error) {
+        console.error("Fetch error:", error);
+        throw error;
     }
 }
-
-
-onIdTokenChanged(auth, async (user) => {
-    if (user) {
-        const token = await user.getIdToken();
-        localStorage.setItem("firebaseToken", token);
-        //if (window.location.href === "/login") {
-            //window.location.href = "/home";
-        //}
-    } else {
-        localStorage.removeItem("firebaseToken");
-        //if (window.location.href !== "/login") {
-        //   window.location.href = "/login";
-        //}
-    }
-});
 
 export async function handleLogout() {
     try {

@@ -10,7 +10,7 @@
 
     document.getElementById('loginBtn').onclick = async () => {
         await handleGoogleLogin();
-        document.getElementById('output').innerText = "Logged in! Token saved to LocalStorage.";
+        document.getElementById('output').innerText = "Logged in!";
     };
 
     document.getElementById('timeBtn').onclick = async () => {
@@ -27,8 +27,8 @@
     document.getElementById('postDataBtn').onclick = async () => {
         const myData = { username: "bird", picture: "penguin" };
         try {
-            const result = await fetchWithAuth("/update-profile", "POST", myData);
-            console.log("Server received data:", result);
+            const data = await fetchWithAuth("/update-profile", "POST", myData);
+            document.getElementById('output').innerText = `Server says: ${JSON.stringify(data)}`;
         } catch (err) {
             alert("Error: " + err.message);
         }
