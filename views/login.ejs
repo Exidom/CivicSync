@@ -1,0 +1,36 @@
+<button id="loginBtn">Login with Google</button>
+<button id="timeBtn">Get Server Time</button>
+<button id="logoutBtn">Logout</button>
+<button id="postDataBtn">Send Data to Server</button>
+
+<div id="output"></div>
+
+<script type="module">
+    import { handleGoogleLogin, fetchWithAuth, handleLogout } from "/js/auth.js";
+
+    document.getElementById('loginBtn').onclick = async () => {
+        await handleGoogleLogin();
+        document.getElementById('output').innerText = "Logged in! Token saved to LocalStorage.";
+    };
+
+    document.getElementById('timeBtn').onclick = async () => {
+        try {
+            const data = await fetchWithAuth("/time");
+            document.getElementById('output').innerText = `Server says: ${JSON.stringify(data)}`;
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
+
+    document.getElementById('logoutBtn').onclick = () => handleLogout();
+
+    document.getElementById('postDataBtn').onclick = async () => {
+        const myData = { username: "bird", picture: "penguin" };
+        try {
+            const result = await fetchWithAuth("/update-profile", "POST", myData);
+            console.log("Server received data:", result);
+        } catch (err) {
+            alert("Error: " + err.message);
+        }
+    };
+</script>
