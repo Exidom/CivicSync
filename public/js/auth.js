@@ -38,7 +38,7 @@ const getRequestOptions = (token, method, body) => ({
     method: method,
     headers: {
         "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"
+        "Content-Type": "application/json"//todo null for cloud
     },
     ...(body && { body: JSON.stringify(body) })
 });

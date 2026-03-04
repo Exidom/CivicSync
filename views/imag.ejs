@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Image</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+        }
+
+        #preview {
+            margin-top: 20px;
+            max-width: 400px;
+            border-radius: 8px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Upload Image</h2>
+
+<input type="file" id="imageInput" accept="image/*" />
+<br/>
+<button id="imageOutput">Upload</button>
+
+<img id="preview" />
+
+<script type="module">
+    import {fetchWithAuth} from "/js/auth.js";
+    import {uploadImage} from "/js/clin.js";
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+    async function uploadImageF() {
+        const fileInput = document.getElementById("imageInput");
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert("Please select a file.");
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            alert("Only image files allowed.");
+            return;
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+            alert("Image must be under 5MB.");
+            return;
+        }
+
+        try {
+            const result = await uploadImage(file);
+
+            console.log(result);
+
+            preview.src = result.secure_url;
+
+            preview.style.display = "block";
+
+
+        } catch (err) {
+            console.error(err);
+            alert("Upload error.");
+        }
+    }
+     document.getElementById('imageOutput').onclick = () => uploadImageF();
+</script>
+
+</body>
+</html>
