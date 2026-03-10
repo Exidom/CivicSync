@@ -1,75 +1,142 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload Image</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 40px;
-        }
+<title>User Images</title>
 
-        #preview {
-            margin-top: 20px;
-            max-width: 400px;
-            border-radius: 8px;
-        }
+<style>
+body{
+    font-family: Arial, sans-serif;
+    padding:40px;
+}
 
-        button {
-            margin-top: 10px;
-            padding: 8px 12px;
-        }
-    </style>
+.slot{
+    margin-top:25px;
+}
+
+.slot img{
+    max-width:350px;
+    display:block;
+    border-radius:8px;
+}
+
+button{
+    margin-top:8px;
+    padding:8px 12px;
+}
+</style>
+
 </head>
 <body>
 
-<h2>Upload Image</h2>
+<h2>User Images</h2>
 
-<input type="file" id="imageInput" accept="image/*" />
-<br/>
-<button id="imageOutput">Upload</button>
+<div id="slot1" class="slot">
+<img id="image1"/>
+</div>
 
-<img id="preview" />
+<div id="slot2" class="slot">
+<img id="image2"/>
+</div>
+
+<div id="slot3" class="slot">
+<img id="image3"/>
+</div>
 
 <script type="module">
-    import {fetchWithAuth} from "/js/auth.js";
-    import {uploadImage} from "/js/clin.js";
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-    async function uploadImageF() {
-        const fileInput = document.getElementById("imageInput");
-        const file = fileInput.files[0];
+import {fetchWithAuth} from "/js/auth.js";
+import {uploadImage,deleteImage} from "/js/clin.js";
 
-        if (!file) {
-            alert("Please select a file.");
-            return;
+const PAGE_UID = "QV3cMyPZEpgdLgC5ISzPe9iE8bi1";
+const viewerUID = localStorage.getItem("uid");
+const isOwner = viewerUID === PAGE_UID;
+
+try{
+
+    const user = await fetchWithAuth("/get-user","POST",{uid: PAGE_UID});
+
+    for(let i=1;i<=3;i++){
+
+        const slot = document.getElementById(`slot${i}`);
+        const img = document.getElementById(`image${i}`);
+
+        const link = user[`ilink${i}`];
+        const pid = user[`pid${i}`];
+
+        if(link){
+
+            img.src = link;
+            img.style.display="block";
+
+            if(isOwner){
+
+                const del = document.createElement("button");
+                del.innerText="Delete";
+
+                del.onclick = async ()=>{
+
+                    await deleteImage(pid,i);
+
+                    location.reload();
+                };
+
+                slot.appendChild(del);
+            }
+
+        }
+        else{
+
+            img.style.display="none";
+
+            if(isOwner){
+
+                const uploadBtn=document.createElement("button");
+                uploadBtn.innerText="Upload Image";
+
+                uploadBtn.onclick = ()=>uploadToSlot(i);
+
+                slot.appendChild(uploadBtn);
+            }
         }
 
-        if (!file.type.startsWith("image/")) {
-            alert("Only image files allowed.");
-            return;
-        }
-
-        if (file.size > MAX_FILE_SIZE) {
-            alert("Image must be under 5MB.");
-            return;
-        }
-
-        try {
-            const result = await uploadImage(file);
-
-            console.log(result);
-
-            preview.src = result.secure_url;
-
-            preview.style.display = "block";
-
-
-        } catch (err) {
-            console.error(err);
-            alert("Upload error.");
-        }
     }
-     document.getElementById('imageOutput').onclick = () => uploadImageF();
+
+}catch(err){
+
+    console.error(err);
+    alert("Failed to load images");
+
+}
+
+async function uploadToSlot(slotNum){
+
+    const input=document.createElement("input");
+    input.type="file";
+    input.accept="image/*";
+
+    input.onchange = async ()=>{
+
+        const file=input.files[0];
+
+        if(!file) return;
+
+        try{
+
+            const result = await uploadImage(file,slotNum);
+            location.reload();
+
+        }catch(err){
+
+            console.error(err);
+            alert("Upload failed");
+
+        }
+
+    };
+
+    input.click();
+}
+
 </script>
 
 </body>

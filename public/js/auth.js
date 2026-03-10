@@ -27,6 +27,8 @@ const getAuthenticatedUser = () => {
 export async function handleGoogleLogin() {
     try {
         const result = await signInWithPopup(auth, provider);
+        const res = await fetchWithAuth("/create-user", "POST");
+        localStorage.setItem('uid', res.uid);
         return result;
 
     } catch (error) {
@@ -38,7 +40,7 @@ const getRequestOptions = (token, method, body) => ({
     method: method,
     headers: {
         "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json"//todo null for cloud
+        "Content-Type": "application/json"
     },
     ...(body && { body: JSON.stringify(body) })
 });
@@ -61,11 +63,13 @@ export async function fetchWithAuth(url, method = "GET", body = null) {
             window.location.href = "/login";
             return;//nothing
         }
+        
+        if (!response.ok) {
+            throw new Error(`Server Error: ${response.statusText}`);
+        }
 
-        if (!response.ok) throw new Error(`Server Error: ${response.statusText}`);
         return await response.json();
     } catch (error) {
-        console.error("Fetch error:", error);
         throw error;
     }
 }
@@ -73,6 +77,7 @@ export async function fetchWithAuth(url, method = "GET", body = null) {
 export async function handleLogout() {
     try {
         await signOut(auth);
+        localStorage.removeItem('uid');
     } catch (error) {
         throw error;
     }
