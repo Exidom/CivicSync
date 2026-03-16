@@ -31,17 +31,13 @@ export async function uploadImage(file,spot,groupName=null) {
         }
     );
 
-
     if (!response.ok) {
-        const error = await response.text();
-        //console.error(error);
-        throw new Error("Cloudinary upload failed");
+        throw new Error(`Server Error: ${response.error}`);
     }
     
     const data = await response.json();
 
-    //todo save to database, delete other stuff if occupied
-    const myData = { "x": spot,"iLink": data.secure_url,"pid": data.public_id}
+    const myData = { "x": spot,"iLink": data.secure_url,"pid": data.public_id,"group":groupName}
     await fetchWithAuth("/set-ilink", "POST", myData);
 
 

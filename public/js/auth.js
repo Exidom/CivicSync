@@ -65,7 +65,7 @@ export async function fetchWithAuth(url, method = "GET", body = null) {
         }
         
         if (!response.ok) {
-            throw new Error(`Server Error: ${response.statusText}`);
+            throw new Error(`Server Error: ${response.error}`);
         }
 
         return await response.json();
