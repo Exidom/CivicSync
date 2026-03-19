@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CivicSync Create Groups Page</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <h1>Civic Sync</h1>
+  <!-- TODO: Add way to where users get redirected to the login page if they are not logged in first and then redirected back -->
+  <div id="userInfo" style="display: flex; align-items: center; gap: 10px;">
+    <img id="userPic" src="" alt="Profile" width="40" height="40" style="border-radius: 50%;">
+    <span id="userName"></span>
+  </div>
+
+  <nav>
+    <a href = "serviceOppotunities.html">Volunteer Now!</a>
+    <a href = "service.html">Need Volunteers?</a>
+    <a href = "aboutUs.html">About Us</a>
+  </nav>
+
+
+  <div id="content"></div>
+
+  <h2>Want to Create a Group?</h2>
+  <h2>Start Below!</h2>
+  <form id="createGroupForm">
+    <label for="email">Group Email</label>
+    <input type="email" id="groupEmail" placeholder="Enter your group email" required>
+
+    <label for="firstName">Group Name</label>
+    <input type="text" id="groupName" placeholder="Enter your group name" required>
+
+    <label for="phone">Group Phone Number</label>
+    <input type="tel" id="phone" placeholder="Enter your phone number">
+
+    <label for="photo">Profile Picture</label>
+    <input type="file" id="photo" accept="image/*">
+
+    <button type="submit">Save Profile</button>
+  </form>
+
+  <script src="app.js"></script>
+</body>
+
+<footer>
+  <nav>
+    <p> Follow Us: </p>
+    <button onclick>Facebook</button>
+    <button onclick>Instagram</button>
+    <button onclick>Twitter</button>
+    <button onclick>Youtube</button>
+  </nav>
+  <nav>
+    <p> Contact Us At: </p>
+    <p>XYZ Address</p>
+    <p> 111-111-1111 </p>
+    <p>contactus@civicsync.org</p>
+  </nav>
+</footer>
+</html>
