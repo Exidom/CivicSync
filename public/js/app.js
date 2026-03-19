@@ -1,7 +1,7 @@
 const API_URL = "http://localhost:5000"; // adjust if needed
 
 // Load Services
-async function loadServices() {
+async function loadOpportunities() {
   const res = await fetch(`${API_URL}/services`);
   const services = await res.json();
 
@@ -34,7 +34,7 @@ async function apply(serviceId) {
 }
 
 // Load Groups
-async function loadGroups() {
+async function loadOrganizations() {
   const res = await fetch(`${API_URL}/groups`);
   const groups = await res.json();
 
@@ -52,7 +52,7 @@ async function loadGroups() {
 }
 
 // Load Profile
-function loadProfile() {
+function loadAboutUs() {
   const content = document.getElementById("content");
 
   content.innerHTML = `

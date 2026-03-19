@@ -7,17 +7,50 @@
 </head>
 <body>
 
-  <h1>Team Penguin Dashboard 🐧</h1>
-  <button onclick="loginButton">Login</button>
+  <h1>Civic Sync</h1>
+  <button id="loginBtn">Login</button>
 
   <nav>
-    <button onclick="loadServices()">Services</button>
-    <button onclick="loadGroups()">Groups</button>
-    <button onclick="loadProfile()">Profile</button>
+    <button onclick="loadOpportunities()">Volunteer Now!</button>
+    <button onclick="loadOrganizations()">Need Volunteers?</button>
+    <button onclick="loadAboutUs()">About Us</button>
   </nav>
 
   <div id="content"></div>
 
+  <h1>Interested in Volunteering? Get Started Now!</h1>
+  <h2>Success Story!</h2>
+  <p>Lorem Ipsum blah blah blah</p>
+
+  <h2>Create User</h2>
+  <button id="loginBtn">Let's Get Started!</button>
+
   <script src="app.js"></script>
 </body>
+
+<footer>
+  <nav>
+    <p> Follow Us: </p>
+    <button onclick>Facebook</button>
+    <button onclick>Instagram</button>
+    <button onclick>Twitter</button>
+    <button onclick>Youtube</button>
+  </nav>
+  <nav>
+    <p> Contact Us At: </p>
+    <p>XYZ Address</p>
+    <p> 111-111-1111 </p>
+    <p>contactus@civicsync.org</p>
+  </nav>
+</footer>
 </html>
+
+<script type="module">
+    import { handleGoogleLogin, fetchWithAuth, handleLogout } from "/js/auth.js";
+
+    document.getElementById('loginBtn').onclick = async () => {
+        await handleGoogleLogin();
+        document.getElementById('output').innerText = "Logged in!";
+        window.location.href = "/dashboard.html";
+    };
+</script>
