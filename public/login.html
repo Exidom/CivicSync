@@ -18,10 +18,6 @@
 
   <div id="content"></div>
 
-  <h1>Interested in Volunteering? Get Started Now!</h1>
-  <h2>Success Story!</h2>
-  <p>Lorem Ipsum blah blah blah</p>
-
   <h2>Create User</h2>
   <button id="signUpBtn">Let's Get Started!</button>
 
@@ -43,7 +39,6 @@
     <p>contactus@civicsync.org</p>
   </nav>
 </footer>
-
 </html>
 
 <script type="module">
@@ -51,11 +46,11 @@
 
     document.getElementById('loginBtn').onclick = async () => {
         await handleGoogleLogin();
-        window.location.href = "/login.html";
+        window.location.href = "/dashboard.html";
     };
 
     document.getElementById('signUpBtn').onclick = async () => {
         await handleGoogleLogin();
-        window.location.href = "/login.html";
+        window.location.href = "/dashboard.html";
     };
 </script>
