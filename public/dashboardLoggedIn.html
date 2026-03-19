@@ -7,8 +7,12 @@
 </head>
 <body>
 
+<div id="userInfo" style="display: flex; align-items: center; gap: 10px;">
+  <img id="userPic" src="" alt="Profile" width="40" height="40" style="border-radius: 50%;">
+  <span id="userName"></span>
+  <button id="logoutBtn">Logout</button>
+</div>
   <h1>Civic Sync</h1>
-  <button id="loginBtn">Login</button>
 
   <nav>
     <button onclick="loadOpportunities()">Volunteer Now!</button>
@@ -47,15 +51,16 @@
 </html>
 
 <script type="module">
-    import { handleGoogleLogin, fetchWithAuth, handleLogout } from "/js/auth.js";
+    import { handleLogout } from "/js/auth.js";
+    // document.getElementById("userName").innerText = user.name;
+    // document.getElementById("userPic").src = user.picture;
+    // TODO: Need to get user info to appear by profile picture!
 
-    document.getElementById('loginBtn').onclick = async () => {
-        await handleGoogleLogin();
-        window.location.href = "/dashboardLoggedIn.html";
+    // Logout Button
+
+    document.getElementById("logoutBtn").onclick = async () => {
+        await handleLogout();
+        window.location.href = "/dashboard.html";
     };
 
-    document.getElementById('signUpBtn').onclick = async () => {
-        await handleGoogleLogin();
-        window.location.href = "/dashboardLoggedIn.html";
-    };
 </script>
