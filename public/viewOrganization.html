@@ -1,20 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>CivicSync View Organization Page</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8">
+    <title>CivicSync View Organization Page</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
 
-  <h1>Civic Sync</h1>
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <!-- TODO: Insert a logo, either ours or the org's stored logo -->
+      <div class="logo">LOGO</div>
 
-  <nav>
-    <a href = "signUpEvents.html">Volunteer Now!</a>
-    <a href = "createEvent.html">Need Volunteers?</a>
-    <a href = "aboutUs.html">About Us</a>
-  </nav>
+      <nav>
+        <a href = "signUpEvents.html">Volunteer Now!</a>
+        <a href = "createEvent.html">Need Volunteers?</a>
+        <a href = "aboutUs.html">About Us</a>
+      </nav>
 
-  <!-- TODO: Complete filling out Service Organization Information Page -->
-</body>
+      <!-- TODO: Display the users name and profile pic -->
+      <a href = "userProfile.html">
+        <button class = "white-btn">User Profile</button>
+      </a>
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+
+      <!-- ORG INFO -->
+      <!-- TODO: Pull the user's organization name and info from the database -->
+      <h1 class="page-title">Organization Name</h1>
+      <section class="card large-card">
+        <div class="org-layout">
+          <div class="org-image"></div>
+
+          <div class="org-text">
+            <p>
+              This is the organization's bio, where they can list out their
+              contact info and any associated links. Lorem ipsum etc etc
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- EVENTS -->
+      <!-- TODO: List an organizations planned events -->
+      <h2 class="section-title">Upcoming Events</h2>
+
+      <section class="card-container">
+        <div class="card">
+          <h3>Park Cleanup</h3>
+          <p>March 28</p>
+        </div>
+
+        <div class="card">
+          <h3>Food Drive</h3>
+          <p>April 2</p>
+        </div>
+        
+
+      </section>
+
+      <!-- JOIN GROUPS BUTTON -->
+      <div class="center">
+        <a href="viewGroup.html">
+          <button class="grey-btn">Join Groups</button>
+        </a>
+      </div>
+
+    </main>
+
+    <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
+    <footer class="footer">
+      <div>Follow Us ● ● ● ●</div>
+      <div>Contact Us: email@email.com</div>
+    </footer>
+  </body>
 </html>
