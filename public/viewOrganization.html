@@ -13,15 +13,14 @@
       <div class="logo">LOGO</div>
 
       <nav>
-        <a href = "signUpEvents.html">Volunteer Now!</a>
-        <a href = "createEvent.html">Need Volunteers?</a>
-        <a href = "aboutUs.html">About Us</a>
+        <a id="signUpEvents" style="cursor: pointer">Volunteer Now!</a>
+        <a id="createEvent" style="cursor: pointer">Need Volunteers?</a>
+        <a id="aboutUs" style="cursor: pointer">About Us</a>
       </nav>
 
       <!-- TODO: Display the users name and profile pic -->
-      <a href = "userProfile.html">
-        <button class = "white-btn">User Profile</button>
-      </a>
+      <button id="profileBtn" class = "white-btn">User Profile</button>
+
     </header>
 
 
@@ -64,9 +63,14 @@
 
       <!-- JOIN GROUPS BUTTON -->
       <div class="center">
-        <a href="viewGroup.html">
-          <button class="grey-btn">Join Groups</button>
-        </a>
+        <button id="groupBtn" class="grey-btn">Join Groups</button>
+      </div>
+
+      <h2>Other links for testing: </h2>
+      <div class="center">
+        <button id="createGroups" class="grey-btn">Create Groups</button>
+        <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
+        <button id="logoutBtn" class="grey-btn">Logout</button>
       </div>
 
     </main>
@@ -78,3 +82,45 @@
     </footer>
   </body>
 </html>
+
+<script type="module">
+    import { handleLogout } from "/js/auth.js";
+    
+    // User profile button
+    document.getElementById("profileBtn").onclick = async () => {
+        window.location.href = "/userProfile";
+    };
+
+    // Join groups button
+    document.getElementById("groupBtn").onclick = async () => {
+        window.location.href = "/viewGroup";
+    };
+
+    // Navbar links
+    document.getElementById("signUpEvents").onclick = async () => {
+        window.location.href = "/signUpEvents";
+    };
+
+    document.getElementById("createEvent").onclick = async () => {
+        window.location.href = "/createEvent";
+    };
+
+    document.getElementById("aboutUs").onclick = async () => {
+        window.location.href = "/aboutUs";
+    };
+
+    // Testing buttons
+    document.getElementById("createGroups").onclick = async () => {
+        window.location.href = "/createGroups";
+    };
+
+    document.getElementById("dashboardLoggedIn").onclick = async () => {
+        window.location.href = "/dashboardLoggedIn";
+    };
+
+    document.getElementById("logoutBtn").onclick = async () => {
+        await handleLogout();
+        window.location.href = "/dashboard";
+    };
+
+</script>
