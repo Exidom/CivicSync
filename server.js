@@ -299,6 +299,56 @@ app.post("/get-user", checkAuth, async (req, res) => {
   }
 });
 
+// For group Creation
+app.post("/api/groups", async (req, res) => {
+  try {
+    // TEMP user (replace later with real auth)
+    const user = { email: "testuser@gmail.com" };
+
+    const {
+      group_name,
+      intro_text,
+      ilink1,
+      ilink2,
+      ilink3
+    } = req.body;
+
+    // 1️ Create group
+    const result = await db.query(
+      `INSERT INTO groups (
+        group_name, intro_text,
+        ilink1, ilink2, ilink3,
+        founder_id, created_time
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,CURRENT_TIMESTAMP)
+      RETURNING *`,
+      [
+        group_name,
+        intro_text,
+        ilink1,
+        ilink2,
+        ilink3,
+        user.email
+      ]
+    );
+
+    const group = result.rows[0];
+
+    // 2️ Add creator as member
+    await db.query(
+      `INSERT INTO group_members (gid, user_id)
+       VALUES ($1, $2)`,
+      [group.gid, user.email]
+    );
+
+    res.json(group);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to create group" });
+  }
+});
+
 app.use(express.static("public"));
 
 
