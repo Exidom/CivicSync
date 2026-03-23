@@ -1,60 +1,37 @@
+import { fetchWithAuth } from "/js/auth.js";
 
-
-// Create Groups Function
+// Creates Groups
 document.addEventListener("DOMContentLoaded", () => {
 
   const form = document.getElementById("createGroupForm");
   const statusDiv = document.getElementById("status");
 
-  // Safety check (prevents errors if element missing)
-  if (!form) {
-    console.error("Form not found: createGroupForm");
-    return;
-  }
-
-  // Handle form submission
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    // Show loading state
-    statusDiv.innerText = "⏳ Creating group...";
-
-    // Collect form data
     const groupData = {
-      group_name: document.getElementById("group_name").value.trim(),
-      intro_text: document.getElementById("intro_text").value.trim(),
-      ilink1: document.getElementById("ilink1").value.trim(),
-      ilink2: document.getElementById("ilink2").value.trim(),
-      ilink3: document.getElementById("ilink3").value.trim()
+      group_name: document.getElementById("group_name").value,
+      intro_text: document.getElementById("intro_text").value,
+      ilink1: document.getElementById("ilink1").value,
+      ilink2: document.getElementById("ilink2").value,
+      ilink3: document.getElementById("ilink3").value
     };
 
     try {
-      const res = await fetch("/api/groups", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(groupData)
-      });
+      // Use fetchWithAuth to get Firebase token
+      const data = await fetchWithAuth("/api/groups", "POST", groupData);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Unknown error");
+      if (data) {
+        statusDiv.innerText = "✅ Group created successfully!";
+        form.reset();
+        console.log("Created group:", data);
+      } else {
+        statusDiv.innerText = "❌ Failed to create group. Try again.";
       }
 
-      // Success
-      statusDiv.innerText = "✅ Group created successfully!";
-      console.log("Created group:", data);
-
-      // Reset form
-      form.reset();
-
     } catch (err) {
-      console.error("Error creating group:", err);
-
-      // Show error message
-      statusDiv.innerText = "❌ Failed to create group. Please try again.";f
+      console.error(err);
+      statusDiv.innerText = "❌ Failed to create group. " + err.message;
     }
   });
 

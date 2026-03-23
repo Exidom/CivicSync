@@ -44,6 +44,10 @@ app.get("/imag", (req, res) => {
   res.render("imag"); 
 });
 
+app.get("/createGroups", (req, res) => {
+  res.render("createGroups");
+});
+
 
 //get user from token (or 401 status)
 const checkAuth = async (req, res, next) => {
@@ -299,11 +303,18 @@ app.post("/get-user", checkAuth, async (req, res) => {
   }
 });
 
-// For group Creation
-app.post("/api/groups", async (req, res) => {
+// For Group Creation
+app.post("/api/groups", checkAuth, async (req, res) => {
   try {
-    // TEMP user (replace later with real auth)
-    const user = { email: "testuser@gmail.com" };
+    const uid = req.user.uid;
+    const email = req.user.email;
+
+    await db.query(
+      `INSERT INTO users (uid, display_name)
+       VALUES ($1, $2)
+       ON CONFLICT (uid) DO NOTHING`,
+      [uid, email]
+    );
 
     const {
       group_name,
@@ -313,7 +324,6 @@ app.post("/api/groups", async (req, res) => {
       ilink3
     } = req.body;
 
-    // 1️ Create group
     const result = await db.query(
       `INSERT INTO groups (
         group_name, intro_text,
@@ -328,23 +338,23 @@ app.post("/api/groups", async (req, res) => {
         ilink1,
         ilink2,
         ilink3,
-        user.email
+        uid
       ]
     );
 
     const group = result.rows[0];
 
-    // 2️ Add creator as member
+    // Adds group founder as admin in membership
     await db.query(
-      `INSERT INTO group_members (gid, user_id)
-       VALUES ($1, $2)`,
-      [group.gid, user.email]
+      `INSERT INTO membership (uid, gid, admin)
+       VALUES ($1, $2, $3)`,
+      [uid, group.gid, true]
     );
 
     res.json(group);
 
   } catch (err) {
-    console.error(err);
+    console.error("GROUP CREATION ERROR:", err);
     res.status(500).json({ error: "Failed to create group" });
   }
 });
