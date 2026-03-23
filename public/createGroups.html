@@ -22,22 +22,27 @@
   <h2>Want to Create a Group?</h2>
   <h2>Start Below!</h2>
   <form id="createGroupForm">
-    <label for="email">Group Email</label>
-    <input type="email" id="groupEmail" placeholder="Enter your group email" required>
+    <h2>Create Group</h2>
 
-    <label for="firstName">Group Name</label>
-    <input type="text" id="groupName" placeholder="Enter your group name" required>
+    <input type="text" id="group_name" placeholder="Group Name" required />
+    <textarea id="intro_text" placeholder="Intro Text"></textarea>
 
-    <label for="phone">Group Phone Number</label>
-    <input type="tel" id="phone" placeholder="Enter your phone number">
+    <input type="text" id="ilink1" placeholder="Link 1" />
+    <input type="text" id="ilink2" placeholder="Link 2" />
+    <input type="text" id="ilink3" placeholder="Link 3" />
 
-    <label for="photo">Profile Picture</label>
-    <input type="file" id="photo" accept="image/*">
+    <!-- Comma-separated inputs for now -->
+    <!-- <input type="text" id="members" placeholder="Members (comma separated user IDs)" />
+    <input type="text" id="medals" placeholder="Medals (comma separated IDs)" />
+    <input type="text" id="memberships" placeholder="Memberships (comma separated IDs)" />
+    <input type="text" id="participations" placeholder="Participations (comma separated IDs)" /> -->
 
-    <button type="submit">Save Profile</button>
+    <button type="submit">Create Group</button>
   </form>
 
-  <script src="app.js"></script>
+<div id="status"></div>
+
+  <script type = "module" src ="functions.js"></script>
 </body>
 
 <footer>

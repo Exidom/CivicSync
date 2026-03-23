@@ -44,6 +44,10 @@ app.get("/imag", (req, res) => {
   res.render("imag"); 
 });
 
+app.get("/createGroups", (req, res) => {
+  res.render("createGroups");
+});
+
 
 //get user from token (or 401 status)
 const checkAuth = async (req, res, next) => {
@@ -296,6 +300,55 @@ app.post("/get-user", checkAuth, async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ error: "database error " });
+  }
+});
+
+// For Group Creation
+app.post("/api/groups", checkAuth, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const email = req.user.email;
+
+    await db.query(
+      `INSERT INTO users (uid, display_name)
+       VALUES ($1, $2)
+       ON CONFLICT (uid) DO NOTHING`,
+      [uid, email]
+    );
+
+    const {
+      group_name,
+      intro_text
+    } = req.body;
+
+    const result = await db.query(
+      `INSERT INTO groups (
+        group_name, intro_text,
+        founder_id, created_time
+      )
+      VALUES ($1,$2,$3,CURRENT_TIMESTAMP)
+      RETURNING *`,
+      [
+        group_name,
+        intro_text,
+        uid
+      ]
+    );
+
+    const group = result.rows[0];
+
+    // Adds group founder as admin in membership
+    await db.query(
+      `INSERT INTO membership (uid, gid, admin)
+       VALUES ($1, $2, $3)`,
+      [uid, group.gid, true]
+    );
+
+    res.json(group);
+
+  } catch (err) {
+    console.error("GROUP CREATION ERROR:", err);
+    res.status(500).json({ error: "Failed to create group" });
   }
 });
 

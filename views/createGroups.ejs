@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CivicSync Create Groups Page</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+  <h1>Civic Sync</h1>
+
+  <nav>
+    <a href="/login">Volunteer Now!</a>
+    <a href="/createOrganizations">Need Volunteers?</a>
+    <a href="/aboutUs">About Us</a>
+  </nav>
+
+  <h2>Want to Create a Group?</h2>
+  <h2>Start Below!</h2>
+
+  <form id="createGroupForm">
+    <input type="text" id="group_name" placeholder="Group Name" required />
+    <textarea id="intro_text" placeholder="Intro Text"></textarea>
+
+    <button type="submit">Create Group</button>
+  </form>
+
+  <div id="status"></div>
+
+  <script type="module" src="/functions.js"></script>
+
+</body>
+</html>
