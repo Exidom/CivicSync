@@ -7,43 +7,91 @@
 </head>
 <body>
 
-  <h1>Civic Sync</h1>
-  <button id="logoutBtn">Logout</button>
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <!-- TODO: Insert a logo, either ours or the org's stored logo -->
+    <div class="logo">LOGO</div>
 
-  <nav>
-    <a href = "serviceOpportunities.html">Volunteer Now!</a>
-    <a href = "createOrganizations.html">Need Volunteers?</a>
-    <a href = "aboutUs.html">About Us</a>
-  </nav>
+    <nav>
+      <a id="signUpEvents" style="cursor: pointer">Volunteer Now!</a>
+      <a id="createEvent" style="cursor: pointer">Need Volunteers?</a>
+      <a id="aboutUs" style="cursor: pointer">About Us</a>
+    </nav>
 
+    <button id="logoutBtn" class="white-btn" style="padding: 15px 30px;">Logout</button>
+  </header>
 
-  <div id="content"></div>
+  <!-- MAIN CONTENT -->
+  <main class="container">
 
-  <h1>Interested in Volunteering? Get Started Now!</h1>
-  <h2>Success Story!</h2>
-  <p>Lorem Ipsum blah blah blah</p>
+    <h1 class="page-title" style="margin: 0 auto 10px;">Civic Sync</h1>
 
-  <h2>Create User</h2>
-  <button id="signUpBtn">Let's Get Started!</button>
+    <h1>Interested in Volunteering? Get Started Now!</h1>
 
-  <script src="app.js"></script>
+    <section class="card-container">
+      <div class="card" style="border: 15px solid #ccc;">
+        <h2>Create User</h2>
+        <button id="signUpBtn" class="grey-btn"
+          style="margin: 80px 30px 10px; padding: 20px 50px"> Let's Get Started!
+        </button>
+      </div>
+    </section>
+
+    <!-- TODO: Create success stories and their associates images -->
+    <h3>Success Stories:</h3>
+    <section class="card large-card">
+      <div class="org-layout">
+        <div class="org-image"></div>
+
+        <div class="org-text">
+          <p>
+            Lorem Ipsum and other example text on repeat.
+            Lorem Ipsum and other example text on repeat.
+          </p>
+        </div>
+      </div>
+    </section>
+    <section class="card large-card">
+      <div class="org-layout">
+        <div class="org-image"></div>
+
+        <div class="org-text">
+          <p>
+            Lorem Ipsum and other example text on repeat.
+            Lorem Ipsum and other example text on repeat. 
+          </p>
+        </div>
+      </div>
+    </section>
+    <section class="card large-card">
+      <div class="org-layout">
+        <div class="org-image"></div>
+
+        <div class="org-text">
+          <p>
+            Lorem Ipsum and other example text on repeat.
+            Lorem Ipsum and other example text on repeat. 
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <h2>Other links for testing: </h2>
+    <div class="center">
+      <button id="createGroups" class="grey-btn">Create Groups</button>
+      <button id="viewGroup" class="grey-btn">View Group</button>
+      <button id="viewOrganization" class="grey-btn">View Organization</button>
+    </div>
+    
+  </main>
+
+  <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
+  <footer class="footer">
+    <div>Follow Us: ● ● ● ●</div>
+    <div>Contact Us: contactus@civicsync.org</div>
+  </footer>
+
 </body>
-
-<footer>
-  <nav>
-    <p> Follow Us: </p>
-    <button onclick>Facebook</button>
-    <button onclick>Instagram</button>
-    <button onclick>Twitter</button>
-    <button onclick>Youtube</button>
-  </nav>
-  <nav>
-    <p> Contact Us At: </p>
-    <p>XYZ Address</p>
-    <p> 111-111-1111 </p>
-    <p>contactus@civicsync.org</p>
-  </nav>
-</footer>
 
 </html>
 
@@ -54,10 +102,40 @@
     // TODO: Need to get user info to appear by profile picture!
 
     // Logout Button
-
     document.getElementById("logoutBtn").onclick = async () => {
         await handleLogout();
-        window.location.href = "/dashboard.html";
+        window.location.href = "/dashboard";
+    };
+
+    // Sign up Button
+    document.getElementById("signUpBtn").onclick = async () => {
+        window.location.href = "/userProfile";
+    };
+
+    //Navbar links
+    document.getElementById("signUpEvents").onclick = async () => {
+        window.location.href = "/signUpEvents";
+    };
+
+    document.getElementById("createEvent").onclick = async () => {
+        window.location.href = "/createEvent";
+    };
+
+    document.getElementById("aboutUs").onclick = async () => {
+        window.location.href = "/aboutUs";
+    };
+
+    // Testing Buttons
+    document.getElementById("createGroups").onclick = async () => {
+        window.location.href = "/createGroups";
+    };
+
+    document.getElementById("viewGroup").onclick = async () => {
+        window.location.href = "/viewGroup";
+    };
+
+    document.getElementById("viewOrganization").onclick = async () => {
+        window.location.href = "/viewOrganization";
     };
 
 </script>

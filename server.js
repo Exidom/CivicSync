@@ -52,6 +52,33 @@ app.get("/aboutUs", (req, res) => {
   res.render("aboutUs");
 });
 
+app.get("/createEvent", (req, res) => {
+  res.render("createEvent");
+});
+
+app.get("/dashboard", (req, res) => {
+  res.render("dashboard");
+});
+
+app.get("/dashboardLoggedIn", (req, res) => {
+  res.render("dashboardLoggedIn"); 
+});
+
+app.get("/signUpEvents", (req, res) => {
+  res.render("signUpEvents");
+});
+
+app.get("/userProfile", (req, res) => {
+  res.render("userProfile");
+});
+
+app.get("/viewGroup", (req, res) => {
+  res.render("viewGroup");
+});
+
+app.get("/viewOrganization", (req, res) => {
+  res.render("viewOrganization");
+});
 
 //get user from token (or 401 status)
 const checkAuth = async (req, res, next) => {
