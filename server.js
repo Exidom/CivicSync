@@ -48,6 +48,10 @@ app.get("/createGroups", (req, res) => {
   res.render("createGroups");
 });
 
+app.get("/aboutUs", (req, res) => {
+  res.render("aboutUs");
+});
+
 
 //get user from token (or 401 status)
 const checkAuth = async (req, res, next) => {
