@@ -1,16 +1,141 @@
-body {
-  font-family: Arial;
-  padding: 20px;
+html, body {
+  height: 100%;
+  margin: 0;
 }
 
-nav button {
-  margin-right: 10px;
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+}
+
+.center {
+  margin-top: 20px;
+}
+
+/* NAVBAR */
+.navbar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #cfcfcf;
+  padding: 30px;
+}
+
+.navbar nav {
+    position: absolute;
+    left: 50%;                    /* centers links */
+    transform: translateX(-50%);  /* centers links */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.navbar nav a {
+  margin: 5px 15px;
+  text-decoration: none;
+  color: black;
+}
+
+.logo {
+  font-weight: bold;
+}
+
+.user-box {
+  background: white;
+  padding: 20px 25px;
+}
+
+/* MAIN CONTAINER */
+.container {
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  padding-top: 20px;
+}
+
+.page-title {
+  max-width: 900px;
+  margin: 0 auto 30px auto;  /* centers it */
+  padding: 25px 100px 25px 100px;
+
+  background: #ddd;
+  text-align: center;
+}
+
+/* CARDS */
+.card {
+  background: white;
+  padding: 20px;
+  margin: 10px;
+  border: 5px solid #ccc;
+}
+
+.large-card {
+  max-width: 1000px;
+  margin: 0 auto 20px auto;
+  padding: 30px;
+}
+
+/* CARD LAYOUT */
+.card-container {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
   padding: 10px;
+  min-height: 0;
+}
+
+/* VIEW ORG SECTION */
+.org-layout {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.org-image {    /* TODO: Make these dynamically resize according to images and text from the database */
+  width: 200px;
+  height: 150px;
+  background: #ccc;
+}
+
+.org-text {
+  text-align: left;
+  max-width: 800px;
+}
+
+/* BUTTONS */
+.grey-btn {
+  padding: 12px 25px;
+  background: #bbb;
+  border: none;
   cursor: pointer;
 }
 
-.card {
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin: 10px 0;
+.white-btn {
+  padding: 20px 20px;
+  background: white;
+  border: none;
+  cursor: pointer;
+}
+
+/* FOOTER */
+.footer {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #cfcfcf;
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
 }
