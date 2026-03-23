@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CivicSync User Profile</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>User Profile</h1>
+
+  <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+
+  <form id="profileForm">
+    <label for="email">Email</label>
+    <input type="email" id="email" readonly>
+
+    <label for="firstName">First Name</label>
+    <input type="text" id="firstName" placeholder="Enter your first name">
+
+    <label for="lastName">Last Name</label>
+    <input type="text" id="lastName" placeholder="Enter your last name">
+
+    <label for="phone">Phone Number</label>
+    <input type="tel" id="phone" placeholder="Enter your phone number">
+
+    <button type="submit">Save Profile</button>
+  </form>
+
+  <script type="module">
+    import { getCurrentUser } from "/js/auth.js"; // your Google auth helper
+
+    const emailInput = document.getElementById('email');
+    const profilePic = document.getElementById('profile-pic');
+    const photoInput = document.getElementById('photo');
+    const profileForm = document.getElementById('profileForm');
+
+    // Load current user info
+    async function loadUserProfile() {
+      const user = await getCurrentUser(); // get user from your auth.js
+      if (!user) return;
+
+      emailInput.value = user.email;
+      if (user.photoURL) {
+        profilePic.src = user.photoURL;
+      }
+      if (user.displayName) {
+        const nameParts = user.displayName.split(' ');
+        document.getElementById('firstName').value = nameParts[0] || '';
+        document.getElementById('lastName').value = nameParts[1] || '';
+      }
+    }
+
+    // Preview selected profile picture
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        profilePic.src = URL.createObjectURL(file);
+      }
+    });
+
+    // Handle form submit
+    profileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const profileData = {
+        email: emailInput.value,
+        firstName: document.getElementById('firstName').value,
+        lastName: document.getElementById('lastName').value,
+        phone: document.getElementById('phone').value,
+        photoFile: photoInput.files[0] || null
+      };
+
+      console.log('Profile data to save:', profileData);
+
+      // TODO: send profileData to your server or Firebase to update user profile
+      alert('Profile saved! (demo only, implement backend logic)');
+    });
+
+    loadUserProfile();
+  </script>
+</body>
+</html>
