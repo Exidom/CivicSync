@@ -11,10 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const groupData = {
       group_name: document.getElementById("group_name").value,
-      intro_text: document.getElementById("intro_text").value,
-      ilink1: document.getElementById("ilink1").value,
-      ilink2: document.getElementById("ilink2").value,
-      ilink3: document.getElementById("ilink3").value
+      intro_text: document.getElementById("intro_text").value
     };
 
     try {
