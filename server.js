@@ -318,26 +318,19 @@ app.post("/api/groups", checkAuth, async (req, res) => {
 
     const {
       group_name,
-      intro_text,
-      ilink1,
-      ilink2,
-      ilink3
+      intro_text
     } = req.body;
 
     const result = await db.query(
       `INSERT INTO groups (
         group_name, intro_text,
-        ilink1, ilink2, ilink3,
         founder_id, created_time
       )
-      VALUES ($1,$2,$3,$4,$5,$6,CURRENT_TIMESTAMP)
+      VALUES ($1,$2,$3,CURRENT_TIMESTAMP)
       RETURNING *`,
       [
         group_name,
         intro_text,
-        ilink1,
-        ilink2,
-        ilink3,
         uid
       ]
     );
