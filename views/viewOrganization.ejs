@@ -13,9 +13,9 @@
       <div class="logo">LOGO</div>
 
       <nav>
-        <a id="signUpEvents" style="cursor: pointer">Volunteer Now!</a>
-        <a id="createEvent" style="cursor: pointer">Need Volunteers?</a>
-        <a id="aboutUs" style="cursor: pointer">About Us</a>
+        <a id="signUpEvents">Volunteer Now!</a>
+        <a id="createEvent">Need Volunteers?</a>
+        <a id="aboutUs">About Us</a>
       </nav>
 
       <!-- TODO: Display the users name and profile pic -->
@@ -80,47 +80,50 @@
       <div>Follow Us ● ● ● ●</div>
       <div>Contact Us: email@email.com</div>
     </footer>
+
+    <script type="module">
+      import { handleLogout } from "/js/auth.js";
+      // document.getElementById("userName").innerText = user.name;
+      // document.getElementById("userPic").src = user.picture;
+      // TODO: Need to get user info to appear by profile picture!
+      
+      // User profile button
+      document.getElementById("profileBtn").onclick = async () => {
+          window.location.href = "/userProfile";
+      };
+
+      // Join groups button
+      document.getElementById("groupBtn").onclick = async () => {
+          window.location.href = "/viewGroup";
+      };
+
+      // Navbar links
+      document.getElementById("signUpEvents").onclick = async () => {
+          window.location.href = "/signUpEvents";
+      };
+
+      document.getElementById("createEvent").onclick = async () => {
+          window.location.href = "/createEvent";
+      };
+
+      document.getElementById("aboutUs").onclick = async () => {
+          window.location.href = "/aboutUs";
+      };
+
+      // Testing buttons
+      document.getElementById("createGroups").onclick = async () => {
+          window.location.href = "/createGroups";
+      };
+
+      document.getElementById("dashboardLoggedIn").onclick = async () => {
+          window.location.href = "/dashboardLoggedIn";
+      };
+
+      document.getElementById("logoutBtn").onclick = async () => {
+          await handleLogout();
+          window.location.href = "/dashboard";
+      };
+
+    </script>
   </body>
 </html>
-
-<script type="module">
-    import { handleLogout } from "/js/auth.js";
-    
-    // User profile button
-    document.getElementById("profileBtn").onclick = async () => {
-        window.location.href = "/userProfile";
-    };
-
-    // Join groups button
-    document.getElementById("groupBtn").onclick = async () => {
-        window.location.href = "/viewGroup";
-    };
-
-    // Navbar links
-    document.getElementById("signUpEvents").onclick = async () => {
-        window.location.href = "/signUpEvents";
-    };
-
-    document.getElementById("createEvent").onclick = async () => {
-        window.location.href = "/createEvent";
-    };
-
-    document.getElementById("aboutUs").onclick = async () => {
-        window.location.href = "/aboutUs";
-    };
-
-    // Testing buttons
-    document.getElementById("createGroups").onclick = async () => {
-        window.location.href = "/createGroups";
-    };
-
-    document.getElementById("dashboardLoggedIn").onclick = async () => {
-        window.location.href = "/dashboardLoggedIn";
-    };
-
-    document.getElementById("logoutBtn").onclick = async () => {
-        await handleLogout();
-        window.location.href = "/dashboard";
-    };
-
-</script>

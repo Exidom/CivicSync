@@ -13,12 +13,12 @@
     <div class="logo">LOGO</div>
 
     <nav>
-      <a id="signUpEvents" style="cursor: pointer">Volunteer Now!</a>
-      <a id="createEvent" style="cursor: pointer">Need Volunteers?</a>
-      <a id="aboutUs" style="cursor: pointer">About Us</a>
+      <a id="signUpEvents">Volunteer Now!</a>
+      <a id="createEvent">Need Volunteers?</a>
+      <a id="aboutUs">About Us</a>
     </nav>
 
-    <button id="logoutBtn" class="white-btn" style="padding: 15px 30px;">Logout</button>
+    <button id="logoutBtn" class="logout-btn">Logout</button>
   </header>
 
   <!-- MAIN CONTENT -->
@@ -31,9 +31,7 @@
     <section class="card-container">
       <div class="card" style="border: 15px solid #ccc;">
         <h2>Create User</h2>
-        <button id="signUpBtn" class="grey-btn"
-          style="margin: 80px 30px 10px; padding: 20px 50px"> Let's Get Started!
-        </button>
+        <button id="signUpBtn" class="signup-btn"> Let's Get Started!</button>
       </div>
     </section>
 
@@ -91,11 +89,7 @@
     <div>Contact Us: contactus@civicsync.org</div>
   </footer>
 
-</body>
-
-</html>
-
-<script type="module">
+  <script type="module">
     import { handleLogout } from "/js/auth.js";
     // document.getElementById("userName").innerText = user.name;
     // document.getElementById("userPic").src = user.picture;
@@ -138,4 +132,6 @@
         window.location.href = "/viewOrganization";
     };
 
-</script>
+  </script>
+</body>
+</html>

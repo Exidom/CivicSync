@@ -38,6 +38,7 @@ body {
   margin: 5px 15px;
   text-decoration: none;
   color: black;
+  cursor: pointer;
 }
 
 .logo {
@@ -122,6 +123,21 @@ body {
 .white-btn {
   padding: 20px;
   background: white;
+  border: none;
+  cursor: pointer;
+}
+
+.logout-btn {
+  padding: 15px 30px;
+  background: white;
+  border: none;
+  cursor: pointer;
+}
+
+.signup-btn {
+  padding: 20px 50px;
+  margin: 80px 30px 10px;
+  background: #bbb;
   border: none;
   cursor: pointer;
 }

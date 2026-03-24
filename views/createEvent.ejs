@@ -7,15 +7,86 @@
 </head>
 <body>
 
-  <!-- This page is designed for Organizations to create events for volunteers to sign up -->
-  <h1>Civic Sync</h1>
+  <!-- This page is designed for members to create volunteering events -->
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <!-- TODO: Insert a logo, either ours or the org's stored logo -->
+    <div class="logo">LOGO</div>
 
-  <nav>
-    <a href = "signUpEvents.html">Volunteer Now!</a>
-    <a href = "createEvent.html">Need Volunteers?</a>
-    <a href = "aboutUs.html">About Us</a>
-  </nav>
+    <nav>
+      <a id="signUpEvents">Volunteer Now!</a>
+      <!-- TODO: figure out what to replace this with: <a id="createEvent">Need Volunteers?</a> -->
+      <a id="aboutUs">About Us</a>
+    </nav>
 
-  <!-- TODO: Complete filling out Event Creation Page -->
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="container">
+
+    <!-- Content goes here -->
+    <h1>Create Events Under Construction</h1>
+
+    <h2>Other links for testing: </h2>
+    <div class="center">
+      <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
+      <button id="userProfileBtn" class="grey-btn">User Profile</button>
+      <button id="createGroups" class="grey-btn">Create Groups</button>
+      <button id="viewGroup" class="grey-btn">View Group</button>
+      <button id="viewOrganization" class="grey-btn">View Organization</button>
+    </div>
+  </main>
+
+
+  <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
+  <footer class="footer">
+    <div>Follow Us: ● ● ● ●</div>
+    <div>Contact Us: contactus@civicsync.org</div>
+  </footer>
+
+  <script type="module">
+    import { handleLogout } from "/js/auth.js";
+    // document.getElementById("userName").innerText = user.name;
+    // document.getElementById("userPic").src = user.picture;
+    // TODO: Need to get user info to appear by profile picture!
+
+    // Logout Button
+    document.getElementById("logoutBtn").onclick = async () => {
+        await handleLogout();
+        window.location.href = "/dashboard";
+    };
+
+    //Navbar links
+    document.getElementById("signUpEvents").onclick = async () => {
+        window.location.href = "/signUpEvents";
+    };
+
+    document.getElementById("aboutUs").onclick = async () => {
+        window.location.href = "/aboutUs";
+    };
+
+    // Testing Buttons
+    document.getElementById("dashboardLoggedIn").onclick = async () => {
+        window.location.href = "/dashboardLoggedIn";
+    };
+
+    document.getElementById("userProfileBtn").onclick = async () => {
+        window.location.href = "/userProfile";
+    };
+
+    document.getElementById("createGroups").onclick = async () => {
+        window.location.href = "/createGroups";
+    };
+
+    document.getElementById("viewGroup").onclick = async () => {
+        window.location.href = "/viewGroup";
+    };
+
+    document.getElementById("viewOrganization").onclick = async () => {
+        window.location.href = "/viewOrganization";
+    };
+
+  </script>
 </body>
 </html>

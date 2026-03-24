@@ -7,27 +7,95 @@
 </head>
 <body>
 
-  <h1>Civic Sync</h1>
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <!-- TODO: Insert a logo, either ours or the org's stored logo -->
+    <div class="logo">LOGO</div>
 
-  <nav>
-    <a href="/login">Volunteer Now!</a>
-    <a href="/createOrganizations">Need Volunteers?</a>
-    <a href="/aboutUs">About Us</a>
-  </nav>
+    <nav>
+      <a id="signUpEvents">Volunteer Now!</a>
+      <a id="createEvent">Need Volunteers?</a>
+      <a id="aboutUs">About Us</a>
+    </nav>
 
-  <h2>Want to Create a Group?</h2>
-  <h2>Start Below!</h2>
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+  </header>
 
-  <form id="createGroupForm">
-    <input type="text" id="group_name" placeholder="Group Name" required />
-    <textarea id="intro_text" placeholder="Intro Text"></textarea>
+  <!-- MAIN CONTENT -->
+  <main class="container">
 
-    <button type="submit">Create Group</button>
-  </form>
+    <!-- Content goes here -->
+    <h1>Create Groups Under Construction</h1>
 
-  <div id="status"></div>
+    <h2>Want to Create a Group?</h2>
+    <h2>Start Below!</h2>
+
+    <form id="createGroupForm">
+      <input type="text" id="group_name" placeholder="Group Name" required />
+      <textarea id="intro_text" placeholder="Intro Text"></textarea>
+
+      <button type="submit">Create Group</button>
+    </form>
+
+    <h2>Other links for testing: </h2>
+    <div class="center">
+      <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
+      <button id="userProfileBtn" class="grey-btn">User Profile</button>
+      <button id="viewGroup" class="grey-btn">View Group</button>
+      <button id="viewOrganization" class="grey-btn">View Organization</button>
+    </div>
+  </main>
+
+  <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
+  <footer class="footer">
+    <div>Follow Us: ● ● ● ●</div>
+    <div>Contact Us: contactus@civicsync.org</div>
+  </footer>
 
   <script type="module" src="/js/functions.js"></script>
 
+  <script type="module">
+      import { handleLogout } from "/js/auth.js";
+      // document.getElementById("userName").innerText = user.name;
+      // document.getElementById("userPic").src = user.picture;
+      // TODO: Need to get user info to appear by profile picture!
+
+      // Logout Button
+      document.getElementById("logoutBtn").onclick = async () => {
+          await handleLogout();
+          window.location.href = "/dashboard";
+      };
+
+      //Navbar links
+      document.getElementById("signUpEvents").onclick = async () => {
+          window.location.href = "/signUpEvents";
+      };
+
+      document.getElementById("createEvent").onclick = async () => {
+          window.location.href = "/createEvent";
+      };
+
+      document.getElementById("aboutUs").onclick = async () => {
+          window.location.href = "/aboutUs";
+      };
+
+      // Testing Buttons
+      document.getElementById("dashboardLoggedIn").onclick = async () => {
+          window.location.href = "/dashboardLoggedIn";
+      };
+
+      document.getElementById("userProfileBtn").onclick = async () => {
+          window.location.href = "/userProfile";
+      };
+
+      document.getElementById("viewGroup").onclick = async () => {
+          window.location.href = "/viewGroup";
+      };
+
+      document.getElementById("viewOrganization").onclick = async () => {
+          window.location.href = "/viewOrganization";
+      };
+
+  </script>
 </body>
 </html>
