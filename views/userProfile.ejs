@@ -6,77 +6,156 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<h1>User Profile</h1>
 
-  <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <!-- TODO: Insert a logo, either ours or the org's stored logo -->
+    <div class="logo">LOGO</div>
 
-  <form id="profileForm">
-    <label for="email">Email</label>
-    <input type="email" id="email" readonly>
+    <nav>
+      <a id="signUpEvents">Volunteer Now!</a>
+      <a id="createEvent">Need Volunteers?</a>
+      <a id="aboutUs">About Us</a>
+    </nav>
 
-    <label for="firstName">First Name</label>
-    <input type="text" id="firstName" placeholder="Enter your first name">
+    <button id="logoutBtn" class="logout-btn">Logout</button>
+  </header>
 
-    <label for="lastName">Last Name</label>
-    <input type="text" id="lastName" placeholder="Enter your last name">
+  <!-- MAIN CONTENT -->
+  <main class="container">
 
-    <label for="phone">Phone Number</label>
-    <input type="tel" id="phone" placeholder="Enter your phone number">
+    <!-- Content goes here -->
+    <h1>User Profile Under Construction</h1>
 
-    <button type="submit">Save Profile</button>
-  </form>
+    <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+
+    <form id="profileForm">
+      <label for="email">Email</label>
+      <input type="email" id="email" readonly>
+
+      <label for="firstName">First Name</label>
+      <input type="text" id="firstName" placeholder="Enter your first name">
+
+      <label for="lastName">Last Name</label>
+      <input type="text" id="lastName" placeholder="Enter your last name">
+
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" placeholder="Enter your phone number">
+
+      <button type="submit">Save Profile</button>
+    </form>
+
+    <h2>Other links for testing: </h2>
+    <div class="center">
+      <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
+      <button id="createGroups" class="grey-btn">Create Groups</button>
+      <button id="viewGroup" class="grey-btn">View Group</button>
+      <button id="viewOrganization" class="grey-btn">View Organization</button>
+    </div>
+  </main>
+
+  <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
+  <footer class="footer">
+    <div>Follow Us: ● ● ● ●</div>
+    <div>Contact Us: contactus@civicsync.org</div>
+  </footer>
 
   <script type="module">
-    import { getCurrentUser } from "/js/auth.js"; // your Google auth helper
+    import { handleLogout } from "/js/auth.js"; // your Google auth helper
+    // When working on the backend, replace the line above with this:
+    // import { getCurrentUser, handleLogout } from "/js/auth.js"; // your Google auth helper
+    // and uncomment the remaining lines below. I commented these out because they crash the
+    // script currently, which breaks the links.
 
-    const emailInput = document.getElementById('email');
-    const profilePic = document.getElementById('profile-pic');
-    const photoInput = document.getElementById('photo');
-    const profileForm = document.getElementById('profileForm');
+    // const emailInput = document.getElementById('email');
+    // const profilePic = document.getElementById('profile-pic');
+    // const photoInput = document.getElementById('photo');
+    // const profileForm = document.getElementById('profileForm');
 
-    // Load current user info
-    async function loadUserProfile() {
-      const user = await getCurrentUser(); // get user from your auth.js
-      if (!user) return;
+    // // Load current user info
+    // async function loadUserProfile() {
+    //   const user = await getCurrentUser(); // get user from your auth.js
+    //   if (!user) return;
 
-      emailInput.value = user.email;
-      if (user.photoURL) {
-        profilePic.src = user.photoURL;
-      }
-      if (user.displayName) {
-        const nameParts = user.displayName.split(' ');
-        document.getElementById('firstName').value = nameParts[0] || '';
-        document.getElementById('lastName').value = nameParts[1] || '';
-      }
-    }
+    //   emailInput.value = user.email;
+    //   if (user.photoURL) {
+    //     profilePic.src = user.photoURL;
+    //   }
+    //   if (user.displayName) {
+    //     const nameParts = user.displayName.split(' ');
+    //     document.getElementById('firstName').value = nameParts[0] || '';
+    //     document.getElementById('lastName').value = nameParts[1] || '';
+    //   }
+    // }
 
-    // Preview selected profile picture
-    photoInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        profilePic.src = URL.createObjectURL(file);
-      }
-    });
+    // // Preview selected profile picture
+    // photoInput.addEventListener('change', (e) => {
+    //   const file = e.target.files[0];
+    //   if (file) {
+    //     profilePic.src = URL.createObjectURL(file);
+    //   }
+    // });
 
-    // Handle form submit
-    profileForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // // Handle form submit
+    // profileForm.addEventListener('submit', async (e) => {
+    //   e.preventDefault();
 
-      const profileData = {
-        email: emailInput.value,
-        firstName: document.getElementById('firstName').value,
-        lastName: document.getElementById('lastName').value,
-        phone: document.getElementById('phone').value,
-        photoFile: photoInput.files[0] || null
-      };
+    //   const profileData = {
+    //     email: emailInput.value,
+    //     firstName: document.getElementById('firstName').value,
+    //     lastName: document.getElementById('lastName').value,
+    //     phone: document.getElementById('phone').value,
+    //     photoFile: photoInput.files[0] || null
+    //   };
 
-      console.log('Profile data to save:', profileData);
+    //   console.log('Profile data to save:', profileData);
 
-      // TODO: send profileData to your server or Firebase to update user profile
-      alert('Profile saved! (demo only, implement backend logic)');
-    });
+    //   // TODO: send profileData to your server or Firebase to update user profile
+    //   alert('Profile saved! (demo only, implement backend logic)');
+    // });
 
-    loadUserProfile();
+    // loadUserProfile();
+
+    // document.getElementById("userName").innerText = user.name;
+    // document.getElementById("userPic").src = user.picture;
+    // TODO: Need to get user info to appear by profile picture!
+
+    // Logout Button
+    document.getElementById("logoutBtn").onclick = async () => {
+        await handleLogout();
+        window.location.href = "/dashboard";
+    };
+
+    //Navbar links
+    document.getElementById("signUpEvents").onclick = async () => {
+        window.location.href = "/signUpEvents";
+    };
+
+    document.getElementById("createEvent").onclick = async () => {
+        window.location.href = "/createEvent";
+    };
+
+    document.getElementById("aboutUs").onclick = async () => {
+        window.location.href = "/aboutUs";
+    };
+
+    // Testing Buttons
+    document.getElementById("dashboardLoggedIn").onclick = async () => {
+        window.location.href = "/dashboardLoggedIn";
+    };
+
+    document.getElementById("createGroups").onclick = async () => {
+        window.location.href = "/createGroups";
+    };
+
+    document.getElementById("viewGroup").onclick = async () => {
+        window.location.href = "/viewGroup";
+    };
+
+    document.getElementById("viewOrganization").onclick = async () => {
+        window.location.href = "/viewOrganization";
+    };
+
   </script>
 </body>
 </html>

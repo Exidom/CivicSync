@@ -7,55 +7,105 @@
 </head>
 <body>
 
-  <h1>Civic Sync</h1>
-  <button id="loginBtn">Login</button>
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <!-- TODO: Insert a logo, either ours or the org's stored logo -->
+    <div class="logo">LOGO</div>
 
-  <nav>
-    <a href = "login.html">Volunteer Now!</a>
-    <a href = "createOrganizations.html">Need Volunteers?</a>
-    <a href = "aboutUs.html">About Us</a>
-  </nav>
+    <nav>
+      <a id="signUpEvents">Volunteer Now!</a>
+      <a id="createEvent">Need Volunteers?</a>
+      <a id="aboutUs">About Us</a>
+    </nav>
 
-  <div id="content"></div>
+    <button id="loginBtn" class="logout-btn">Login</button>
+  </header>
 
-  <h1>Interested in Volunteering? Get Started Now!</h1>
-  <h2>Success Story!</h2>
-  <p>Lorem Ipsum blah blah blah</p>
+  <!-- MAIN CONTENT -->
+  <main class="container">
 
-  <h2>Create User</h2>
-  <button id="signUpBtn">Let's Get Started!</button>
+    <h1 class="page-title" style="margin: 0 auto 10px;">Civic Sync</h1>
 
-  <script src="app.js"></script>
+    <h1>Interested in Volunteering? Get Started Now!</h1>
+
+    <section class="card-container">
+      <div class="card" style="border: 15px solid #ccc;">
+        <h2>Create User</h2>
+        <button id="signUpBtn" class="signup-btn"> Let's Get Started!</button>
+      </div>
+    </section>
+
+    <!-- TODO: Create success stories and their associates images -->
+    <h3>Success Stories:</h3>
+    <section class="card large-card">
+      <div class="org-layout">
+        <div class="org-image"></div>
+
+        <div class="org-text">
+          <p>
+            Lorem Ipsum and other example text on repeat.
+            Lorem Ipsum and other example text on repeat.
+          </p>
+        </div>
+      </div>
+    </section>
+    <section class="card large-card">
+      <div class="org-layout">
+        <div class="org-image"></div>
+
+        <div class="org-text">
+          <p>
+            Lorem Ipsum and other example text on repeat.
+            Lorem Ipsum and other example text on repeat. 
+          </p>
+        </div>
+      </div>
+    </section>
+    <section class="card large-card">
+      <div class="org-layout">
+        <div class="org-image"></div>
+
+        <div class="org-text">
+          <p>
+            Lorem Ipsum and other example text on repeat.
+            Lorem Ipsum and other example text on repeat. 
+          </p>
+        </div>
+      </div>
+    </section>    
+  </main>
+
+  <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
+  <footer class="footer">
+    <div>Follow Us: ● ● ● ●</div>
+    <div>Contact Us: contactus@civicsync.org</div>
+  </footer>
+
+  <script type="module">
+    
+    // Login Button
+    document.getElementById("loginBtn").onclick = async () => {
+        window.location.href = "/login";
+    };
+
+    // Sign up Button
+    document.getElementById("signUpBtn").onclick = async () => {
+        window.location.href = "/login";
+    };
+
+    //Navbar links
+    document.getElementById("signUpEvents").onclick = async () => {
+        window.location.href = "/login";
+    };
+
+    document.getElementById("createEvent").onclick = async () => {
+        window.location.href = "/login";
+    };
+
+    document.getElementById("aboutUs").onclick = async () => {
+        window.location.href = "/aboutUs";
+    };
+
+  </script>
 </body>
-
-<footer>
-  <nav>
-    <p> Follow Us: </p>
-    <button onclick>Facebook</button>
-    <button onclick>Instagram</button>
-    <button onclick>Twitter</button>
-    <button onclick>Youtube</button>
-  </nav>
-  <nav>
-    <p> Contact Us At: </p>
-    <p>XYZ Address</p>
-    <p> 111-111-1111 </p>
-    <p>contactus@civicsync.org</p>
-  </nav>
-</footer>
-
 </html>
-
-<script type="module">
-    import { handleGoogleLogin, fetchWithAuth, handleLogout } from "/js/auth.js";
-
-    document.getElementById('loginBtn').onclick = async () => {
-        await handleGoogleLogin();
-        window.location.href = "/dashboardLoggedIn.html";
-    };
-
-    document.getElementById('signUpBtn').onclick = async () => {
-        await handleGoogleLogin();
-        window.location.href = "/dashboardLoggedIn.html";
-    };
-</script>
