@@ -25,25 +25,108 @@
   <main class="container">
 
     <!-- Content goes here -->
-    <h1>User Profile Under Construction</h1>
+    <h1>User Profile</h1>
 
     <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
-
-    <form id="profileForm">
-      <label for="email">Email</label>
+    
+    <form id="profileForm" class="center">
+      <!-- TODO: Pull the users email & any of the other 3 inputs from the database & use as placeholders -->
+      <label for="email">Email: </label>
       <input type="email" id="email" readonly>
 
-      <label for="firstName">First Name</label>
+      <label for="firstName">First Name: </label>
       <input type="text" id="firstName" placeholder="Enter your first name">
 
-      <label for="lastName">Last Name</label>
+      <label for="lastName">Last Name: </label>
       <input type="text" id="lastName" placeholder="Enter your last name">
 
-      <label for="phone">Phone Number</label>
+      <label for="phone">Phone Number: </label>
       <input type="tel" id="phone" placeholder="Enter your phone number">
 
-      <button type="submit">Save Profile</button>
+      <!-- TODO: Send the info entered above to the database -->
+      <button id="profileSubmit" type="submit">Save Profile</button>
     </form>
+    
+    <!-- TODO: Pull the user's org, group, and event info if they have it and display it where listed. If not: -->
+    <!-- TODO: Implement a randomized invite code for org accounts to give to users, and -->
+    <!-- TODO: do the same any time a user creates a group, then implement the submit buttons to -->
+    <!-- TODO: verify invite codes, and then include the user as a member of the correct group/org -->
+    <!-- TODO: Also implement the variables and logic for determining whether the user has a group or org -->
+
+    <!--user.hasOrg == true-->
+    <% if (1) { %>
+      <section class="card-container">
+        <div class="center">
+          <h2 class="section-title" style="padding: 20px">Organization name here:</h2>
+            <div class="card" style="border: 10px solid #ccc">
+              <h3>*Organization's name here*</h3>
+              <button id="viewOrganization" class="grey-btn" style="margin-top: 80px">View Organization</button>
+            </div>
+          <!--if user.hasGroup == true-->
+          <% if (1) { %>
+        </div>
+          <div class="center">
+            <h2 class="section-title" style="padding: 20px">Group name here: </h2>
+            <div class="card" style="border: 10px solid #ccc;">
+              <h3>*Current members' names here*</h3>
+              <button id="viewGroup" class="grey-btn" style="margin-top: 80px;">View Group</button>
+            </div>
+          </div>
+          <!--if user.hasGroup == false-->
+          <% } else { %>
+            <h2 class="section-title" style="padding: 20px">Join a group! </h2>
+            <div class="card">
+              <form id="groupInviteForm">
+                <input type="text" id="groupCode" style="margin-top: 20px;" placeholder="Enter your invite code">
+              </form>
+              <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+            </div>
+            <h2 class="section-title" style="padding: 20px">Or, create your own! </h2>
+            <button id="createGroups" class="grey-btn">Create Groups</button>
+        </div>
+          <% } %>
+      </section>
+        <!--if user.hasEvents == true-->
+        <% if (1) { %>
+
+        <div class="center">
+          <h2 class="section-title">Planned events:</h2>
+        </div>
+
+        <section class="card-container" style="flex:none;">
+          <div class="card">
+            <h3>Park Cleanup</h3>
+            <p>March 28</p>
+          </div>
+
+          <div class="card">
+            <h3>Food Drive</h3>
+            <p>April 2</p>
+          </div>
+        </section>
+
+        <!--if user.hasEvents == false-->  
+        <% } else { %>
+          <div class="center" style="margin-bottom: 20px;">
+            <h2 class="section-title" style="padding: 20px">You have no current events, sign up here! </h2>
+            <button id="signUpEvents" class="grey-btn">Sign up</button>
+          </div>
+        <% } %>
+
+    <!--if user.hasOrg == false-->
+    <% } else { %>
+      <section class="card-container">
+        <div class="center">
+          <h2 class="section-title" style="padding: 20px">Join an org! </h2>
+            <div class="card" style="border: 10px solid #ccc">
+                <form id="orgInviteForm">
+                  <input type="text" id="orgCode" placeholder="Enter your invite code">
+                </form>
+                <button id="orgCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+            </div>
+        </div>
+      </section>
+    <% } %>
 
     <h2>Other links for testing: </h2>
     <div class="center">
