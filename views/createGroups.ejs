@@ -21,30 +21,82 @@
     <button id="logoutBtn" class="logout-btn">Logout</button>
   </header>
 
-  <!-- MAIN CONTENT -->
-  <main class="container">
+    <!-- MAIN CONTENT -->
 
-    <!-- Content goes here -->
-    <h1>Create Groups Under Construction</h1>
+    <!-- TODO: Pull the user's org and group info if they have it. If not: -->
+    <!-- TODO: Implement a randomized invite code for org accounts to give to users, and -->
+    <!-- TODO: do the same any time a user creates a group, then implement the submit buttons to -->
+    <!-- TODO: verify invite codes or remove membership, and then include or remove the user as a member of the correct group/org -->
+    <!-- TODO: Also implement the variables and logic for determining whether the user has a group or org -->
 
-    <h2>Want to Create a Group?</h2>
-    <h2>Start Below!</h2>
+    <!--if user.hasOrg == true && user.hasGroup == true-->
+    <% if (0) { %>
+    <main class="container">
+      <h1>Group creation page</h1>
+      <h2>You already belong to this group: </h2>
+        <section class="card-container">
+          <div class="card" style="border: 10px solid #ccc;">
+            <h2 class="section-title" style="padding: 20px">Group name here: </h2>
+            <h3>*Current members' names here*</h3>
+            <button id="viewGroup" class="grey-btn" style="margin-top: 80px;">View Group</button>
+          </div>
+        </section>
+        <div class="center">
+          <h2>Do you want to leave the group to join another?</h2>
+          <button id="leaveGroupBtn" class="grey-btn" style="margin: 20px">Leave my group</button>
+        </div>
+    <!--if user.hasOrg == true && user.hasGroup == false-->
+    <% } else if (1) { %>
+    <main class="container">
+      <h1>Group creation page</h1>
+      <h2>Want to create a group?</h2>
+      <h2>Start below!</h2>
 
-    <form id="createGroupForm">
-      <input type="text" id="group_name" placeholder="Group Name" required />
-      <textarea id="intro_text" placeholder="Intro Text"></textarea>
+      <section class="card-container">
+        <div class="card">
+          <form id="createGroupForm">
+            <input type="text" id="group_name" placeholder="Group Name" required />
+            <textarea id="group_intro_text" rows="4" placeholder="Intro Text"></textarea>
 
-      <button type="submit">Create Group</button>
-    </form>
+            <button type="submit">Create Group</button>
+          </form>
+        </div>
+      </section>
+      <section class="card-container">
+        <div class="center">
+          <h2>Or, join a group! </h2>
+          <div class="card">
+            <form id="groupInviteForm">
+              <input type="text" id="groupCode" placeholder="Enter your invite code">
+            </form>
+            <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+          </div>
+        </div>
+      </section>
+    <!--if user.hasOrg == false-->
+    <% } else { %>
+    <main class="container">
+      <section class="card-container">
+        <div class="center">
+          <h2 class="section-title" style="padding: 20px">Join an organization to create a group: </h2>
+            <div class="card" style="border: 10px solid #ccc">
+                <form id="orgInviteForm" style="margin-top: 30px;">
+                  <input type="text" id="orgCode" placeholder="Enter your invite code">
+                </form>
+                <button id="orgCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+            </div>
+        </div>
+      </section>
+    <% } %>
 
-    <h2>Other links for testing: </h2>
-    <div class="center">
-      <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
-      <button id="userProfileBtn" class="grey-btn">User Profile</button>
-      <button id="viewGroup" class="grey-btn">View Group</button>
-      <button id="viewOrganization" class="grey-btn">View Organization</button>
-    </div>
-  </main>
+      <h2>Other links for testing: </h2>
+      <div class="center">
+        <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
+        <button id="userProfileBtn" class="grey-btn">User Profile</button>
+        <button id="viewGroup" class="grey-btn">View Group</button>
+        <button id="viewOrganization" class="grey-btn">View Organization</button>
+      </div>
+    </main>
 
   <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
   <footer class="footer">

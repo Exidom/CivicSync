@@ -25,15 +25,48 @@
   </header>
 
   <!-- MAIN CONTENT -->
+
+  <!-- TODO: Pull the user's org info if they have it. If not: -->
+  <!-- TODO: Implement a randomized invite code for org accounts to give to users, and -->
+  <!-- TODO: implement the submit buttons to verify invite codes. Then include the user -->
+  <!-- TODO: as a member of the correct org in the database. Next, display an org's upcoming events -->
+  <!-- TODO: from the database, and implement the Join button with an "are you sure you want to join" -->
+  <!-- TODO: popup field with yes/no options. Also implement the variables and logic for determining whether the user has an org -->
+   
+  <!--if user.hasOrg == true-->
+  <% if (1) { %>
   <main class="container">
+    <h1>Event Signup</h1>
+    <section class="card-container" style="flex:none;">
+      <div class="card">
+        <h3>Park Cleanup</h3>
+        <p>March 28</p>
+        <button type="submit">Join Event</button>
+      </div>
 
-    <!-- Content goes here -->
-    <h1>Event Signup Under Construction</h1>
+      <div class="card">
+        <h3>Food Drive</h3>
+        <p>April 2</p>
+        <button type="submit">Join Event</button>
+      </div>
+    </section>
 
-    <div id="userInfo" style="display: flex; align-items: center; gap: 10px;">
-      <img id="userPic" src="" alt="Profile" width="40" height="40" style="border-radius: 50%;">
-      <span id="userName"></span>
-    </div>
+  <!--if user.hasOrg == false-->
+  <% } else { %>
+  <main class="container">
+    <h1>Event Signup</h1>
+    <section class="card-container">
+      <div class="center">
+        <h2 class="section-title" style="padding: 20px">Join an organization to sign up for events: </h2>
+          <div class="card" style="border: 10px solid #ccc">
+              <form id="orgInviteForm" style="margin-top: 30px;">
+                <input type="text" id="orgCode" placeholder="Enter your invite code">
+              </form>
+              <button id="orgCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+          </div>
+      </div>
+    </section>
+  <% } %>
 
     <h2>Other links for testing: </h2>
     <div class="center">

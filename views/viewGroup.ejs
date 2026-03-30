@@ -22,10 +22,62 @@
   </header>
 
   <!-- MAIN CONTENT -->
-  <main class="container">
 
-    <!-- Content goes here -->
-    <h1>View Group Under Construction</h1>
+  <!-- TODO: Pull the user's org and group info if they have it, and display it where listed. If not: -->
+  <!-- TODO: Implement a randomized invite code for org accounts to give to users, and -->
+  <!-- TODO: do the same any time a user creates a group, then implement the submit buttons to -->
+  <!-- TODO: verify invite codes, and then include the user as a member of the correct group/org -->
+  <!-- TODO: Also implement the variables and logic for determining whether the user has a group or org -->
+
+    <!--user.hasOrg == true && user.hasGroup == true-->
+    <% if (0) { %>
+      <main class="container">
+        <h1>View group page</h1>
+        <section class="card-container">
+          <div class="center">
+            <h2 class="section-title" style="padding: 20px">Group name here: </h2>
+            <div class="card" style="border: 10px solid #ccc;">
+              <h3 style="margin-bottom: 100px;">*Current members' names here*</h3>
+            </div>
+          </div>
+        </section>
+        <div class="center">
+          <h2>Do you want to leave the group?</h2>
+          <button id="leaveGroupBtn" class="grey-btn" style="margin: 20px">Leave my group</button>
+        </div>
+    <!--if user.hasGroup == false-->
+    <% } else if (1) { %>
+      <main class="container">
+        <h1>View group page</h1>
+        <section class="card-container">
+          <div class="center">
+            <h2 class="section-title" style="padding: 20px">You are not currently in a group, join one below! </h2>
+            <div class="card">
+              <form id="groupInviteForm">
+                <input type="text" id="groupCode" style="margin-top: 20px;" placeholder="Enter your invite code">
+              </form>
+              <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+            </div>
+            <h2 class="section-title" style="padding: 20px">Or, create your own! </h2>
+            <button id="createGroups" class="grey-btn">Create Groups</button>
+          </div>
+        </section>
+    <!--if user.hasOrg == false-->
+    <% } else { %>
+      <main class="container">
+        <h1>View group page</h1>
+        <section class="card-container">
+          <div class="center">
+            <h2 class="section-title" style="padding: 20px">Join an organization to join groups: </h2>
+              <div class="card">
+                  <form id="orgInviteForm">
+                    <input type="text" id="orgCode" style="margin-top: 20px;" placeholder="Enter your invite code">
+                  </form>
+                  <button id="orgCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+              </div>
+          </div>
+        </section>
+    <% } %>
 
     <h2>Other links for testing: </h2>
     <div class="center">
