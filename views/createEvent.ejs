@@ -24,16 +24,9 @@
 
   <!-- MAIN CONTENT -->
 
-  <!-- TODO: Implement permission levels, and pull the user's permission level. Then: -->
-  <!-- TODO: Implement a randomized invite code for org accounts to give to users, and -->
-  <!-- TODO: then implement the submit buttons to verify invite codes, and then enter the -->
-  <!-- TODO: user's info into the organizations table in the database. Finally, if the user -->
-  <!-- TODO: is an admin or org, submit their created events to the database. Also implement -->
-  <!-- TODO: the variables and logic for determining whether the user has an org, & their permission level -->
+  <main class="container">
 
-  <!--if user.isAdmin == true || user.isOrg == true-->
-  <% if (1) { %>
-    <main class="container">
+    <div id="eventFormSection" style="display:none;">
       <h1>Event creation page</h1>
       <h2>Want to create an event?</h2>
       <h2>Start below!</h2>
@@ -41,36 +34,35 @@
       <section class="card-container">
         <div class="card">
           <form id="createEventForm">
-            <input type="text" id="event_name" placeholder="Event Name" required />
-            <input type="date" id="event_date" placeholder="Event Date" required />
+            <input type="text" id="event_name" placeholder="Event Name" required>
+            <input type="date" id="event_date" required>
             <textarea id="event_description" rows="3" placeholder="Event details"></textarea>
             
             <button type="submit">Create Event</button>
           </form>
         </div>
       </section>
+    </div>
 
 
-  <!--if user shouldn't be able to create events-->
-  <% } else { %>
-    <main class="container">
+    <!--if user shouldn't be able to create events-->
+    <div id="noOrgEventSection" style="display:none;">
       <h1>Event creation page </h1>
       <h2 style="text-decoration: underline;">Only admins and organization accounts can create events</h2>
-      <h2 style="margin-top: 40px;">Contact your org for details on how to become an admin:</h2>
+      <h2 style="margin-top: 40px;">Contact your group for details on how to become an admin:</h2>
       <div class="center">
-        <button id="viewOrganization" class="grey-btn">View Organization</button>
+        <button id="viewGroup" class="grey-btn">View Group</button>
       </div>
-      <h2 style="margin-top: 40px;">Or, join an org if you haven't already:</h2>
+      <h2 style="margin-top: 40px;">Or, join a group if you haven't already:</h2>
       <div class="center">
         <button id="userProfileBtn" class="grey-btn">User Profile</button>
       </div>
-
-  <% } %>
+    </div>
 
     <h2 style="margin-top: 40px;">Other links for testing: </h2>
     <div class="center">
       <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
-      <button id="userProfileBtn" class="grey-btn">User Profile</button>
+      <button id="userProfileBtn2" class="grey-btn">User Profile</button>
       <button id="createGroups" class="grey-btn">Create Groups</button>
       <button id="viewGroup" class="grey-btn">View Group</button>
       <button id="viewOrganization" class="grey-btn">View Organization</button>
@@ -86,9 +78,11 @@
 
   <script type="module">
     import { handleLogout } from "/js/auth.js";
-    // document.getElementById("userName").innerText = user.name;
-    // document.getElementById("userPic").src = user.picture;
-    // TODO: Need to get user info to appear by profile picture!
+    import { initCreateEvent } from "/js/functions.js";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      initCreateEvent();
+    });
 
     // Logout Button
     document.getElementById("logoutBtn").onclick = async () => {
@@ -105,12 +99,16 @@
         window.location.href = "/aboutUs";
     };
 
+    document.getElementById("userProfileBtn").onclick = async () => {
+        window.location.href = "/userProfile";
+    };
+
     // Testing Buttons
     document.getElementById("dashboardLoggedIn").onclick = async () => {
         window.location.href = "/dashboardLoggedIn";
     };
 
-    document.getElementById("userProfileBtn").onclick = async () => {
+    document.getElementById("userProfileBtn2").onclick = async () => {
         window.location.href = "/userProfile";
     };
 
