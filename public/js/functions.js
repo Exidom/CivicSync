@@ -189,38 +189,186 @@ export function initJoinGroup() {
   });
 }
 
-// Creates Groups
-// document.addEventListener("DOMContentLoaded", () => {
+// Combines create event page functions
+export function initCreateEvent() {
+  loadCreateEvent();
+  createEventSubmit();
+}
 
-//   const form = document.getElementById("createGroupForm");
-//   const statusDiv = document.getElementById("status");
+// Determines the create event page layout depending on org ownership
+async function loadCreateEvent() {
+  try {
+    const data = await fetchWithAuth("/api/createEventData");
 
-//   if (!form) return;
+    const formSection = document.getElementById("eventFormSection");
+    const noOrgSection = document.getElementById("noOrgEventSection");
 
-//   form.addEventListener("submit", async (e) => {
-//     e.preventDefault();
+    if (data.hasOrg) {
+      formSection.style.display = "block";
+      noOrgSection.style.display = "none";
+    } else {
+      formSection.style.display = "none";
+      noOrgSection.style.display = "block";
+    }
 
-//     const groupData = {
-//       group_name: document.getElementById("group_name").value,
-//       intro_text: document.getElementById("intro_text").value
-//     };
+  } catch (err) {
+    console.error("Failed to load create event page", err);
+  }
+}
 
-//     try {
-//       // Use fetchWithAuth to get Firebase token
-//       const data = await fetchWithAuth("/api/groups", "POST", groupData);
+// Handles the submission of new events
+function createEventSubmit() {
+  const form = document.getElementById("createEventForm");
+  if (!form) return;
 
-//       if (data) {
-//         statusDiv.innerText = "✅ Group created successfully!";
-//         form.reset();
-//         console.log("Created group:", data);
-//       } else {
-//         statusDiv.innerText = "❌ Failed to create group. Try again.";
-//       }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-//     } catch (err) {
-//       console.error(err);
-//       statusDiv.innerText = "❌ Failed to create group. " + err.message;
-//     }
-//   });
+    const eventData = {
+      event_name: document.getElementById("event_name").value,
+      event_date: document.getElementById("event_date").value,
+      event_description: document.getElementById("event_description").value
+    };
 
-// });
+    try {
+      await fetchWithAuth("/api/events", "POST", eventData);
+
+      alert("Event Created!");
+      form.reset();
+
+    } catch (err) {
+      console.error("SUBMIT EVENT ERROR ", err)
+      alert("Failed to create event");
+    }
+  });
+}
+
+// Combines event signup page functions
+export function initEventSignup(){
+  loadEventSignup();
+  submitEventSignup();
+  initJoinGroup();
+}
+
+// Determines the event signup page layout depending on group membership
+async function loadEventSignup() {
+  try {
+    const data = await fetchWithAuth("/api/eventsSignupData");
+
+    const eventSection = document.getElementById("eventSignupSection");
+    const noGroupSection = document.getElementById("noGroupEventSection");
+    const eventList = document.getElementById("eventSignupList");
+
+    if (data.hasGroup) {
+      eventSection.style.display = "block";
+      noGroupSection.style.display = "none";
+
+      eventList.innerHTML = "";
+
+      data.events.forEach(e => {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `<h3>${e.service_name}</h3>
+          <button class="joinEventBtn" data-id="${e.sid}">Join Event</button>`;
+
+        eventList.appendChild(div);
+      });
+
+    } else {
+      eventSection.style.display = "none";
+      noGroupSection.style.display = "block";
+    }
+
+  } catch (err) {
+    console.error("Failed to load event signup page", err);
+  }
+}
+
+// Handles the process of signing users up for events
+function submitEventSignup() {
+  document.addEventListener("click", async (e) => {
+    if (!e.target.classList.contains("joinEventBtn")) return;
+
+    const sid = e.target.dataset.id;
+
+    const confirmJoin = confirm("Join this event?");
+    if (!confirmJoin) return;
+
+    try {
+      await fetchWithAuth("/api/join-event", "POST", { sid });
+      alert("Joined event!");
+    } catch (err) {
+      console.error("SUBMIT SIGNUP ERROR ", err);
+      alert("Failed to join event");
+    }
+  });
+}
+
+// Combines create group page functions
+export function initCreateGroups() {
+  loadCreateGroup();
+  submitNewGroup();
+  initJoinGroup(); 
+}
+
+// Displays a users groups if they are a part of any:
+async function loadCreateGroup() {
+  try {
+    const data = await fetchWithAuth("/api/createGroupData");
+
+    const hasGroupSection = document.getElementById("hasGroupSection");
+    const noGroupSection = document.getElementById("noGroupSection");
+    const groupList = document.getElementById("groupList");
+
+    if (data.hasGroup) {
+      hasGroupSection.style.display = "block";
+      noGroupSection.style.display = "block"; 
+
+      groupList.innerHTML = "";
+
+      data.groups.forEach(g => {
+        const div = document.createElement("div");
+        div.className = "card";
+
+        div.innerHTML = `<h2>${g.group_name}</h2>`;
+
+        groupList.appendChild(div);
+      });
+
+    } else {
+      hasGroupSection.style.display = "none";
+      noGroupSection.style.display = "block";
+    }
+
+  } catch (err) {
+    console.error("Failed to load create groups page", err);
+  }
+}
+
+// Creates New Groups  
+function submitNewGroup() {
+  const form = document.getElementById("createGroupForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const groupData = {
+      group_name: document.getElementById("group_name").value,
+      intro_text: document.getElementById("group_intro_text").value
+    };
+
+    try {
+      // Use fetchWithAuth to get Firebase token
+      await fetchWithAuth("/api/groups", "POST", groupData);
+
+      alert("Group Created!");
+      location.reload();
+
+    } catch (err) {
+      console.error("SUBMIT NEW GROUP ERROR ", err);
+      alert("Failed to create group")
+    }
+  });
+}

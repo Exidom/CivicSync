@@ -390,7 +390,7 @@ app.post("/api/groups", checkAuth, async (req, res) => {
   }
 });
 
-// For group joining
+// For Group Joining
 app.post("/api/join-group", checkAuth, async (req, res) => {
   try{
     const { invite_code } = req.body;
@@ -460,6 +460,150 @@ app.post("/api/orgs", checkAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to create org" });
   }
 });
+
+
+// For Event Creation
+app.post("/api/events", checkAuth, async (req, res) => {
+  try {
+    const { event_name, event_date, event_descripton } = req.body;
+    const uid = req.user.uid;
+
+    // Ensure only orgs create events
+    const orgData = await db.query(
+      "SELECT * FROM orgs WHERE founder_id = $1",
+      [uid]
+    );
+
+    if (orgData.rows.length === 0) {
+      return res.status(403).json({ error: "You must own an organization to create events" });
+    }
+
+    const org = orgData.rows[0];
+
+    const result = await db.query(
+      "INSERT INTO services (service_name, oid, info_text, date) VALUES ($1, $2, $3, $4) RETURNING *",
+      [event_name, org.oid, event_descripton, event_date]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("EVENT CREATION ERROR ", err);
+    res.status(500).json({ error: "Failed to create event" });
+  }
+});
+
+// Gets org info for createEvent
+app.get("/api/createEventData", checkAuth, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    const orgResult = await db.query(
+      "SELECT * FROM orgs WHERE founder_id = $1",
+      [uid]
+    );
+
+    res.json({
+      hasOrg: orgResult.rows.length > 0
+    });
+
+  } catch (err) {
+    console.error("CREATE_EVENT ORG REQUIREMENT ERROR", err);
+    res.status(500).json({ error: "Failed to load org data" });
+  }
+});
+
+// Gets Group And Event Info For Event Signups
+app.get("/api/eventsSignupData", checkAuth, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    // Check groups
+    const groupData = await db.query(
+      "SELECT * FROM membership WHERE uid = $1",
+      [uid]
+    );
+
+    const hasGroup = groupData.rows.length > 0;
+
+    let events = [];
+
+    if (hasGroup) {
+      const eventResult = await db.query(
+        "SELECT * FROM services"
+      );
+
+      events = eventResult.rows;
+    }
+
+    res.json({
+      hasGroup,
+      events
+    });
+
+  } catch (err) {
+    console.error("EVENT SIGNUP LOADING ERROR: ", err);
+    res.status(500).json({ error: "Failed to load events" });
+  }
+});
+
+// For Event Sign Ups
+app.post("/api/join-event", checkAuth, async (req, res) => {
+  try {
+    const { sid } = req.body;
+    const uid = req.user.uid;
+
+    // Prevent duplicates
+    const existing = await db.query(
+      "SELECT * FROM participation WHERE uid = $1 AND sid = $2",
+      [uid, sid]
+    );
+
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ error: "You already joined this event" });
+    }
+
+    await db.query(
+      "INSERT INTO participation (uid, sid) VALUES ($1, $2)",
+      [uid, sid]
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error("EVENT SIGNUP JOINING ERROR ", err);
+    res.status(500).json({ error: "Failed to join event" });
+  }
+});
+
+// Collects group info for the group creation page
+app.get("/api/createGroupData", checkAuth, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    const groupResult = await db.query(
+      `SELECT g.*
+       FROM groups g
+       JOIN membership m ON g.gid = m.gid
+       WHERE m.uid = $1`,
+      [uid]
+    );
+
+    const groups = groupResult.rows;
+
+    res.json({
+      hasGroup: groups.length > 0,
+      groups
+    });
+
+  } catch (err) {
+    console.error("GROUP CREATION LOADING ERROR ", err);
+    res.status(500).json({ error: "Failed to load group data" });
+  }
+});
+
+// TODO: Implement a leave-group feature
+
 
 // Handles collecting user data from the database
 app.get("/api/userProfileData", checkAuth, async (req, res) => {
