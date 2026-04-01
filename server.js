@@ -125,14 +125,21 @@ app.get("/time", checkAuth, async (req, res) => {
 //testing
 app.post("/update-profile", checkAuth, async (req, res) => {
   try{
-    const { username, picture } = req.body;
-    const {uid} = req.user;
+    const { first_name, last_name, phone_number } = req.body;
+    const { uid } = req.user;
 
-    console.log(`User ${req.user.email} wants to change theme to ${picture}`);
+    console.log("Updating profile for: ", uid);
+    console.log(req.body);
+
+    await db.query(
+      "UPDATE users SET first_name = $1, last_name = $2, phone_number = $3 WHERE uid = $4",
+      [first_name, last_name, phone_number, uid]
+    )
 
     res.json({ 
-      status: "Profile updated for " + req.user.email 
+      success: true
     });
+
   } catch (error) {
     res.status(500).json({ error: "Internal server error "});
   }
@@ -380,6 +387,132 @@ app.post("/api/groups", checkAuth, async (req, res) => {
   } catch (err) {
     console.error("GROUP CREATION ERROR:", err);
     res.status(500).json({ error: "Failed to create group" });
+  }
+});
+
+// For group joining
+app.post("/api/join-group", checkAuth, async (req, res) => {
+  try{
+    const { invite_code } = req.body;
+    const uid = req.user.uid;
+
+    const groupInvite = await db.query(
+      "SELECT * FROM groups WHERE invite_code = $1",
+      [invite_code]
+    );
+
+    if (groupInvite.rows.length === 0) {
+      return res.status(400).json({ error: "Invalid invite code" });
+    }
+
+    const group = groupInvite.rows[0];
+
+    // Prevents users signing up for the same group twice
+    const noRepeats = await db.query(
+      "SELECT * FROM membership WHERE uid = $1 AND gid = $2",
+      [uid, group.gid]
+    );
+
+    if (noRepeats.rows.length > 0) {
+      return res.status(400).json({ error: "You are already in this group" });
+    }
+
+    await db.query(
+      "INSERT INTO membership (uid, gid, admin) VALUES ($1, $2, $3)",
+      [uid, group.gid, false]
+    );
+
+    res.json({ success: true });
+    
+  } catch (err) {
+    console.error("GROUP JOIN ERROR", err);
+    res.status(500).json({ error: "Failed to join group" });
+  }
+});
+
+// TODO: Create an app.post function to change a users permissions to admin
+
+// For Org Creation
+app.post("/api/orgs", checkAuth, async (req, res) => {
+  try {
+    const { org_name, intro_text } = req.body;
+    const uid = req.user.uid;
+
+    // Failsafe to prevent users creating multiple orgs
+    const onlyOne = await db.query(
+      "SELECT * FROM orgs WHERE founder_id = $1",
+      [uid]
+    );
+
+    if (onlyOne.rows.length > 0) {
+      return res.status(400).json({ error: "User already has an organization"});
+    }
+
+    const result = await db.query(
+      "INSERT INTO orgs (founder_id, org_name, intro_text) VALUES ($1, $2, $3) RETURNING *",
+      [uid, org_name, intro_text]
+    );
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("ORG CREATION ERROR", err);
+    res.status(500).json({ error: "Failed to create org" });
+  }
+});
+
+// Handles collecting user data from the database
+app.get("/api/userProfileData", checkAuth, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+
+    const userData = await db.query(
+      "SELECT * FROM users WHERE uid = $1",
+      [uid]
+    );
+
+    const user = userData.rows[0];
+
+
+    const groupData = await db.query(
+      "SELECT g.* FROM groups g JOIN membership m ON g.gid = m.gid WHERE m.uid = $1",
+      [uid]
+    );
+
+    const groups = groupData.rows;
+
+
+    const orgData = await db.query(
+      "SELECT * FROM orgs WHERE founder_id = $1",
+      [uid]
+    );
+
+    const org = orgData.rows[0] || null;
+
+    
+    let events = [];
+    // Only people in groups can sign up for events
+    if (groups.length > 0) {
+      const eventData = await db.query(
+        "SELECT s.* FROM services s JOIN participation p ON s.sid = p.sid WHERE p.uid = $1",
+        [uid]
+      );
+      events = eventData.rows;
+    }
+
+    res.json({
+      ...user,
+      hasGroup: groups.length > 0,
+      hasOrg: !!org,
+      hasEvent: events.length > 0,
+      groups,
+      org,
+      events
+    });
+
+  } catch (err) {
+    console.error("PROFILE INFO ERROR: ", err);
+    res.status(500).json({ error: "Failed to load profile" });
   }
 });
 

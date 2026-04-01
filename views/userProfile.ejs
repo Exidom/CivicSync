@@ -24,13 +24,12 @@
   <!-- MAIN CONTENT -->
   <main class="container">
 
-    <!-- Content goes here -->
     <h1>User Profile</h1>
 
-    <img id="profile-pic" src="default-profile.png" alt="Profile Picture">
+    <!-- TODO: Implement the pictures feature <img id="profile-pic" src="default-profile.png" alt="Profile Picture"> -->
     
     <form id="profileForm" class="center">
-      <!-- TODO: Pull the users email & any of the other 3 inputs from the database & use as placeholders -->
+      
       <label for="email">Email: </label>
       <input type="email" id="email" readonly>
 
@@ -40,93 +39,90 @@
       <label for="lastName">Last Name: </label>
       <input type="text" id="lastName" placeholder="Enter your last name">
 
-      <label for="phone">Phone Number: </label>
+      <label for="phone">Phone Number (must be 10 digits): </label>
       <input type="tel" id="phone" placeholder="Enter your phone number">
 
-      <!-- TODO: Send the info entered above to the database -->
       <button id="profileSubmit" type="submit">Save Profile</button>
     </form>
-    
-    <!-- TODO: Pull the user's org, group, and event info if they have it and display it where listed. If not: -->
-    <!-- TODO: Implement a randomized invite code for org accounts to give to users, and -->
-    <!-- TODO: do the same any time a user creates a group, then implement the submit buttons to -->
-    <!-- TODO: verify invite codes, and then include the user as a member of the correct group/org -->
-    <!-- TODO: Also implement the variables and logic for determining whether the user has a group or org -->
 
-    <!--user.hasOrg == true-->
-    <% if (1) { %>
-      <section class="card-container">
+    <section class="card-container">
+
+      <div id="groupSection" style="display: none;">
         <div class="center">
-          <h2 class="section-title" style="padding: 20px">Organization name here:</h2>
+          <h2 class="section-title" style="padding: 20px">Your Groups:</h2>
+          <div id="groupList"></div>
+          <button id="viewGroup" class="grey-btn" style="margin: 40px;">View Groups</button>
+          <h2 class="section-title" style="padding: 20px">Join more! </h2>
+          <div class="card">
+            <form id="groupInviteForm">
+              <input type="text" id="groupCode" style="margin-top: 20px;" placeholder="Enter your invite code">
+            </form>
+            <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+          </div>
+          <h2 class="section-title" style="padding: 20px">Or, create your own! </h2>
+          <button id="createGroups" class="grey-btn">Create Groups</button>
+        </div>
+        
+
+        <div id="orgSection" style="display: none;">
+          <div class="center">
+            <h2 class="section-title" style="padding: 20px">Your Organization:</h2>
             <div class="card" style="border: 10px solid #ccc">
-              <h3>*Organization's name here*</h3>
+              <h3 id="orgName"></h3>
               <button id="viewOrganization" class="grey-btn" style="margin-top: 80px">View Organization</button>
             </div>
-          <!--if user.hasGroup == true-->
-          <% if (1) { %>
+          </div>
         </div>
+
+        <div id="noOrgSection" style="display: none;">
           <div class="center">
-            <h2 class="section-title" style="padding: 20px">Group name here: </h2>
-            <div class="card" style="border: 10px solid #ccc;">
-              <h3>*Current members' names here*</h3>
-              <button id="viewGroup" class="grey-btn" style="margin-top: 80px;">View Group</button>
-            </div>
-          </div>
-          <!--if user.hasGroup == false-->
-          <% } else { %>
-            <h2 class="section-title" style="padding: 20px">Join a group! </h2>
-            <div class="card">
-              <form id="groupInviteForm">
-                <input type="text" id="groupCode" style="margin-top: 20px;" placeholder="Enter your invite code">
-              </form>
-              <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
-            </div>
-            <h2 class="section-title" style="padding: 20px">Or, create your own! </h2>
-            <button id="createGroups" class="grey-btn">Create Groups</button>
-        </div>
-          <% } %>
-      </section>
-        <!--if user.hasEvents == true-->
-        <% if (1) { %>
-
-        <div class="center">
-          <h2 class="section-title">Planned events:</h2>
-        </div>
-
-        <section class="card-container" style="flex:none;">
-          <div class="card">
-            <h3>Park Cleanup</h3>
-            <p>March 28</p>
-          </div>
-
-          <div class="card">
-            <h3>Food Drive</h3>
-            <p>April 2</p>
-          </div>
-        </section>
-
-        <!--if user.hasEvents == false-->  
-        <% } else { %>
-          <div class="center" style="margin-bottom: 20px;">
-            <h2 class="section-title" style="padding: 20px">You have no current events, sign up here! </h2>
-            <button id="signUpEvents" class="grey-btn">Sign up</button>
-          </div>
-        <% } %>
-
-    <!--if user.hasOrg == false-->
-    <% } else { %>
-      <section class="card-container">
-        <div class="center">
-          <h2 class="section-title" style="padding: 20px">Join an org! </h2>
+            <h2 class="section-title" style="padding: 20px">You don't have an organization, create one here:</h2>
             <div class="card" style="border: 10px solid #ccc">
-                <form id="orgInviteForm">
-                  <input type="text" id="orgCode" placeholder="Enter your invite code">
-                </form>
-                <button id="orgCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+              <form id="createOrgForm">
+                <input type="text" id="orgNameInput" placeholder="Organization name" required>
+                <textarea id="orgIntroInput" rows="4" placeholder="Organization description"></textarea>
+                <button type="submit">Create Org</button>
+              </form>
             </div>
+          </div>
         </div>
+
+      </div>
+    </section>
+
+
+    <div id="eventSection" style="display: none;">
+      <div class="center">
+        <h2 class="section-title">Your events:</h2>
+      </div>
+
+      <section class="card-container" style="flex:none;">
+        <div id="eventList"></div>
       </section>
-    <% } %>
+    </div>
+
+    <div id="noEventSection" style="display: none;">
+      <div class="center" style="margin-bottom: 20px;">
+        <h2 class="section-title" style="padding: 20px">You have no current events, sign up here!</h2>
+        <button id="signUpEvents" class="grey-btn">Sign up</button>
+      </div>
+    </div>
+
+
+    <div id="noGroupSection" style="display: none;">
+      <div class="center">
+        <h2 class="section-title" style="padding: 20px">Join a group to gain access to events and orgs! </h2>
+        <div class="card">
+          <form id="groupInviteForm">
+            <input type="text" id="groupCode" style="margin-top: 20px;" placeholder="Enter your invite code">
+          </form>
+          <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+        </div>
+        <h2 class="section-title" style="padding: 20px">Or, create your own! </h2>
+        <button id="createGroups" class="grey-btn">Create Groups</button>
+      </div>
+    </div>
+
 
     <h2>Other links for testing: </h2>
     <div class="center">
@@ -145,31 +141,17 @@
 
   <script type="module">
     import { handleLogout } from "/js/auth.js"; // your Google auth helper
-    // When working on the backend, replace the line above with this:
-    // import { getCurrentUser, handleLogout } from "/js/auth.js"; // your Google auth helper
-    // and uncomment the remaining lines below. I commented these out because they crash the
-    // script currently, which breaks the links.
+    import { initUserProfile, initCreateOrg, initJoinGroup } from "/js/functions.js";
 
-    // const emailInput = document.getElementById('email');
-    // const profilePic = document.getElementById('profile-pic');
-    // const photoInput = document.getElementById('photo');
-    // const profileForm = document.getElementById('profileForm');
+    document.addEventListener("DOMContentLoaded", () => {
+      initUserProfile();
+      initCreateOrg();
+      initJoinGroup();
+    });
 
-    // // Load current user info
-    // async function loadUserProfile() {
-    //   const user = await getCurrentUser(); // get user from your auth.js
-    //   if (!user) return;
-
-    //   emailInput.value = user.email;
     //   if (user.photoURL) {
     //     profilePic.src = user.photoURL;
     //   }
-    //   if (user.displayName) {
-    //     const nameParts = user.displayName.split(' ');
-    //     document.getElementById('firstName').value = nameParts[0] || '';
-    //     document.getElementById('lastName').value = nameParts[1] || '';
-    //   }
-    // }
 
     // // Preview selected profile picture
     // photoInput.addEventListener('change', (e) => {
@@ -179,25 +161,11 @@
     //   }
     // });
 
-    // // Handle form submit
-    // profileForm.addEventListener('submit', async (e) => {
-    //   e.preventDefault();
-
     //   const profileData = {
-    //     email: emailInput.value,
-    //     firstName: document.getElementById('firstName').value,
-    //     lastName: document.getElementById('lastName').value,
-    //     phone: document.getElementById('phone').value,
     //     photoFile: photoInput.files[0] || null
     //   };
 
     //   console.log('Profile data to save:', profileData);
-
-    //   // TODO: send profileData to your server or Firebase to update user profile
-    //   alert('Profile saved! (demo only, implement backend logic)');
-    // });
-
-    // loadUserProfile();
 
     // document.getElementById("userName").innerText = user.name;
     // document.getElementById("userPic").src = user.picture;
