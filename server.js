@@ -662,7 +662,6 @@ app.get("/api/userProfileData", checkAuth, async (req, res) => {
 
 // Get organization
 app.get("/api/getOrganizationData", checkAuth, async (req, res) => {
-  console.log("Fetching org for user:", req.user.uid);
   try {
     const uid = req.user.uid;  // UID from authentication
 

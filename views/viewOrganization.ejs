@@ -27,25 +27,9 @@
     <!-- MAIN CONTENT -->
     <main class="container">
 
-      <!-- ORG INFO -->
-      <!-- TODO: Pull the user's organization name and info from the database -->
-      <h1 id="org-name" class="page-title">View Organization Under Construction</h1>
-      <section class="card large-card">
-        <div class="org-layout">
-          <div class="org-image"></div>
-
-          <div id="org-description" class="org-text">
-            <p>
-              This is the organization's bio, where they can list out their
-              contact info and any associated links. Lorem ipsum etc etc
-            </p>
-          </div>
-        </div>
-      </section>
-
       <!-- EVENTS -->
       <!-- TODO: List an organizations planned events -->
-      <h2 class="section-title">Upcoming Events</h2>
+      <!-- <h2 class="section-title">Upcoming Events</h2>
 
       <section class="card-container">
         <div class="card">
@@ -59,7 +43,58 @@
         </div>
         
 
-      </section>
+      </section> -->
+
+      <!-- TABS -->
+      <div class="tab-vertical-container">
+        <!-- Tab buttons on the left -->
+        <div class="tab-vertical-buttons">
+          <button class="tablinks" data-tab="Profile">Organization Profile</button>
+          <button class="tablinks" data-tab="Applications">View Applications</button>
+          <button class="tablinks" data-tab="Events">View Current Events</button>
+          <button class="tablinks" data-tab="CreateEvent">Create New Event</button>
+        </div>
+
+        <div class="tab-vertical-content">
+          <div id="Profile" class="tabcontent">
+            <h1 id="org-name">Organization Name</h1>
+            <section class="card large-card">
+              <div class="org-layout">
+                <div id="org-image" class="org-image"></div>
+                <div id="org-description" class="org-text">
+                  <p>This is the organization's bio, contact info, and links.</p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div id="Applications" class="tabcontent">
+            <h3>User Applications</h3>
+            <div id="applications-container" class="card-container">
+              <div class="card placeholder"><p>No applications yet.</p></div>
+            </div>
+          </div>
+
+          <div id="Events" class="tabcontent">
+            <h3>Upcoming Events</h3>
+            <div id="events-container" class="card-container">
+              <div class="card placeholder"><p>No events yet.</p></div>
+            </div>
+          </div>
+
+          <div id="CreateEvent" class="tabcontent">
+            <h3>Create New Event</h3>
+            <form id="create-event-form">
+              <label>Event Name: <input type="text" name="title" required></label><br>
+              <label>Date: <input type="date" name="date" required></label><br>
+              <label>Description:<br>
+                <textarea name="description" rows="4" cols="40"></textarea>
+              </label><br>
+              <button type="submit">Create Event</button>
+            </form>
+          </div>
+        </div>
+      </div>
 
       <!-- JOIN GROUPS BUTTON -->
       <div class="center">
