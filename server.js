@@ -794,6 +794,25 @@ app.delete("/api/services/:sid", checkAuth, async (req, res) => {
   }
 });
 
+// Edit Orgs Functionality
+app.put("/api/orgs", checkAuth, async (req, res) => {
+  const { org_name, intro_text } = req.body;
+  const uid = req.user.uid;
+
+  try {
+    const result = await db.query(
+      "UPDATE orgs SET org_name=$1, intro_text=$2 WHERE founder_id=$3 RETURNING *",
+      [org_name, intro_text, uid]
+    );
+
+    if (!result.rows[0]) return res.status(404).json({ error: "Organization not found" });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error updating organization:", err);
+    res.status(500).json({ error: "Failed to update organization" });
+  }
+});
+
 app.use(express.static("public"));
 
 

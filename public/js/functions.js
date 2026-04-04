@@ -436,6 +436,7 @@ export async function fetchOrg(fetchWithAuth) {
     document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
       btn.disabled = false;
     });
+    initEditOrg(fetchWithAuth); // only init when org exists
   } else {
     orgNameEl.textContent = "You are not in an Organization";
     orgDescEl.innerHTML = "";
@@ -552,5 +553,50 @@ export function initEventActions(fetchWithAuth) {
       }
     }
 
+  });
+}
+
+// Edit organizations functionality
+export function initEditOrg(fetchWithAuth) {
+  const editBtn = document.getElementById("editOrgBtn");
+  const editForm = document.getElementById("editOrgForm");
+  const cancelBtn = document.getElementById("cancelEditOrgBtn");
+
+  editBtn.addEventListener("click", () => {
+    // Pre-fill with current values
+    document.getElementById("editOrgName").value = document.getElementById("org-name").textContent;
+    document.getElementById("editOrgIntro").value = document.getElementById("org-description").innerText;
+    editForm.style.display = "block";
+    editBtn.style.display = "none";
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    editForm.style.display = "none";
+    editBtn.style.display = "block";
+  });
+
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const org_name = document.getElementById("editOrgName").value.trim();
+    const intro_text = document.getElementById("editOrgIntro").value.trim();
+
+    if (!org_name) { alert("Organization name is required."); return; }
+
+    try {
+      const res = await fetchWithAuth("/api/orgs", "PUT", { org_name, intro_text });
+      if (res.error) { alert("Error updating organization: " + res.error); return; }
+
+      // Update the displayed values
+      document.getElementById("org-name").textContent = res.org_name;
+      document.getElementById("org-description").innerHTML = `<p>${res.intro_text || ""}</p>`;
+
+      editForm.style.display = "none";
+      editBtn.style.display = "block";
+      alert("Organization Information Saved!");
+    } catch (err) {
+      console.error("Failed to Update Organization:", err);
+      alert("Failed to Update Organization.");
+    }
   });
 }
