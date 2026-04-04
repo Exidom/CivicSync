@@ -372,3 +372,26 @@ function submitNewGroup() {
     }
   });
 }
+
+export async function loadOrganization() {
+  try {
+    console.log("Fetching org...");
+
+    // Using auth helper instead of fetch
+    const data = await fetchWithAuth("/api/getOrganizationData", "GET");
+
+    if (!data) {
+      document.getElementById("org-name").textContent = "No organization found";
+      document.getElementById("org-description").textContent = "";
+      return;
+    }
+
+    document.getElementById("org-name").textContent = data.org_name;
+    document.getElementById("org-description").textContent = data.intro_text;
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("org-name").textContent = "Error loading organization";
+    document.getElementById("org-description").textContent = "";
+  }
+}
