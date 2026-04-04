@@ -600,3 +600,150 @@ export function initEditOrg(fetchWithAuth) {
     }
   });
 }
+
+// Gets Applications
+export async function fetchApplications(fetchWithAuth) {
+  const applications = await fetchWithAuth("/api/applications", "GET");
+  const container = document.getElementById("applications-container");
+
+  if (!applications || applications.error || applications.length === 0) {
+    container.innerHTML = `<div class="card placeholder"><p>No applications yet.</p></div>`;
+    return;
+  }
+
+  // Group applications by event
+  const grouped = applications.reduce((acc, app) => {
+    if (!acc[app.sid]) {
+      acc[app.sid] = { service_name: app.service_name, applications: [] };
+    }
+    acc[app.sid].applications.push(app);
+    return acc;
+  }, {});
+
+  container.innerHTML = Object.entries(grouped).map(([sid, group]) => `
+    <div class="card">
+      <h3>${group.service_name}</h3>
+      ${group.applications.map(app => {
+        const name = app.first_name
+          ? `${app.first_name} ${app.last_name ? app.last_name[0] + "." : ""}`
+          : app.display_name;
+
+        const isPending = app.status === "pending";
+
+        return `
+          <div class="application-row" data-sid="${app.sid}" data-uid="${app.uid}">
+            <span>${name}</span>
+            <span class="app-status status-${app.status}">${app.status}</span>
+            ${isPending ? `
+              <button class="approve-btn" data-sid="${app.sid}" data-uid="${app.uid}">Approve</button>
+              <button class="reject-btn" data-sid="${app.sid}" data-uid="${app.uid}">Reject</button>
+            ` : ""}
+          </div>
+        `;
+      }).join("")}
+    </div>
+  `).join("");
+}
+
+// Applications Information
+export function initApplicationActions(fetchWithAuth) {
+  const container = document.getElementById("applications-container");
+
+  container.addEventListener("click", async (e) => {
+    const sid = e.target.dataset.sid;
+    const uid = e.target.dataset.uid;
+
+    if (!sid || !uid) return;
+
+    let status = null;
+    if (e.target.classList.contains("approve-btn")) status = "approve";
+    if (e.target.classList.contains("reject-btn")) status = "reject";
+    if (!status) return;
+
+    try {
+      const res = await fetchWithAuth(`/api/applications/${sid}/${uid}`, "PUT", { status });
+      if (res.error) { alert(`Error: ${res.error}`); return; }
+      await fetchApplications(fetchWithAuth);
+    } catch (err) {
+      console.error("Failed to update application:", err);
+      alert("Failed to update application.");
+    }
+  });
+}
+
+export async function initSignUpEvents() {
+  try {
+    const events = await fetchWithAuth("/api/public-events", "GET");
+    const list = document.getElementById("eventSignupList");
+    const section = document.getElementById("eventSignupSection");
+    const noGroupSection = document.getElementById("noGroupEventSection");
+
+    section.style.display = "block";
+    noGroupSection.style.display = "none";
+
+    if (!events || events.length === 0) {
+      list.innerHTML = `<div class="card placeholder"><p>No events available.</p></div>`;
+      return;
+    }
+
+    list.innerHTML = events.map(event => `
+      <div class="card">
+        <h3>${event.service_name}</h3>
+        <p>${event.org_name}</p>
+        <p>${new Date(event.time_start).toLocaleString()}</p>
+        <p>${event.info_text || ""}</p>
+        <p>Hours: ${event.estimated_hours}</p>
+        <button class="view-event-btn" data-sid="${event.sid}">View Event</button>
+      </div>
+    `).join("");
+
+    list.addEventListener("click", (e) => {
+      if (!e.target.classList.contains("view-event-btn")) return;
+      sessionStorage.setItem("selectedSid", e.target.dataset.sid);
+      window.location.href = "/eventDetails";
+    });
+
+  } catch (err) {
+    console.error("Failed to load events:", err);
+  }
+}
+
+export async function initEventDetails() {
+  const sid = sessionStorage.getItem("selectedSid");
+  if (!sid) { window.location.href = "/signUpEvents"; return; }
+
+  try {
+    const event = await fetchWithAuth(`/api/events/${sid}`, "GET");
+    if (!event || event.error) { window.location.href = "/signUpEvents"; return; }
+
+    document.getElementById("event-name").textContent = event.service_name;
+    document.getElementById("event-description").textContent = event.info_text || "";
+    document.getElementById("event-org").textContent = event.org_name;
+    document.getElementById("event-time").textContent = new Date(event.time_start).toLocaleString();
+    document.getElementById("event-hours").textContent = event.estimated_hours;
+
+    const joinBtn = document.getElementById("joinEventBtn");
+
+    if (!event.applications_open || !event.visibility_public) {
+      joinBtn.textContent = "Applications Closed";
+      joinBtn.disabled = true;
+      return;
+    }
+
+    joinBtn.addEventListener("click", async () => {
+      try {
+        const res = await fetchWithAuth("/api/applications", "POST", { sid });
+        if (res.error) { alert(res.error); return; }
+        alert("Successfully applied!");
+        joinBtn.textContent = "Applied!";
+        joinBtn.disabled = true;
+      } catch (err) {
+        console.error("Failed to join event:", err);
+        alert("Failed to join event.");
+      }
+    });
+
+  } catch (err) {
+    console.error("Failed to load event details:", err);
+  }
+}

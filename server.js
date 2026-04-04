@@ -80,6 +80,18 @@ app.get("/viewOrganization", (req, res) => {
   res.render("viewOrganization");
 });
 
+app.get("/manageEvent", (req, res) => {
+  res.render("manageEvent");
+});
+
+app.get("/signUpEvent", (req, res) => {
+  res.render("signUpEvent");
+});
+
+app.get("/eventDetails", (req, res) => {
+  res.render("eventDetails");
+});
+
 //get user from token (or 401 status)
 const checkAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -810,6 +822,168 @@ app.put("/api/orgs", checkAuth, async (req, res) => {
   } catch (err) {
     console.error("Error updating organization:", err);
     res.status(500).json({ error: "Failed to update organization" });
+  }
+});
+
+// Get all applications for the org's events
+app.get("/api/applications", checkAuth, async (req, res) => {
+  const uid = req.user.uid;
+
+  try {
+    const orgData = await db.query("SELECT oid FROM orgs WHERE founder_id = $1", [uid]);
+    if (!orgData.rows[0]) return res.status(404).json({ error: "No organization found" });
+    const oid = orgData.rows[0].oid;
+
+    const result = await db.query(
+      `SELECT p.uid, p.sid, p.hours, p.status,
+              s.service_name, s.estimated_volunteers,
+              u.display_name, u.first_name, u.last_name
+       FROM participation p
+       JOIN services s ON p.sid = s.sid
+       JOIN users u ON p.uid = u.uid
+       WHERE s.oid = $1
+       ORDER BY s.sid, p.status`,
+      [oid]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching applications:", err);
+    res.status(500).json({ error: "Failed to fetch applications" });
+  }
+});
+
+// Approve or reject an application
+app.put("/api/applications/:sid/:uid", checkAuth, async (req, res) => {
+  const { sid, uid: applicantUid } = req.params;
+  const { status } = req.body; // "approve" or "reject"
+  const uid = req.user.uid;
+
+  try {
+    const orgData = await db.query("SELECT oid FROM orgs WHERE founder_id = $1", [uid]);
+    if (!orgData.rows[0]) return res.status(403).json({ error: "No organization found" });
+    const oid = orgData.rows[0].oid;
+
+    // Update the application status
+    const result = await db.query(
+      `UPDATE participation SET status = $1
+       WHERE sid = $2 AND uid = $3
+       RETURNING *`,
+      [status, sid, applicantUid]
+    );
+
+    if (!result.rows[0]) return res.status(404).json({ error: "Application not found" });
+
+    // If approving, check if capacity has been hit
+    if (status === "approve") {
+      const approvedCount = await db.query(
+        "SELECT COUNT(*) FROM participation WHERE sid = $1 AND status = 'approve'",
+        [sid]
+      );
+
+      const serviceData = await db.query(
+        "SELECT estimated_volunteers FROM services WHERE sid = $1 AND oid = $2",
+        [sid, oid]
+      );
+
+      const approved = parseInt(approvedCount.rows[0].count);
+      const max = serviceData.rows[0].estimated_volunteers;
+
+      if (approved >= max) {
+        // Reject all remaining pending applications
+        await db.query(
+          `UPDATE participation SET status = 'reject'
+           WHERE sid = $1 AND status = 'pending'`,
+          [sid]
+        );
+
+        // Hide the event from public listing
+        await db.query(
+          "UPDATE services SET visibility_public = false WHERE sid = $1",
+          [sid]
+        );
+      }
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error updating application:", err);
+    res.status(500).json({ error: "Failed to update application" });
+  }
+});
+
+// User signs up for an event
+app.post("/api/applications", checkAuth, async (req, res) => {
+  const { sid } = req.body;
+  const uid = req.user.uid;
+
+  try {
+    // Get hours from the service
+    const serviceData = await db.query(
+      "SELECT estimated_hours FROM services WHERE sid = $1",
+      [sid]
+    );
+
+    if (!serviceData.rows[0]) return res.status(404).json({ error: "Event not found" });
+    const hours = serviceData.rows[0].estimated_hours;
+
+    // Check if already applied
+    const existing = await db.query(
+      "SELECT * FROM participation WHERE uid = $1 AND sid = $2",
+      [uid, sid]
+    );
+
+    if (existing.rows[0]) return res.status(400).json({ error: "Already applied to this event" });
+
+    const result = await db.query(
+      `INSERT INTO participation (uid, sid, hours, status)
+       VALUES ($1, $2, $3, 'pending') RETURNING *`,
+      [uid, sid, hours]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error creating application:", err);
+    res.status(500).json({ error: "Failed to apply to event" });
+  }
+});
+
+// Get all public events for signUpEvents page
+app.get("/api/public-events", checkAuth, async (req, res) => {
+  try {
+    const result = await db.query(
+      `SELECT s.sid, s.service_name, s.info_text, s.time_start, s.estimated_hours,
+              o.org_name
+       FROM services s
+       JOIN orgs o ON s.oid = o.oid
+       WHERE s.visibility_public = true
+       ORDER BY s.time_start ASC`
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching public events:", err);
+    res.status(500).json({ error: "Failed to fetch events" });
+  }
+});
+
+// Get a single event by sid
+app.get("/api/events/:sid", checkAuth, async (req, res) => {
+  const { sid } = req.params;
+  try {
+    const result = await db.query(
+      `SELECT s.sid, s.service_name, s.info_text, s.time_start, s.estimated_hours,
+              s.estimated_volunteers, s.visibility_public, s.applications_open,
+              o.org_name
+       FROM services s
+       JOIN orgs o ON s.oid = o.oid
+       WHERE s.sid = $1`,
+      [sid]
+    );
+    if (!result.rows[0]) return res.status(404).json({ error: "Event not found" });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error fetching event:", err);
+    res.status(500).json({ error: "Failed to fetch event" });
   }
 });
 

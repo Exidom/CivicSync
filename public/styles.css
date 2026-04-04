@@ -131,6 +131,25 @@ textarea {
 
 }
 
+/* Application Row */
+.application-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.app-status {
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-approve { background: #d1e7dd; color: #0f5132; }
+.status-reject  { background: #f8d7da; color: #842029; }
+
 /* VIEW ORG SECTION (Used as default) */
 .org-layout {
   display: flex;
