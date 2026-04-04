@@ -684,6 +684,39 @@ app.get("/api/getOrganizationData", checkAuth, async (req, res) => {
   }
 });
 
+// Create Event/Service
+app.post("/api/services", checkAuth, async (req, res) => {
+  const { service_name, info_text, time_start, estimated_volunteers, estimated_hours, visibility_public, applications_open } = req.body;
+  const uid = req.user.uid;
+
+  try {
+    // Get the org ID for this user
+    const orgData = await db.query(
+      "SELECT oid FROM orgs WHERE founder_id = $1",
+      [uid]
+    );
+
+    if (!orgData.rows[0]) {
+      return res.status(403).json({ error: "User has no organization" });
+    }
+
+    const oid = orgData.rows[0].oid;
+
+    // Insert the service
+    const result = await db.query(
+      `INSERT INTO services (service_name, oid, info_text, visibility_public, applications_open, estimated_volunteers, estimated_hours, created_time, finalized_time, time_start)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW(), $8)
+       RETURNING *`,
+      [service_name, oid, info_text, visibility_public, applications_open, estimated_volunteers, estimated_hours, time_start]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error creating service:", err);
+    res.status(500).json({ error: "Failed to create service" });
+  }
+});
+
 app.use(express.static("public"));
 
 

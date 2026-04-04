@@ -172,7 +172,7 @@ textarea {
 /* TABS */
 .tab-vertical-container {
   display: flex;
-  height: 500px;
+  height: 800px;
   border: 1px solid #ccc;
   border-radius: 6px;
   overflow: hidden;
@@ -204,6 +204,11 @@ textarea {
   background-color: #fff;
   border-left: 4px solid #4CAF50;
   font-weight: bold;
+}
+
+.tab-vertical-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .tab-vertical-content {
