@@ -745,6 +745,74 @@ app.get("/api/services", checkAuth, async (req, res) => {
   }
 });
 
+// Edits current events
+app.put("/api/services/:sid", checkAuth, async (req, res) => {
+  const { sid } = req.params;
+  const { service_name, info_text, time_start, estimated_volunteers, estimated_hours, visibility_public, applications_open } = req.body;
+  const uid = req.user.uid;
+
+  try {
+    // Make sure this service belongs to the user's org
+    const orgData = await db.query("SELECT oid FROM orgs WHERE founder_id = $1", [uid]);
+    if (!orgData.rows[0]) return res.status(403).json({ error: "No organization found" });
+    const oid = orgData.rows[0].oid;
+
+    const result = await db.query(
+      `UPDATE services SET service_name=$1, info_text=$2, time_start=$3, estimated_volunteers=$4, estimated_hours=$5, visibility_public=$6, applications_open=$7
+       WHERE sid=$8 AND oid=$9 RETURNING *`,
+      [service_name, info_text, time_start, estimated_volunteers, estimated_hours, visibility_public, applications_open, sid, oid]
+    );
+
+    if (!result.rows[0]) return res.status(404).json({ error: "Event not found or unauthorized" });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error updating service:", err);
+    res.status(500).json({ error: "Failed to update service" });
+  }
+});
+
+// Deletes Current Events
+app.delete("/api/services/:sid", checkAuth, async (req, res) => {
+  const { sid } = req.params;
+  const uid = req.user.uid;
+
+  try {
+    const orgData = await db.query("SELECT oid FROM orgs WHERE founder_id = $1", [uid]);
+    if (!orgData.rows[0]) return res.status(403).json({ error: "No organization found" });
+    const oid = orgData.rows[0].oid;
+
+    const result = await db.query(
+      "DELETE FROM services WHERE sid=$1 AND oid=$2 RETURNING *",
+      [sid, oid]
+    );
+
+    if (!result.rows[0]) return res.status(404).json({ error: "Event not found or unauthorized" });
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Error deleting service:", err);
+    res.status(500).json({ error: "Failed to delete service" });
+  }
+});
+
+// Edit Orgs Functionality
+app.put("/api/orgs", checkAuth, async (req, res) => {
+  const { org_name, intro_text } = req.body;
+  const uid = req.user.uid;
+
+  try {
+    const result = await db.query(
+      "UPDATE orgs SET org_name=$1, intro_text=$2 WHERE founder_id=$3 RETURNING *",
+      [org_name, intro_text, uid]
+    );
+
+    if (!result.rows[0]) return res.status(404).json({ error: "Organization not found" });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Error updating organization:", err);
+    res.status(500).json({ error: "Failed to update organization" });
+  }
+});
+
 app.use(express.static("public"));
 
 

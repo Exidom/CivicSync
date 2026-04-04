@@ -436,6 +436,7 @@ export async function fetchOrg(fetchWithAuth) {
     document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
       btn.disabled = false;
     });
+    initEditOrg(fetchWithAuth); // only init when org exists
   } else {
     orgNameEl.textContent = "You are not in an Organization";
     orgDescEl.innerHTML = "";
@@ -446,6 +447,7 @@ export async function fetchOrg(fetchWithAuth) {
   }
 }
 
+// Gets current events
 export async function fetchEvents(fetchWithAuth) {
   const events = await fetchWithAuth("/api/services", "GET");
   const container = document.getElementById("events-container");
@@ -456,12 +458,145 @@ export async function fetchEvents(fetchWithAuth) {
   }
 
   container.innerHTML = events.map(event => `
-    <div class="card">
-      <h3>${event.service_name}</h3>
-      <p>${new Date(event.time_start).toLocaleString()}</p>
-      <p>${event.info_text || ""}</p>
-      <p>Volunteers needed: ${event.estimated_volunteers} &nbsp;|&nbsp; Hours: ${event.estimated_hours}</p>
-      <p>${event.visibility_public ? "Public" : "Private"} &nbsp;|&nbsp; Applications: ${event.applications_open ? "Open" : "Closed"}</p>
+    <div class="card" data-sid="${event.sid}">
+      <div class="event-view">
+        <h3>${event.service_name}</h3>
+        <p>${new Date(event.time_start).toLocaleString()}</p>
+        <p>${event.info_text || ""}</p>
+        <p>Volunteers Needed: ${event.estimated_volunteers} &nbsp;|&nbsp; Hours: ${event.estimated_hours}</p>
+        <p>${event.visibility_public ? "Public" : "Private"} &nbsp;|&nbsp; Applications: ${event.applications_open ? "Open" : "Closed"}</p>
+        <button class="edit-event-btn" data-sid="${event.sid}">Edit</button>
+        <button class="delete-event-btn" data-sid="${event.sid}">Delete</button>
+      </div>
+
+      <div class="event-edit" style="display:none;">
+        <label>Service Name: <input type="text" name="service_name" value="${event.service_name}"></label><br>
+        <label>Description:<br><textarea name="info_text" rows="3">${event.info_text || ""}</textarea></label><br>
+        <label>Start Date/Time: <input type="datetime-local" name="time_start" value="${event.time_start.slice(0, 16)}"></label><br>
+        <label>Volunteers Needed: <input type="number" name="estimated_volunteers" value="${event.estimated_volunteers}" min="1"></label><br>
+        <label>Hours: <input type="number" name="estimated_hours" value="${event.estimated_hours}" min="1"></label><br>
+        <label>Visible to Public:
+          <select name="visibility_public">
+            <option value="true" ${event.visibility_public ? "selected" : ""}>Yes</option>
+            <option value="false" ${!event.visibility_public ? "selected" : ""}>No</option>
+          </select>
+        </label><br>
+        <label>Applications Open:
+          <select name="applications_open">
+            <option value="true" ${event.applications_open ? "selected" : ""}>Yes</option>
+            <option value="false" ${!event.applications_open ? "selected" : ""}>No</option>
+          </select>
+        </label><br>
+        <button class="save-event-btn" data-sid="${event.sid}">Save</button>
+        <button class="cancel-edit-btn" data-sid="${event.sid}">Cancel</button>
+      </div>
     </div>
   `).join("");
+}
+
+// Delete and Edit functionality in the current events
+export function initEventActions(fetchWithAuth) {
+  const container = document.getElementById("events-container");
+
+  container.addEventListener("click", async (e) => {
+
+    const sid = e.target.dataset.sid;
+    const card = document.querySelector(`.card[data-sid="${sid}"]`);
+
+    // Show edit form
+    if (e.target.classList.contains("edit-event-btn")) {
+      card.querySelector(".event-view").style.display = "none";
+      card.querySelector(".event-edit").style.display = "block";
+    }
+
+    // Hide edit form
+    if (e.target.classList.contains("cancel-edit-btn")) {
+      card.querySelector(".event-view").style.display = "block";
+      card.querySelector(".event-edit").style.display = "none";
+    }
+
+    // Save edits
+    if (e.target.classList.contains("save-event-btn")) {
+      const editForm = card.querySelector(".event-edit");
+      const payload = {
+        service_name: editForm.querySelector("[name=service_name]").value.trim(),
+        info_text: editForm.querySelector("[name=info_text]").value.trim(),
+        time_start: editForm.querySelector("[name=time_start]").value,
+        estimated_volunteers: parseInt(editForm.querySelector("[name=estimated_volunteers]").value),
+        estimated_hours: parseInt(editForm.querySelector("[name=estimated_hours]").value),
+        visibility_public: editForm.querySelector("[name=visibility_public]").value === "true",
+        applications_open: editForm.querySelector("[name=applications_open]").value === "true"
+      };
+
+      try {
+        const res = await fetchWithAuth(`/api/services/${sid}`, "PUT", payload);
+        if (res.error) { alert("Error updating event: " + res.error); return; }
+        alert("Event updated!");
+        await fetchEvents(fetchWithAuth);
+      } catch (err) {
+        console.error("Failed to update event:", err);
+        alert("Failed to update event.");
+      }
+    }
+
+    // Delete
+    if (e.target.classList.contains("delete-event-btn")) {
+      if (!confirm("Are you sure you want to delete this event?")) return;
+
+      try {
+        const res = await fetchWithAuth(`/api/services/${sid}`, "DELETE");
+        if (res && res.error) { alert("Error deleting event: " + res.error); return; }
+        await fetchEvents(fetchWithAuth);
+      } catch (err) {
+        console.error("Failed to delete event:", err);
+        alert("Failed to delete event.");
+      }
+    }
+
+  });
+}
+
+// Edit organizations functionality
+export function initEditOrg(fetchWithAuth) {
+  const editBtn = document.getElementById("editOrgBtn");
+  const editForm = document.getElementById("editOrgForm");
+  const cancelBtn = document.getElementById("cancelEditOrgBtn");
+
+  editBtn.addEventListener("click", () => {
+    // Pre-fill with current values
+    document.getElementById("editOrgName").value = document.getElementById("org-name").textContent;
+    document.getElementById("editOrgIntro").value = document.getElementById("org-description").innerText;
+    editForm.style.display = "block";
+    editBtn.style.display = "none";
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    editForm.style.display = "none";
+    editBtn.style.display = "block";
+  });
+
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const org_name = document.getElementById("editOrgName").value.trim();
+    const intro_text = document.getElementById("editOrgIntro").value.trim();
+
+    if (!org_name) { alert("Organization name is required."); return; }
+
+    try {
+      const res = await fetchWithAuth("/api/orgs", "PUT", { org_name, intro_text });
+      if (res.error) { alert("Error updating organization: " + res.error); return; }
+
+      // Update the displayed values
+      document.getElementById("org-name").textContent = res.org_name;
+      document.getElementById("org-description").innerHTML = `<p>${res.intro_text || ""}</p>`;
+
+      editForm.style.display = "none";
+      editBtn.style.display = "block";
+      alert("Organization Information Saved!");
+    } catch (err) {
+      console.error("Failed to Update Organization:", err);
+      alert("Failed to Update Organization.");
+    }
+  });
 }

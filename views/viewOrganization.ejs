@@ -65,6 +65,16 @@
                   <p>This is the organization's bio, contact info, and links.</p>
                 </div>
               </div>
+              <button id="editOrgBtn">Edit Organization</button>
+
+              <form id="editOrgForm" style="display:none;">
+                <label>Organization Name: <input type="text" id="editOrgName" required></label><br>
+                <label>Description:<br>
+                  <textarea id="editOrgIntro" rows="4" cols="40"></textarea>
+                </label><br>
+                <button type="submit">Save</button>
+                <button type="button" id="cancelEditOrgBtn">Cancel</button>
+              </form>
             </section>
 
             <!-- Shown only when user has NO org -->
@@ -149,13 +159,15 @@
     <script type="module" src="/js/functions.js"></script>
     <script type="module">
       import { handleLogout, fetchWithAuth } from "/js/auth.js";
-      import { fetchOrg, fetchEvents } from "/js/functions.js";
+      import { fetchOrg, fetchEvents, initEventActions, initEditOrg } from "/js/functions.js";
 
       document.addEventListener("DOMContentLoaded", async () => {
 
         // Initial page load
         await fetchOrg(fetchWithAuth);
         await fetchEvents(fetchWithAuth);
+        initEventActions(fetchWithAuth);
+        initEditOrg(fetchWithAuth);
 
         // Create Org form
         document.getElementById("createOrgForm").addEventListener("submit", async (e) => {
