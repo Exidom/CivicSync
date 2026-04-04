@@ -660,6 +660,31 @@ app.get("/api/userProfileData", checkAuth, async (req, res) => {
   }
 });
 
+// Get organization
+app.get("/api/getOrganizationData", checkAuth, async (req, res) => {
+  console.log("Fetching org for user:", req.user.uid);
+  try {
+    const uid = req.user.uid;  // UID from authentication
+
+    // Query orgs where this user is the founder
+    const orgData = await db.query(
+      "SELECT org_name, intro_text FROM orgs WHERE founder_id = $1",
+      [uid]
+    );
+
+    const org = orgData.rows[0] || null;
+
+    if (!org) {
+      return res.status(404).json({ error: "User has no organization" });
+    }
+
+    res.json(org);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 app.use(express.static("public"));
 
 

@@ -29,12 +29,12 @@
 
       <!-- ORG INFO -->
       <!-- TODO: Pull the user's organization name and info from the database -->
-      <h1 class="page-title">View Organization Under Construction</h1>
+      <h1 id="org-name" class="page-title">View Organization Under Construction</h1>
       <section class="card large-card">
         <div class="org-layout">
           <div class="org-image"></div>
 
-          <div class="org-text">
+          <div id="org-description" class="org-text">
             <p>
               This is the organization's bio, where they can list out their
               contact info and any associated links. Lorem ipsum etc etc
@@ -81,11 +81,19 @@
       <div>Contact Us: email@email.com</div>
     </footer>
 
+    <script type="module" src="/js/functions.js"></script>
     <script type="module">
       import { handleLogout } from "/js/auth.js";
+      import { loadOrganization } from "/js/functions.js";
+      
+      document.addEventListener('DOMContentLoaded', () => {
+          loadOrganization();
+      });
+      
       // document.getElementById("userName").innerText = user.name;
       // document.getElementById("userPic").src = user.picture;
       // TODO: Need to get user info to appear by profile picture!
+
       
       // User profile button
       document.getElementById("profileBtn").onclick = async () => {
