@@ -146,9 +146,9 @@ textarea {
   border-radius: 12px;
 }
 
-.status-pending { background: #fff3cd; color: #856404; }
-.status-approve { background: #d1e7dd; color: #0f5132; }
-.status-reject  { background: #f8d7da; color: #842029; }
+.status-pending  { background: #fff3cd; color: #856404; }
+.status-accepted { background: #d1e7dd; color: #0f5132; }
+.status-rejected { background: #f8d7da; color: #842029; }
 
 /* VIEW ORG SECTION (Used as default) */
 .org-layout {

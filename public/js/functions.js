@@ -458,16 +458,17 @@ export async function fetchEvents(fetchWithAuth) {
   }
 
   container.innerHTML = events.map(event => `
-    <div class="card" data-sid="${event.sid}">
-      <div class="event-view">
-        <h3>${event.service_name}</h3>
-        <p>${new Date(event.time_start).toLocaleString()}</p>
-        <p>${event.info_text || ""}</p>
-        <p>Volunteers Needed: ${event.estimated_volunteers} &nbsp;|&nbsp; Hours: ${event.estimated_hours}</p>
-        <p>${event.visibility_public ? "Public" : "Private"} &nbsp;|&nbsp; Applications: ${event.applications_open ? "Open" : "Closed"}</p>
-        <button class="edit-event-btn" data-sid="${event.sid}">Edit</button>
-        <button class="delete-event-btn" data-sid="${event.sid}">Delete</button>
-      </div>
+      <div class="card" data-sid="${event.sid}">
+        <div class="event-view">
+          <h3>${event.service_name}</h3>
+          <p>${new Date(event.time_start).toLocaleString()}</p>
+          <p>${event.info_text || ""}</p>
+          <p>Volunteers needed: ${event.estimated_volunteers} &nbsp;|&nbsp; Hours: ${event.estimated_hours}</p>
+          <p>${event.visibility_public ? "Public" : "Private"} &nbsp;|&nbsp; Applications: ${event.applications_open ? "Open" : "Closed"}</p>
+          <button class="manage-event-btn" data-sid="${event.sid}">Manage Event</button>
+          <button class="edit-event-btn" data-sid="${event.sid}">Edit</button>
+          <button class="delete-event-btn" data-sid="${event.sid}">Delete</button>
+        </div>
 
       <div class="event-edit" style="display:none;">
         <label>Service Name: <input type="text" name="service_name" value="${event.service_name}"></label><br>
@@ -499,9 +500,14 @@ export function initEventActions(fetchWithAuth) {
   const container = document.getElementById("events-container");
 
   container.addEventListener("click", async (e) => {
-
     const sid = e.target.dataset.sid;
     const card = document.querySelector(`.card[data-sid="${sid}"]`);
+
+    // Navigate to manage event page
+    if (e.target.classList.contains("manage-event-btn")) {
+      sessionStorage.setItem("selectedOrgSid", sid);
+      window.location.href = "/manageEvent";
+    }
 
     // Show edit form
     if (e.target.classList.contains("edit-event-btn")) {
@@ -552,7 +558,6 @@ export function initEventActions(fetchWithAuth) {
         alert("Failed to delete event.");
       }
     }
-
   });
 }
 
@@ -633,7 +638,7 @@ export async function fetchApplications(fetchWithAuth) {
         return `
           <div class="application-row" data-sid="${app.sid}" data-uid="${app.uid}">
             <span>${name}</span>
-            <span class="app-status status-${app.status}">${app.status}</span>
+            <span class="app-status status-${app.status}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span>
             ${isPending ? `
               <button class="approve-btn" data-sid="${app.sid}" data-uid="${app.uid}">Approve</button>
               <button class="reject-btn" data-sid="${app.sid}" data-uid="${app.uid}">Reject</button>
@@ -656,8 +661,8 @@ export function initApplicationActions(fetchWithAuth) {
     if (!sid || !uid) return;
 
     let status = null;
-    if (e.target.classList.contains("approve-btn")) status = "approve";
-    if (e.target.classList.contains("reject-btn")) status = "reject";
+    if (e.target.classList.contains("approve-btn")) status = "accepted";
+    if (e.target.classList.contains("reject-btn")) status = "rejected";
     if (!status) return;
 
     try {
@@ -746,4 +751,88 @@ export async function initEventDetails() {
   } catch (err) {
     console.error("Failed to load event details:", err);
   }
+}
+
+export async function initManageEvent() {
+  const sid = sessionStorage.getItem("selectedOrgSid");
+  if (!sid) { window.location.href = "/viewOrganization"; return; }
+
+  try {
+    // Load event details
+    const event = await fetchWithAuth(`/api/manage-event/${sid}`, "GET");
+    if (!event || event.error) { window.location.href = "/viewOrganization"; return; }
+
+    document.getElementById("event-name").textContent = event.service_name;
+    document.getElementById("event-description").textContent = event.info_text || "";
+    document.getElementById("event-time").textContent = new Date(event.time_start).toLocaleString();
+    document.getElementById("event-hours").textContent = event.estimated_hours;
+    document.getElementById("event-volunteers").textContent = event.estimated_volunteers;
+
+    await loadParticipants(sid);
+
+  } catch (err) {
+    console.error("Failed to load manage event page:", err);
+  }
+}
+
+async function loadParticipants(sid) {
+  const participants = await fetchWithAuth(`/api/manage-event/${sid}/participants`, "GET");
+  const container = document.getElementById("participants-container");
+
+  if (!participants || participants.error || participants.length === 0) {
+    container.innerHTML = `<div class="card placeholder"><p>No participants yet.</p></div>`;
+    return;
+  }
+
+  // Separate approved and pending
+  const approved = participants.filter(p => p.status === "accepted");
+  const pending = participants.filter(p => p.status === "pending");
+  const rejected = participants.filter(p => p.status === "rejected");
+
+  container.innerHTML = `
+    ${approved.length > 0 ? `
+      <h3>Approved (${approved.length})</h3>
+      ${approved.map(p => participantCard(p, true)).join("")}
+    ` : ""}
+
+    ${pending.length > 0 ? `
+      <h3>Pending</h3>
+      ${pending.map(p => participantCard(p, false)).join("")}
+    ` : ""}
+
+    ${rejected.length > 0 ? `
+      <h3>Rejected</h3>
+      ${rejected.map(p => participantCard(p, false)).join("")}
+    ` : ""}
+  `;
+
+  // Attach kick listeners
+  container.querySelectorAll(".kick-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to kick this volunteer?")) return;
+      try {
+        const res = await fetchWithAuth(`/api/manage-event/${sid}/kick/${btn.dataset.uid}`, "PUT");
+        if (res.error) { alert(res.error); return; }
+        await loadParticipants(sid);
+      } catch (err) {
+        console.error("Failed to kick participant:", err);
+        alert("Failed to kick participant.");
+      }
+    });
+  });
+}
+
+function participantCard(p, showKick) {
+  const name = p.first_name
+    ? `${p.first_name} ${p.last_name ? p.last_name[0] + "." : ""}`
+    : p.display_name;
+
+  return `
+    <div class="application-row">
+      <span>${name}</span>
+      <span>Hours: ${p.hours}</span>
+      <span class="app-status status-${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
+      ${showKick ? `<button class="kick-btn" data-uid="${p.uid}">Kick</button>` : ""}
+    </div>
+  `;
 }

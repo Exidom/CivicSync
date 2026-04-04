@@ -144,10 +144,18 @@
 
       document.addEventListener("DOMContentLoaded", async () => {
 
+        const openTab = sessionStorage.getItem("openTab");
+        if (openTab) {
+          sessionStorage.removeItem("openTab");
+          const tabBtn = document.querySelector(`.tab-vertical-buttons button[data-tab="${openTab}"]`);
+          if (tabBtn) tabBtn.click();
+        }
+        
         // Initial page load
         await fetchOrg(fetchWithAuth);
         await fetchEvents(fetchWithAuth);
         await fetchApplications(fetchWithAuth);
+        initApplicationActions(fetchWithAuth);
         initEventActions(fetchWithAuth);
         initEditOrg(fetchWithAuth);
 

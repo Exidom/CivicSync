@@ -2,59 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>CivicSync Manage Event Pagee</title>
+  <title>CivicSync Manage Event</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <!-- NAVBAR -->
   <header class="navbar">
-    <!-- TODO: Insert a logo, either ours or the org's stored logo -->
     <div class="logo">LOGO</div>
-
     <nav>
-      <!-- TODO: figure out what to replace this with: <a id="signUpEvents">Volunteer Now!</a> -->
       <a id="createEvent">Need Volunteers?</a>
       <a id="aboutUs">About Us</a>
     </nav>
-
     <button id="logoutBtn" class="logout-btn">Logout</button>
   </header>
 
-  <!-- MAIN CONTENT -->
-
   <main class="container">
-    <div id="eventSignupSection" style="display: none;"></div>
-      <h1>Event Signup</h1>
-      <section class="card-container" id="eventSignupList" style="flex:none;"></section>
-    </div>
+    <button id="backBtn" class="grey-btn" style="margin-bottom: 20px;">← Back</button>
 
-    <div id="noGroupEventSection" style="display: none;">
-      <section class="card-container">
-        <div class="center">
-          <h2 class="section-title" style="padding: 20px">Join a group to sign up for events: </h2>
-          <div class="card" style="border: 10px solid #ccc">
-            <form id="groupInviteForm" style="margin-top: 30px;">
-              <input type="text" id="groupCode" placeholder="Enter your invite code">
-            </form>
-            <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
-          </div>
-        </div>
-      </section>
-    </div>
+    <section class="card large-card">
+      <h1 id="event-name"></h1>
+      <p><strong>Date & Time:</strong> <span id="event-time"></span></p>
+      <p><strong>Hours:</strong> <span id="event-hours"></span></p>
+      <p><strong>Volunteers Wanted:</strong> <span id="event-volunteers"></span></p>
+      <p id="event-description"></p>
+    </section>
 
-    <h2>Other links for testing: </h2>
+    <h2>Participants</h2>
+    <div id="participants-container" class="card-container"></div>
+
+    <h2>Other links for testing:</h2>
     <div class="center">
       <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
       <button id="userProfileBtn" class="grey-btn">User Profile</button>
-      <button id="createGroups" class="grey-btn">Create Groups</button>
-      <button id="viewGroup" class="grey-btn">View Group</button>
       <button id="viewOrganization" class="grey-btn">View Organization</button>
     </div>
   </main>
 
-
-  <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
   <footer class="footer">
     <div>Follow Us: ● ● ● ●</div>
     <div>Contact Us: contactus@civicsync.org</div>
@@ -62,48 +45,19 @@
 
   <script type="module">
     import { handleLogout } from "/js/auth.js";
-    import { initEventSignup } from "/js/functions.js";
+    import { initManageEvent } from "/js/functions.js";
 
-    document.addEventListener("DOMContentLoaded", () => {
-      initEventSignup();
+    document.addEventListener("DOMContentLoaded", async () => {
+      await initManageEvent();
     });
 
-    // Logout Button
-    document.getElementById("logoutBtn").onclick = async () => {
-        await handleLogout();
-        window.location.href = "/dashboard";
-    };
-
-    //Navbar links
-    document.getElementById("createEvent").onclick = async () => {
-        window.location.href = "/createEvent";
-    };
-
-    document.getElementById("aboutUs").onclick = async () => {
-        window.location.href = "/aboutUs";
-    };
-
-    // Testing Buttons
-    document.getElementById("dashboardLoggedIn").onclick = async () => {
-        window.location.href = "/dashboardLoggedIn";
-    };
-
-    document.getElementById("userProfileBtn").onclick = async () => {
-        window.location.href = "/userProfile";
-    };
-
-    document.getElementById("createGroups").onclick = async () => {
-        window.location.href = "/createGroups";
-    };
-
-    document.getElementById("viewGroup").onclick = async () => {
-        window.location.href = "/viewGroup";
-    };
-
-    document.getElementById("viewOrganization").onclick = async () => {
-        window.location.href = "/viewOrganization";
-    };
-
+    document.getElementById("backBtn").onclick = () => window.location.href = "/viewOrganization";
+    document.getElementById("logoutBtn").onclick = async () => { await handleLogout(); window.location.href = "/dashboard"; };
+    document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
+    document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
+    document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
+    document.getElementById("userProfileBtn").onclick = () => window.location.href = "/userProfile";
+    document.getElementById("viewOrganization").onclick = () => window.location.href = "/viewOrganization";
   </script>
 </body>
 </html>
