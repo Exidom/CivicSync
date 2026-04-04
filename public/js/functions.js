@@ -421,3 +421,47 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.openTab = openTab; // Makes openTab function global
+
+export async function fetchOrg(fetchWithAuth) {
+  const data = await fetchWithAuth("/api/getOrganizationData", "GET");
+
+  const orgNameEl = document.getElementById("org-name");
+  const orgDescEl = document.getElementById("org-description");
+  const noOrgSection = document.getElementById("noOrgSection");
+
+  if (data && !data.error) {
+    orgNameEl.textContent = data.org_name;
+    orgDescEl.innerHTML = `<p>${data.intro_text || ""}</p>`;
+    noOrgSection.style.display = "none";
+    document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
+      btn.disabled = false;
+    });
+  } else {
+    orgNameEl.textContent = "You are not in an Organization";
+    orgDescEl.innerHTML = "";
+    noOrgSection.style.display = "block";
+    document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
+      if (btn.dataset.tab !== "Profile") btn.disabled = true;
+    });
+  }
+}
+
+export async function fetchEvents(fetchWithAuth) {
+  const events = await fetchWithAuth("/api/services", "GET");
+  const container = document.getElementById("events-container");
+
+  if (!events || events.error || events.length === 0) {
+    container.innerHTML = `<div class="card placeholder"><p>No events yet.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = events.map(event => `
+    <div class="card">
+      <h3>${event.service_name}</h3>
+      <p>${new Date(event.time_start).toLocaleString()}</p>
+      <p>${event.info_text || ""}</p>
+      <p>Volunteers needed: ${event.estimated_volunteers} &nbsp;|&nbsp; Hours: ${event.estimated_hours}</p>
+      <p>${event.visibility_public ? "Public" : "Private"} &nbsp;|&nbsp; Applications: ${event.applications_open ? "Open" : "Closed"}</p>
+    </div>
+  `).join("");
+}

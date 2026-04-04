@@ -717,6 +717,34 @@ app.post("/api/services", checkAuth, async (req, res) => {
   }
 });
 
+// Get Current Events
+app.get("/api/services", checkAuth, async (req, res) => {
+  const uid = req.user.uid;
+
+  try {
+    const orgData = await db.query(
+      "SELECT oid FROM orgs WHERE founder_id = $1",
+      [uid]
+    );
+
+    if (!orgData.rows[0]) {
+      return res.status(404).json({ error: "User has no organization" });
+    }
+
+    const oid = orgData.rows[0].oid;
+
+    const result = await db.query(
+      "SELECT * FROM services WHERE oid = $1 ORDER BY time_start ASC",
+      [oid]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error fetching services:", err);
+    res.status(500).json({ error: "Failed to fetch services" });
+  }
+});
+
 app.use(express.static("public"));
 
 
