@@ -875,9 +875,9 @@ app.put("/api/applications/:sid/:uid", checkAuth, async (req, res) => {
     if (!result.rows[0]) return res.status(404).json({ error: "Application not found" });
 
     // If approving, check if capacity has been hit
-    if (status === "approve") {
+    if (status === "accepted") {
       const approvedCount = await db.query(
-        "SELECT COUNT(*) FROM participation WHERE sid = $1 AND status = 'approve'",
+        "SELECT COUNT(*) FROM participation WHERE sid = $1 AND status = 'accepted'",
         [sid]
       );
 
@@ -892,8 +892,8 @@ app.put("/api/applications/:sid/:uid", checkAuth, async (req, res) => {
       if (approved >= max) {
         // Reject all remaining pending applications
         await db.query(
-          `UPDATE participation SET status = 'reject'
-           WHERE sid = $1 AND status = 'pending'`,
+          `UPDATE participation SET status = 'rejected'
+          WHERE sid = $1 AND status = 'pending'`,
           [sid]
         );
 
@@ -1053,13 +1053,13 @@ app.put("/api/manage-event/:sid/kick/:participantUid", checkAuth, async (req, re
 
     // Set participant status to reject
     await db.query(
-      "UPDATE participation SET status = 'reject' WHERE sid = $1 AND uid = $2",
+      "UPDATE participation SET status = 'rejected' WHERE sid = $1 AND uid = $2",
       [sid, participantUid]
     );
 
     // Check current approved count vs capacity
     const approvedCount = await db.query(
-      "SELECT COUNT(*) FROM participation WHERE sid = $1 AND status = 'approve'",
+      "SELECT COUNT(*) FROM participation WHERE sid = $1 AND status = 'accepted'",
       [sid]
     );
 

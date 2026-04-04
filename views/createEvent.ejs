@@ -78,11 +78,10 @@
 
   <script type="module">
     import { handleLogout } from "/js/auth.js";
-    import { initCreateEvent } from "/js/functions.js";
-
     document.addEventListener("DOMContentLoaded", () => {
-      initCreateEvent();
-    });
+        sessionStorage.setItem("openTab", "CreateEvent");
+        window.location.href = "/viewOrganization";
+      });
 
     // Logout Button
     document.getElementById("logoutBtn").onclick = async () => {

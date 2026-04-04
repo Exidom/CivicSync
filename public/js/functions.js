@@ -638,7 +638,7 @@ export async function fetchApplications(fetchWithAuth) {
         return `
           <div class="application-row" data-sid="${app.sid}" data-uid="${app.uid}">
             <span>${name}</span>
-            <span class="app-status status-${app.status}">${app.status}</span>
+            <span class="app-status status-${app.status}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span>
             ${isPending ? `
               <button class="approve-btn" data-sid="${app.sid}" data-uid="${app.uid}">Approve</button>
               <button class="reject-btn" data-sid="${app.sid}" data-uid="${app.uid}">Reject</button>
@@ -661,8 +661,8 @@ export function initApplicationActions(fetchWithAuth) {
     if (!sid || !uid) return;
 
     let status = null;
-    if (e.target.classList.contains("approve-btn")) status = "approve";
-    if (e.target.classList.contains("reject-btn")) status = "reject";
+    if (e.target.classList.contains("approve-btn")) status = "accepted";
+    if (e.target.classList.contains("reject-btn")) status = "rejected";
     if (!status) return;
 
     try {
@@ -785,9 +785,9 @@ async function loadParticipants(sid) {
   }
 
   // Separate approved and pending
-  const approved = participants.filter(p => p.status === "approve");
+  const approved = participants.filter(p => p.status === "accepted");
   const pending = participants.filter(p => p.status === "pending");
-  const rejected = participants.filter(p => p.status === "reject");
+  const rejected = participants.filter(p => p.status === "rejected");
 
   container.innerHTML = `
     ${approved.length > 0 ? `
@@ -831,7 +831,7 @@ function participantCard(p, showKick) {
     <div class="application-row">
       <span>${name}</span>
       <span>Hours: ${p.hours}</span>
-      <span class="app-status status-${p.status}">${p.status}</span>
+      <span class="app-status status-${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
       ${showKick ? `<button class="kick-btn" data-uid="${p.uid}">Kick</button>` : ""}
     </div>
   `;
