@@ -149,13 +149,14 @@
     <script type="module" src="/js/functions.js"></script>
     <script type="module">
       import { handleLogout, fetchWithAuth } from "/js/auth.js";
-      import { fetchOrg, fetchEvents } from "/js/functions.js";
+      import { fetchOrg, fetchEvents, initEventActions } from "/js/functions.js";
 
       document.addEventListener("DOMContentLoaded", async () => {
 
         // Initial page load
         await fetchOrg(fetchWithAuth);
         await fetchEvents(fetchWithAuth);
+        initEventActions(fetchWithAuth);
 
         // Create Org form
         document.getElementById("createOrgForm").addEventListener("submit", async (e) => {
