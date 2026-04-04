@@ -7,7 +7,6 @@
   </head>
   <body>
 
-    <!-- TODO: Have users be able to edit the profile -->
     <!-- NAVBAR -->
     <header class="navbar">
       <!-- TODO: Insert a logo, either ours or the org's stored logo -->
@@ -27,24 +26,6 @@
 
     <!-- MAIN CONTENT -->
     <main class="container">
-
-      <!-- EVENTS -->
-      <!-- TODO: List an organizations planned events -->
-      <!-- <h2 class="section-title">Upcoming Events</h2>
-
-      <section class="card-container">
-        <div class="card">
-          <h3>Park Cleanup</h3>
-          <p>March 28</p>
-        </div>
-
-        <div class="card">
-          <h3>Food Drive</h3>
-          <p>April 2</p>
-        </div>
-        
-
-      </section> -->
 
       <!-- TABS -->
       <div class="tab-vertical-container">
@@ -159,13 +140,14 @@
     <script type="module" src="/js/functions.js"></script>
     <script type="module">
       import { handleLogout, fetchWithAuth } from "/js/auth.js";
-      import { fetchOrg, fetchEvents, initEventActions, initEditOrg } from "/js/functions.js";
+      import { fetchOrg, fetchEvents, initEventActions, initEditOrg, fetchApplications, initApplicationActions } from "/js/functions.js";
 
       document.addEventListener("DOMContentLoaded", async () => {
 
         // Initial page load
         await fetchOrg(fetchWithAuth);
         await fetchEvents(fetchWithAuth);
+        await fetchApplications(fetchWithAuth);
         initEventActions(fetchWithAuth);
         initEditOrg(fetchWithAuth);
 
