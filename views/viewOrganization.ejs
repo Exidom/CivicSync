@@ -27,25 +27,9 @@
     <!-- MAIN CONTENT -->
     <main class="container">
 
-      <!-- ORG INFO -->
-      <!-- TODO: Pull the user's organization name and info from the database -->
-      <h1 id="org-name" class="page-title">View Organization Under Construction</h1>
-      <section class="card large-card">
-        <div class="org-layout">
-          <div class="org-image"></div>
-
-          <div id="org-description" class="org-text">
-            <p>
-              This is the organization's bio, where they can list out their
-              contact info and any associated links. Lorem ipsum etc etc
-            </p>
-          </div>
-        </div>
-      </section>
-
       <!-- EVENTS -->
       <!-- TODO: List an organizations planned events -->
-      <h2 class="section-title">Upcoming Events</h2>
+      <!-- <h2 class="section-title">Upcoming Events</h2>
 
       <section class="card-container">
         <div class="card">
@@ -59,7 +43,92 @@
         </div>
         
 
-      </section>
+      </section> -->
+
+      <!-- TABS -->
+      <div class="tab-vertical-container">
+        <div class="tab-vertical-buttons">
+          <button class="tablinks" data-tab="Profile">Organization Profile</button>
+          <button class="tablinks" data-tab="Applications">View Applications</button>
+          <button class="tablinks" data-tab="Events">View Current Events</button>
+          <button class="tablinks" data-tab="CreateEvent">Create New Event</button>
+        </div>
+
+        <div class="tab-vertical-content">
+          <div id="Profile" class="tabcontent">
+            <h1 id="org-name">Organization Name</h1>
+            <section class="card large-card">
+              <div class="org-layout">
+                <div id="org-image" class="org-image"></div>
+                <div id="org-description" class="org-text">
+                  <p>This is the organization's bio, contact info, and links.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Shown only when user has NO org -->
+            <div id="noOrgSection" style="display: none;">
+              <div class="center">
+                <h2 class="section-title" style="padding: 20px">
+                  You don't have an organization yet — create one here:
+                </h2>
+                <div class="card" style="border: 1px solid #ccc; padding: 20px;">
+                  <form id="createOrgForm">
+                    <input type="text" id="orgNameInput" placeholder="Organization name" required
+                          style="width: 100%; padding: 8px; margin-bottom: 10px;">
+                    <textarea id="orgIntroInput" rows="4" placeholder="Organization description"
+                              style="width: 100%; padding: 8px;"></textarea>
+                    <button type="submit" style="margin-top: 10px; padding: 10px 20px;">Create Org</button>
+                  </form>
+                </div>
+              </div>
+            </div>  <!-- ← closing noOrgSection -->
+
+          </div>  <!-- ← closing Profile tabcontent -->
+
+          <div id="Applications" class="tabcontent">
+            <h3>User Applications</h3>
+            <div id="applications-container" class="card-container">
+              <div class="card placeholder"><p>No applications yet.</p></div>
+            </div>
+          </div>
+
+          <div id="Events" class="tabcontent">
+            <h3>Upcoming Events</h3>
+            <div id="events-container" class="card-container">
+              <div class="card placeholder"><p>No events yet.</p></div>
+            </div>
+          </div>
+
+          <div id="CreateEvent" class="tabcontent">
+            <h3>Create New Event</h3>
+            <form id="create-event-form">
+              <label>Service Name: <input type="text" name="service_name" required></label><br>
+              <label>Description:<br>
+                <textarea name="info_text" rows="4" cols="40"></textarea>
+              </label><br>
+              <label>Start Date/Time: <input type="datetime-local" name="time_start" required></label><br>
+              <label>Number of Volunteers Needed: <input type="number" name="estimated_volunteers" min="1"></label><br>
+              <label>How many hours is the event? <input type="number" name="estimated_hours" min="1"></label><br>
+              <label>Visible to Public:
+                <select name="visibility_public">
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </label><br>
+              <label>Applications Open:
+                <select name="applications_open">
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </label><br>
+              <button type="submit">Create Event</button>
+            </form>
+          </div>
+        
+        </div>
+      
+      </div>
 
       <!-- JOIN GROUPS BUTTON -->
       <div class="center">
@@ -85,15 +154,119 @@
     <script type="module">
       import { handleLogout } from "/js/auth.js";
       import { loadOrganization } from "/js/functions.js";
+      import { fetchWithAuth } from "/js/auth.js";
       
-      document.addEventListener('DOMContentLoaded', () => {
-          loadOrganization();
+      // For Profile Loading
+      document.addEventListener("DOMContentLoaded", async () => {
+        const noOrgSection = document.getElementById("noOrgSection");
+        const createOrgForm = document.getElementById("createOrgForm");
+        const orgNameEl = document.getElementById("org-name");
+        const orgDescEl = document.getElementById("org-description");
+
+        // Renders org data into the Profile tab
+        function displayOrg(data) {
+          orgNameEl.textContent = data.org_name;
+          orgDescEl.innerHTML = `<p>${data.intro_text || ""}</p>`;
+          noOrgSection.style.display = "none";
+
+          // Enable all tabs
+          document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
+            btn.disabled = false;
+          });
+        }
+
+        function displayNoOrg() {
+          orgNameEl.textContent = "You are not in an Organization";
+          orgDescEl.innerHTML = "";
+          noOrgSection.style.display = "block";
+
+          // Disable all tabs except Profile
+          document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
+            if (btn.dataset.tab !== "Profile") {
+              btn.disabled = true;
+            }
+          });
+        }
+
+        async function fetchOrg() {
+          try {
+            const data = await fetchWithAuth("/api/getOrganizationData", "GET");
+            data ? displayOrg(data) : displayNoOrg();
+          } catch (err) {
+            console.error("Error fetching organization:", err);
+            displayNoOrg();
+          }
+        }
+
+        // Initial load
+        await fetchOrg();
+
+        createOrgForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const org_name = document.getElementById("orgNameInput").value.trim();
+          const intro_text = document.getElementById("orgIntroInput").value.trim();
+
+          if (!org_name) {
+            alert("Please enter an organization name.");
+            return;
+          }
+
+          try {
+            const res = await fetchWithAuth("/api/orgs", "POST", { org_name, intro_text });
+
+            if (res.error) {
+              alert("Error creating organization: " + res.error);
+              return;
+            }
+
+            alert("Organization created successfully!");
+            createOrgForm.reset();
+
+            // Re-fetch from server so Profile tab reflects real saved data
+            await fetchOrg();
+
+            // Switch to Profile tab
+            document.querySelector('.tab-vertical-buttons button[data-tab="Profile"]').click();
+
+          } catch (err) {
+            console.error("Create organization failed:", err);
+            alert("Failed to create organization. Check console for details.");
+          }
+        });
       });
-      
-      // document.getElementById("userName").innerText = user.name;
-      // document.getElementById("userPic").src = user.picture;
+
+      // For Form Submission on Creating an Event
+      document.getElementById("create-event-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const form = e.target;
+
+        const payload = {
+          service_name: form.service_name.value.trim(),
+          info_text: form.info_text.value.trim(),
+          time_start: form.time_start.value,
+          estimated_volunteers: parseInt(form.estimated_volunteers.value),
+          estimated_hours: parseInt(form.estimated_hours.value),
+          visibility_public: form.visibility_public.value === "true",
+          applications_open: form.applications_open.value === "true"
+        };
+
+        try {
+          const res = await fetchWithAuth("/api/services", "POST", payload);
+          if (res.error) {
+            alert("Error creating event: " + res.error);
+            return;
+          }
+          alert("Event created successfully!");
+          form.reset();
+        } catch (err) {
+          console.error("Failed to create event:", err);
+          alert("Failed to create event. Check console for details.");
+        }
+      });
       // TODO: Need to get user info to appear by profile picture!
 
+      // TODO: Update form entirely dynamically
       
       // User profile button
       document.getElementById("profileBtn").onclick = async () => {

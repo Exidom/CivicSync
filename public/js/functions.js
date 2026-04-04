@@ -373,6 +373,7 @@ function submitNewGroup() {
   });
 }
 
+// Loads organization information
 export async function loadOrganization() {
   try {
     console.log("Fetching org...");
@@ -391,7 +392,32 @@ export async function loadOrganization() {
 
   } catch (err) {
     console.error(err);
-    document.getElementById("org-name").textContent = "Error loading organization";
+    document.getElementById("org-name").textContent = "You are not in an Organization";
     document.getElementById("org-description").textContent = "";
   }
 }
+
+// Adds additional tab functionality
+function openTab(tabName, button) {
+  const tabContents = document.querySelectorAll(".tabcontent");
+  tabContents.forEach(tc => tc.style.display = "none");
+
+  const tabButtons = document.querySelectorAll(".tab-vertical-buttons button");
+  tabButtons.forEach(btn => btn.classList.remove("active"));
+
+  document.getElementById(tabName).style.display = "block";
+  button.classList.add("active");
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const tabButtons = document.querySelectorAll(".tab-vertical-buttons button");
+  tabButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      openTab(btn.dataset.tab, btn);
+    });
+  });
+
+  tabButtons[0].click();
+});
+
+window.openTab = openTab; // Makes openTab function global

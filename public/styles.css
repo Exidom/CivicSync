@@ -95,6 +95,12 @@ body {
   min-height: 0;
 }
 
+.card.application-card {
+  border-left: 4px solid #4CAF50; /* Green border to differentiate */
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
 /* FORMS */
 form {
   display: flex;
@@ -162,6 +168,67 @@ textarea {
   border: none;
   cursor: pointer;
 }
+
+/* TABS */
+.tab-vertical-container {
+  display: flex;
+  height: 800px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.tab-vertical-buttons {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #ccc;
+  background-color: #f1f1f1;
+  width: 200px;
+}
+
+.tab-vertical-buttons button {
+  padding: 15px;
+  border: none;
+  outline: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.tab-vertical-buttons button:hover {
+  background-color: #ddd;
+}
+
+.tab-vertical-buttons button.active {
+  background-color: #fff;
+  border-left: 4px solid #4CAF50;
+  font-weight: bold;
+}
+
+.tab-vertical-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tab-vertical-content {
+  flex-grow: 1;
+  padding: 20px;
+  background-color: #fff;
+  overflow-y: auto;
+}
+
+.tabcontent {
+  display: none;
+  animation: fadeEffect 0.3s;
+}
+
+@keyframes fadeEffect {
+  from {opacity: 0;}
+  to {opacity: 1;}
+}
+
+
 
 /* FOOTER */
 .footer {
