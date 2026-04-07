@@ -396,9 +396,10 @@ export async function fetchOrg(fetchWithAuth) {
     });
     initEditOrg(fetchWithAuth); // only init when org exists
   } else {
-    orgNameEl.textContent = "You are not in an Organization";
+    orgNameEl.textContent = "";
     orgDescEl.innerHTML = "";
     noOrgSection.style.display = "block";
+    document.querySelector(".large-card").style.display = "none";
     document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
       if (btn.dataset.tab !== "Profile") btn.disabled = true;
     });
@@ -411,12 +412,12 @@ export async function fetchEvents(fetchWithAuth) {
   const container = document.getElementById("events-container");
 
   if (!events || events.error || events.length === 0) {
-    container.innerHTML = `<div class="card placeholder"><p>No events yet.</p></div>`;
+    container.innerHTML = `<div class="event-card placeholder"><p>No events yet.</p></div>`;
     return;
   }
 
   container.innerHTML = events.map(event => `
-      <div class="card" data-sid="${event.sid}">
+      <div class="event-card" data-sid="${event.sid}">
         <div class="event-view">
           <h3>${event.service_name}</h3>
           <p>${new Date(event.time_start).toLocaleString()}</p>
@@ -570,7 +571,7 @@ export async function fetchApplications(fetchWithAuth) {
   const container = document.getElementById("applications-container");
 
   if (!applications || applications.error || applications.length === 0) {
-    container.innerHTML = `<div class="card placeholder"><p>No applications yet.</p></div>`;
+    container.innerHTML = `<div class="event-card placeholder"><p>No applications yet.</p></div>`;
     return;
   }
 
@@ -584,7 +585,7 @@ export async function fetchApplications(fetchWithAuth) {
   }, {});
 
   container.innerHTML = Object.entries(grouped).map(([sid, group]) => `
-    <div class="card">
+    <div class="event-card">
       <h3>${group.service_name}</h3>
       ${group.applications.map(app => {
         const name = app.first_name
@@ -645,12 +646,12 @@ export async function initSignUpEvents() {
     noGroupSection.style.display = "none";
 
     if (!events || events.length === 0) {
-      list.innerHTML = `<div class="card placeholder"><p>No events available.</p></div>`;
+      list.innerHTML = `<div class="event-card placeholder"><p>No events available.</p></div>`;
       return;
     }
 
     list.innerHTML = events.map(event => `
-      <div class="card">
+      <div class="event-card">
         <h3>${event.service_name}</h3>
         <p>${event.org_name}</p>
         <p>${new Date(event.time_start).toLocaleString()}</p>

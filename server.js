@@ -48,10 +48,6 @@ app.get("/createGroups", (req, res) => {
   res.render("createGroups");
 });
 
-app.get("/aboutUs", (req, res) => {
-  res.render("aboutUs");
-});
-
 app.get("/createEvent", (req, res) => {
   res.render("createEvent");
 });
