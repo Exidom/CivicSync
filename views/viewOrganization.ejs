@@ -74,7 +74,7 @@
 
           <div class="dropdown-divider"></div>
 
-          <a class="dropdown-item sign-out" id="logoutBtn" href="#">
+          <a class="dropdown-item sign-out" id="logoutBtn">
             <div class="item-title">Logout</div>
           </a>
         </div>
@@ -111,7 +111,7 @@
                 <label>Description:<br>
                   <textarea id="editOrgIntro" rows="4" cols="40"></textarea>
                 </label><br>
-                <button type="submit">Save</button>
+                <button type="submit" id="saveEditOrgBtn">Save</button>
                 <button type="button" id="cancelEditOrgBtn">Cancel</button>
               </form>
             </section>
@@ -120,9 +120,9 @@
             <div id="noOrgSection" style="display: none;">
               <div class="center">
                 <h2 class="section-title" style="padding: 20px">
-                  You don't have an organization yet — create one here:
+                  You don't have an organization yet — Create one here:
                 </h2>
-                <div class="card" style="border: 1px solid #ccc; padding: 20px;">
+                <div class="card">
                   <form id="createOrgForm">
                     <input type="text" id="orgNameInput" placeholder="Organization name" required
                           style="width: 100%; padding: 8px; margin-bottom: 10px;">
@@ -137,14 +137,14 @@
           </div>
 
           <div id="Applications" class="tabcontent">
-            <h3>User Applications</h3>
+            <h3 id="applications-title">User Applications</h3>
             <div id="applications-container" class="event-grid">
               <div class="event-card placeholder"><p>No applications yet.</p></div>
             </div>
           </div>
 
           <div id="Events" class="tabcontent">
-            <h3>Upcoming Events</h3>
+            <h3 id="upcomingEventsTitle">Upcoming Events</h3>
             <div id="events-container" class="event-grid">
               <div class="event-card placeholder"><p>No events yet.</p></div>
             </div>
@@ -172,7 +172,7 @@
                   <option value="false">No</option>
                 </select>
               </label><br>
-              <button type="submit">Create Event</button>
+              <button type="submit" id="createEventBtn">Create Event</button>
             </form>
           </div>
         
@@ -273,14 +273,12 @@
         }
 
         // Navigation
-        document.getElementById("viewOrganization").onclick = () => window.location.href = "/viewOrganization";
-        document.getElementById("viewGroup").onclick = () => window.location.href = "/viewGroup";
-        document.getElementById("profileBtn").onclick = () => window.location.href = "/userProfile";
-        document.getElementById("signUpEvents").onclick = () => window.location.href = "/signUpEvents";
-        document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
-        document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
-        document.getElementById("createGroups").onclick = () => window.location.href = "/createGroups";
-        document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
+        // document.getElementById("profileBtn").onclick = () => window.location.href = "/userProfile";
+        // document.getElementById("signUpEvents").onclick = () => window.location.href = "/signUpEvents";
+        // document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
+        // document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
+        // document.getElementById("createGroups").onclick = () => window.location.href = "/createGroups";
+        // document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
         document.getElementById("logoutBtn").onclick = async () => {
           await handleLogout();
           window.location.href = "/dashboard";
