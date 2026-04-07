@@ -39,15 +39,16 @@ body {
 
 .navbar nav a {
   margin: 5px 15px;
-  text-decoration: none;
   color: #086375;
   cursor: pointer;
   font-size: 20px;
+  text-decoration: none;
 }
 
 .navbar nav a:hover {
   color: #086375;
   font-weight: bold;
+  text-decoration: underline;
 }
 
 .logo {
@@ -70,6 +71,13 @@ body {
   padding-top: 20px;
 }
 
+.container h2 {
+  color: #086375;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 20px 0 12px;
+}
+
 .page-title {
   max-width: 900px;
   margin: 0 auto 30px auto;  /* centers it */
@@ -88,6 +96,10 @@ body {
   border: 1px solid #A0CFD3;
 }
 
+.card.placeholder p {
+  color: #086375;
+}
+
 .large-card {
   max-width: 1000px;
   margin: 0 auto 20px auto;
@@ -95,6 +107,25 @@ body {
   background: #ffffff;
   border: 1px solid #b8d8dc;
   border-radius: 8px;
+}
+
+.large-card h1 {
+  color: #086375;
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #d6eef0;
+}
+
+.large-card p {
+  color: #4a7a82;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.large-card strong {
+  color: #086375;
 }
 
 /* CARD LAYOUT */
@@ -256,10 +287,37 @@ textarea {
   color: #086375;
 }
 
+.application-row span:first-child,
+.application-row span:nth-child(2) {
+  color: #086375;
+}
+
 #participants-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+#participants-title {
+  color: #086375;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+#participants-container .application-row span {
+  color: #086375;
+}
+
+#participants-container h3 {
+  color: #086375;
+}
+
+#event-name {
+  color: #086375;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
 }
 
 .app-status {
@@ -267,6 +325,11 @@ textarea {
   padding: 2px 8px;
   border-radius: 12px;
 }
+
+.application-row .status-pending  { background: #fff3cd; color: #856404 !important; font-weight: bold;}
+.application-row .status-accepted { background: #d1e7dd; color: #0f5132 !important; font-weight: bold;}
+.application-row .status-rejected { background: #f8d7da; color: #842029 !important; font-weight: bold;}
+.application-row .status-completed { background: #d1e7dd; color: #0f5132 !important; font-weight: bold;}
 
 .status-pending  { background: #fff3cd; color: #856404; font-weight: bold;}
 .status-accepted { background: #d1e7dd; color: #0f5132; font-weight: bold;}
@@ -450,6 +513,53 @@ textarea {
 
 #createEventBtn:hover {
   background: #f0f8f9;
+  font-weight: bold;
+}
+
+#backBtn {
+  background: #ffffff;
+  color: #086375;
+  border: 1px solid #A0CFD3;
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-bottom: 20px;
+}
+
+#backBtn:hover {
+  background: #f0f8f9;
+  font-weight: bold;
+}
+
+.kick-btn {
+  background: #ffffff;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.kick-btn:hover {
+  background: #fee2e2;
+}
+
+.complete-btn {
+  background: #086375;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.complete-btn:hover {
+  background: #065260;
   font-weight: bold;
 }
 
