@@ -686,7 +686,29 @@ export async function initEventDetails() {
     document.getElementById("event-time").textContent = new Date(event.time_start).toLocaleString();
     document.getElementById("event-hours").textContent = event.estimated_hours;
 
+    const groupData = await fetchWithAuth("/api/createGroupData");
+
+    const select = document.getElementById("groupSelect");
+    select.innerHTML = "";
+
     const joinBtn = document.getElementById("joinEventBtn");
+
+    if (!groupData.hasGroup || groupData.groups.length === 0) {
+      const option = document.createElement("option");
+      option.disabled = true;
+      select.appendChild(option);
+      joinBtn.textContent = "Join a group first";
+      joinBtn.disabled = true;
+    } 
+    
+    else {
+      groupData.groups.forEach(g => {
+        const option = document.createElement("option");
+        option.value = g.gid;
+        option.textContent = g.group_name;
+        select.appendChild(option);
+      });
+    }
 
     if (!event.applications_open || !event.visibility_public) {
       joinBtn.textContent = "Applications Closed";
@@ -696,7 +718,14 @@ export async function initEventDetails() {
 
     joinBtn.addEventListener("click", async () => {
       try {
-        const res = await fetchWithAuth("/api/applications", "POST", { sid });
+        const gid = select.value;
+
+        if (!gid) {
+          alert("Please select a group");
+          return;
+        }
+
+        const res = await fetchWithAuth("/api/applications", "POST", { sid, gid });
         if (res.error) { alert(res.error); return; }
         alert("Successfully applied!");
         joinBtn.textContent = "Applied!";

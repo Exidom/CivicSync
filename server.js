@@ -909,7 +909,7 @@ app.put("/api/applications/:sid/:uid", checkAuth, async (req, res) => {
 
 // User signs up for an event
 app.post("/api/applications", checkAuth, async (req, res) => {
-  const { sid } = req.body;
+  const { sid, gid } = req.body;
   const uid = req.user.uid;
 
   try {
@@ -931,9 +931,9 @@ app.post("/api/applications", checkAuth, async (req, res) => {
     if (existing.rows[0]) return res.status(400).json({ error: "Already applied to this event" });
 
     const result = await db.query(
-      `INSERT INTO participation (uid, sid, hours, status)
-       VALUES ($1, $2, $3, 'pending') RETURNING *`,
-      [uid, sid, hours]
+      `INSERT INTO participation (uid, sid, hours, gid, status)
+       VALUES ($1, $2, $3, $4, 'pending') RETURNING *`,
+      [uid, sid, hours, gid]
     );
 
     res.json(result.rows[0]);
@@ -1517,12 +1517,10 @@ app.get("/api/group-hours", checkAuth, async (req, res) => {
 
   try{
     const result = await db.query(
-      `SELECT m1.gid, COALESCE(SUM(p.hours), 0) AS total
-      FROM membership m1
-      JOIN membership m2 ON m1.gid = m2.gid
-      LEFT JOIN participation p ON m2.uid = p.uid AND p.status = 'completed'
-      WHERE m1.uid = $1                      
-      GROUP BY m1.gid`,
+      `SELECT p.gid, COALESCE(SUM(p.hours), 0) AS total
+      FROM participation p
+      WHERE p.status = 'completed' AND p.gid IN (SELECT gid FROM membership WHERE uid = $1)
+      GROUP BY p.gid`,
       [uid]
     );
 
