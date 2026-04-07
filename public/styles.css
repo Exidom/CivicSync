@@ -496,6 +496,21 @@ textarea {
   cursor: pointer;
 }
 
+.login-btn {
+  background: #086375;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.login-btn:hover {
+  background: #065260;
+  font-weight: bold;
+}
+
 .signup-btn {
   padding: 20px 50px;
   margin: 80px 30px 10px;

@@ -13,12 +13,12 @@
     <div class="logo">LOGO</div>
 
     <nav>
+      <a id="dashboard">Home</a>
       <a id="signUpEvents">Volunteer Now!</a>
       <a id="createEvent">Need Volunteers?</a>
-      <a id="aboutUs">About Us</a>
     </nav>
 
-    <button id="loginBtn" class="logout-btn">Login</button>
+    <button id="loginBtn" class="login-btn">Login</button>
   </header>
 
   <!-- MAIN CONTENT -->
@@ -100,9 +100,9 @@
         window.location.href = "/login";
     };
 
-    document.getElementById("aboutUs").onclick = async () => {
-        window.location.href = "/aboutUs";
-    };
+    document.getElementById("dashboard").onclick = async () => {
+      window.location.href = "/dashboard";
+    }
 
   </script>
 </body>
