@@ -396,9 +396,10 @@ export async function fetchOrg(fetchWithAuth) {
     });
     initEditOrg(fetchWithAuth); // only init when org exists
   } else {
-    orgNameEl.textContent = "You are not in an Organization";
+    orgNameEl.textContent = "";
     orgDescEl.innerHTML = "";
     noOrgSection.style.display = "block";
+    document.querySelector(".large-card").style.display = "none";
     document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
       if (btn.dataset.tab !== "Profile") btn.disabled = true;
     });
