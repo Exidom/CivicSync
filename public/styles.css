@@ -265,7 +265,24 @@ textarea {
   to {opacity: 1;}
 }
 
+/* EVENTS SIGNUP */
+.event-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
 
+.event-card {
+  background: white;
+  padding: 20px;
+  border: 5px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
 
 /* FOOTER */
 .footer {
