@@ -584,35 +584,6 @@ app.get("/api/eventsSignupData", checkAuth, async (req, res) => {
   }
 });
 
-// For Event Sign Ups
-app.post("/api/join-event", checkAuth, async (req, res) => {
-  try {
-    const { sid } = req.body;
-    const uid = req.user.uid;
-
-    // Prevent duplicates
-    const existing = await db.query(
-      "SELECT * FROM participation WHERE uid = $1 AND sid = $2",
-      [uid, sid]
-    );
-
-    if (existing.rows.length > 0) {
-      return res.status(400).json({ error: "You already joined this event" });
-    }
-
-    await db.query(
-      "INSERT INTO participation (uid, sid) VALUES ($1, $2)",
-      [uid, sid]
-    );
-
-    res.json({ success: true });
-
-  } catch (err) {
-    console.error("EVENT SIGNUP JOINING ERROR ", err);
-    res.status(500).json({ error: "Failed to join event" });
-  }
-});
-
 // Collects group info for the group creation page
 app.get("/api/createGroupData", checkAuth, async (req, res) => {
   try {
@@ -817,6 +788,9 @@ app.delete("/api/services/:sid", checkAuth, async (req, res) => {
     const orgData = await db.query("SELECT oid FROM orgs WHERE founder_id = $1", [uid]);
     if (!orgData.rows[0]) return res.status(403).json({ error: "No organization found" });
     const oid = orgData.rows[0].oid;
+
+    // Removes any participants before deleting to avoid errors
+    await db.query ("DELETE FROM participation WHERE sid = $1 RETURNING *", [sid]);
 
     const result = await db.query(
       "DELETE FROM services WHERE sid=$1 AND oid=$2 RETURNING *",
@@ -1500,6 +1474,68 @@ app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
   }
 });
 
+
+// Mark hours as completed for tracking
+app.put("/api/participation/complete", checkAuth, async (req, res) => {
+  const { uid, sid, hours } = req.body;
+
+  try {
+    await db.query(
+      `UPDATE participation
+       SET status = 'completed',
+           hours = $1,
+           credited_at = NOW()
+       WHERE uid = $2 AND sid = $3`,
+      [hours, uid, sid]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Complete participation error:", err);
+    res.status(500).json({ error: "Failed to mark completed" });
+  }
+});
+
+// Tracks a users completed hours instead of storing in the database
+app.get("/api/user-hours", checkAuth, async (req, res) => {
+  const uid = req.user.uid;
+
+  try{
+    const result = await db.query(
+      `SELECT COALESCE(SUM(hours), 0) AS total
+      FROM participation
+      WHERE uid = $1 AND status = 'completed'`,
+      [uid]
+    );
+
+    res.json({ total: result.rows[0].total });
+  } catch (err) {
+    console.error("Error finding completed user hours:", err);
+    res.status(500).json({ error: "Failed to calculate users hours"});
+  }
+});
+
+// Tracks the total number of hours completed by all users in a group
+app.get("/api/group-hours", checkAuth, async (req, res) => {
+  const uid = req.user.uid;
+
+  try{
+    const result = await db.query(
+      `SELECT m1.gid, COALESCE(SUM(p.hours), 0) AS total
+      FROM membership m1
+      JOIN membership m2 ON m1.gid = m2.gid
+      LEFT JOIN participation p ON m2.uid = p.uid AND p.status = 'completed'
+      WHERE m1.uid = $1                      
+      GROUP BY m1.gid`,
+      [uid]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Error finding completed group hours:", err);
+    res.status(500).json({ error: "Failed to calculate groups hours"});
+  }
+});
 
 app.use(express.static("public"));
 
