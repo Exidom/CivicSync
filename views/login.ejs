@@ -3,6 +3,7 @@
 <button id="logoutBtn">Logout</button>
 <button id="postDataBtn">Send Data to Server</button>
 <button id="imageButton">Go to image stuff</button>
+<button id="groupButton">group</button>
 
 <div id="output"></div>
 
@@ -38,5 +39,10 @@
 
     document.getElementById('imageButton').onclick = async () => {
         window.location.href = "/imag";
+    };
+
+    document.getElementById('groupButton').onclick = async () => {
+        localStorage.setItem('groupViewId', 11);
+        window.location.href = "/group";
     };
 </script>

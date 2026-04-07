@@ -92,6 +92,10 @@ app.get("/eventDetails", (req, res) => {
   res.render("eventDetails");
 });
 
+app.get("/group", (req, res) => {
+  res.render("group");
+});
+
 //get user from token (or 401 status)
 const checkAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
@@ -201,12 +205,21 @@ app.post("/delete-image", checkAuth, async (req, res) => {
       org: "orgs"
     };
 
+    if(group!=null){
+      //todo check if user is admin
+      const query = `
+        UPDATE groups
+        SET iLink${spot} = $1,
+            pid${spot} = $2
+        WHERE gid = $3 AND
+        pid${spot} = $4
+      `;
+      await db.query(query, [null, null, group,pid]);
+      await cloudinary.uploader.destroy(pid);
+      return res.json({ success: true });
+    }
 
     if (!pid.startsWith(`user_uploads/${req.user.uid}`)) {
-      if(group!=null){
-        //check if user is admin
-        //delete entry with public id in group database
-      }
       return res.status(403).json({ error: "Unauthorized" });
     }
     
@@ -280,12 +293,24 @@ app.post("/set-ilink", checkAuth, async (req, res) => {
   };
 
 
-  if(group!=null){
-    //check if user is admin
-    //save to group
-  }
 
   try {
+
+    if(group!=null){
+      //todo check if user is admin
+      const query = `
+        UPDATE groups
+        SET iLink${x} = $1,
+            pid${x} = $2
+        WHERE gid = $3
+      `;
+
+      await db.query(query, [iLink, pid, group]);
+
+      return res.json({ success: true });
+    
+    }
+
 
     let tableType = "user";
     let iLinkCol = `iLink${x}`;
@@ -1085,6 +1110,396 @@ app.put("/api/manage-event/:sid/kick/:participantUid", checkAuth, async (req, re
     res.status(500).json({ error: "Failed to kick participant" });
   }
 });
+
+
+
+app.post("/api/messageSend", checkAuth, async (req, res) => {//types (0=service,1=group,2=user,3=org,4=groupAdmins)
+  //group and service ref type is invite code
+  //sendId can be null unless sendType=1
+  const { sendId, sendType, destId, destType, refId, refType} = req.params;
+  const uid = req.user.uid;
+
+  try{
+
+    let toSendId = uid;
+    let toSendType = "user";
+    let toRefId = uid;
+    let toRefType = "user";
+    let toDestType = "groupAdmins";
+
+    if(sendType==3){
+      const orgData = await db.query("SELECT oid FROM orgs WHERE founder_id = $1", [uid]);
+      if (!orgData.rows[0]) return res.status(403).json({ error: "No organization found" });
+      toSendId = orgData.rows[0].oid;
+      toSendType = "org";
+    }
+    
+    if(sendType==1){
+      const groupData = await db.query("SELECT admin FROM membership INNER JOIN groups on membership.gid = groups.gid WHERE invite_code = $1 AND uid = $2", [sendID,uid]);//sanatize?
+      if (!groupData.rows[0]) return res.status(403).json({ error: "no position found" });
+      if (!groupData.rows[0].admin) return res.status(403).json({ error: "no admin position found" });
+      toSendId = sendId;
+      toSendType = "group";
+    }
+
+    //sanatize?
+    if(refType==0){
+      //check refId is real service
+      const serviceData = await db.query("SELECT sid FROM services WHERE invite_code = $1", [refId]);
+      if (!serviceData.rows[0]) return res.status(403).json({ error: "no service found" });
+    }
+    if(destType==2){
+      //check destId is real user
+      const userData = await db.query("SELECT uid FROM users WHERE uid = $1", [destId]);
+      if (!userData.rows[0]) return res.status(403).json({ error: "no user found" });
+    }
+    if(destType==4){
+      //check destId is real group invite
+       const adminData = await db.query("SELECT gid FROM groups WHERE invite_code = $1", [destId]);
+      if (!adminData.rows[0]) return res.status(403).json({ error: "no group found" });
+    }
+
+
+    
+    if(((toSendType == "org")||(toSendType == "user")) && ( ((destType==4)) && (refType==0))){//send services to groupAdmin
+      toRefId = refId;
+      toRefType = "service";
+
+      const result = await db.query(
+        `INSERT INTO messages (from_id,from_type,to_id,to_type,reference_id,reference_type)
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [toSendId,toSendType,destId,toDestType,toRefId,toRefType]
+      );
+      res.json(result.rows[0]);
+    }
+
+    else if((toSendType == "user") && ( ((destType==4)) && (refType==2))){//apply to group admins
+      
+      const result = await db.query(
+        `INSERT INTO messages (from_id,from_type,to_id,to_type,reference_id,reference_type)
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [toSendId,toSendType,destId,toDestType,toRefId,toRefType]
+      );
+      res.json(result.rows[0]);
+    }
+
+    else if((toSendType == "group") && ( ((destType==2)) && (refType==1))){//invite users
+      toRefId=sendId;
+      toRefType = "group";
+      toDestType = "user";
+
+      const result = await db.query(
+        `INSERT INTO messages (from_id,from_type,to_id,to_type,reference_id,reference_type)
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [toSendId,toSendType,destId,toDestType,toRefId,toRefType]
+      );
+      res.json(result.rows[0]);
+    }
+
+    else if((toSendType == "group") && ( ((destType==1)) && (refType==0))){//share in group service
+      if(destId!=sendId){
+        return res.status(403).json({ error: "invalid message" });
+      }
+      else{
+        toRefId=refId;
+        toRefType = "service";
+        toDestType = "group";
+      }
+
+      const result = await db.query(
+        `INSERT INTO messages (from_id,from_type,to_id,to_type,reference_id,reference_type)
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [toSendId,toSendType,destId,toDestType,toRefId,toRefType]
+      );
+      res.json(result.rows[0]);
+    }
+
+    return res.status(403).json({ error: "invalid message" });
+
+  }
+  catch (err) {
+    console.error("Error sending message:", err);
+    res.status(500).json({ error: "Failed to send message" });
+  }
+
+});
+
+app.get("/api/messageGetAdmin", checkAuth, async (req, res) => {
+  const { gid } = req.params;
+  const uid = req.user.uid;
+
+  try{
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+    if (!groupData.rows[0]) return res.status(403).json({ error: "no position found" });
+    if (!groupData.rows[0].admin) return res.status(403).json({ error: "no admin position found" });
+
+    const inviteData = await db.query("SELECT invite_code FROM groups WHERE gid = $1", [gid]);
+    if (!inviteData.rows[0]) return res.status(403).json({ error: "no group found" });
+    const inviteCode = inviteData.rows[0].invite_code;
+
+    const result = await db.query(
+      `SELECT FROM messages WHERE to_id = $1 AND to_type = "groupAdmins"`,
+      [inviteCode]
+    );
+    res.json(result.rows);
+  }
+  catch (err) {
+    console.error("Error getting messages:", err);
+    res.status(500).json({ error: "Failed to get messages" });
+  }
+});
+
+app.get("/api/messageGetGroup", checkAuth, async (req, res) => {
+  const { gid } = req.params;
+  const uid = req.user.uid;
+
+  try{
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+    if (!groupData.rows[0]) return res.status(403).json({ error: "no position found" });
+
+    const inviteData = await db.query("SELECT invite_code FROM groups WHERE gid = $1", [gid]);
+    if (!inviteData.rows[0]) return res.status(403).json({ error: "no group found" });
+    const inviteCode = inviteData.rows[0].invite_code;
+
+    const result = await db.query(
+      `SELECT FROM messages WHERE to_id = $1 AND to_type = "group"`,
+      [inviteCode]
+    );
+    res.json(result.rows);
+  }
+  catch (err) {
+    console.error("Error getting messages:", err);
+    res.status(500).json({ error: "Failed to get messages" });
+  }
+});
+
+app.delete("/api/messageDelete", checkAuth, async (req, res) => {
+  const { mid } = req.params;
+  const uid = req.user.uid;
+
+  try{
+    const messageData = await db.query("SELECT * FROM messages WHERE mid = $1", [mid]);//sanatize?
+    if (!messageData.rows[0]) return res.status(403).json({ error: "no message found" });
+
+    if (messageData.rows[0].to_type=="user"){
+      if(messageData.rows[0].to_id==uid){
+        const result = await db.query(
+          "DELETE FROM services WHERE mid=$1 RETURNING *",
+          [mid]
+        );
+        if (!result.rows[0]) return res.status(404).json({ error: "Event not found or unauthorized" });
+        res.json({ success: true });
+      }
+    }
+    else if ((messageData.rows[0].to_type=="group")||(messageData.rows[0].to_type=="groupAdmin")){
+      const groupData = await db.query("SELECT admin FROM membership INNER JOIN groups on membership.gid = groups.gid WHERE invite_code = $1 AND uid = $2", [messageData.rows[0].destId,uid]);
+      if (!groupData.rows[0]) return res.status(403).json({ error: "no position found" });
+      if (!groupData.rows[0].admin) return res.status(403).json({ error: "no admin position found" });
+
+      const result = await db.query(
+        "DELETE FROM services WHERE mid=$1 RETURNING *",
+        [mid]
+      );
+      if (!result.rows[0]) return res.status(404).json({ error: "Event not found or unauthorized" });
+      res.json({ success: true });
+    }
+
+
+    return res.status(403).json({ error: "invalid message delete" });
+  }
+  catch (err) {
+    console.error("Error deleting message:", err);
+    res.status(500).json({ error: "Failed to delete message" });
+  }
+
+});
+
+
+app.post("/api/baseGroupPermissions", checkAuth, async (req, res) => {
+  const { gid } = req.body;
+  const uid = req.user.uid;
+
+
+  try{
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+      if (!groupData.rows[0]) return res.json({ role: "none" });
+      if (!groupData.rows[0].admin) return res.json({ role: "member" });
+      return res.json({ role: "admin" });
+  }
+  catch (err) {
+    console.error("Error deleting message:", err);
+    res.status(500).json({ error: "Failed to delete message" });
+  }
+});
+
+
+app.post("/api/getGroupData", checkAuth, async (req, res) => {
+  try {
+    const uid = req.user.uid;  // UID from authentication
+    const { gid } = req.body;
+
+
+    const groupData = await db.query(
+      "SELECT * FROM groups WHERE gid = $1",
+      [gid]
+    );
+
+    const group = groupData.rows[0] || null;
+
+    if (!group) {
+      return res.status(404).json({ error: "No group found" });
+    }
+
+    res.json(group);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.put("/api/groupUpdate", checkAuth, async (req, res) => {
+  try {
+    const { group_name, intro_text , gid} = req.body;
+    const uid = req.user.uid;
+  
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+    if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
+    if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
+
+    const result = await db.query(
+      "UPDATE groups SET group_name=$1, intro_text=$2 WHERE gid=$3 RETURNING *",
+      [group_name, intro_text, gid]
+    );
+
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("Group update ERROR", err);
+    res.status(500).json({ error: "Failed to update group" });
+  }
+});
+
+app.post("/api/getGroupMemberData", checkAuth, async (req, res) => {
+  try {
+    const uid = req.user.uid;  // UID from authentication
+    const { gid } = req.body;
+
+    const memberData = await db.query(
+      "SELECT * FROM membership INNER JOIN users ON membership.uid = users.uid WHERE gid = $1",
+      [gid]
+    );
+
+    const members = memberData.rows || null;
+
+    if (!members) {
+      return res.status(404).json({ error: "No members found" });
+    }
+
+    res.json(members);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+app.put("/api/groupPromote", checkAuth, async (req, res) => {
+  try {
+    const { targetUid, gid} = req.body;
+    const uid = req.user.uid;
+  
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+    if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
+    if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
+
+    const result = await db.query(
+      "UPDATE membership SET admin=TRUE WHERE gid=$1 and uid = $2 RETURNING *",
+      [gid, targetUid]
+    );
+
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("Group promote ERROR", err);
+    res.status(500).json({ error: "Failed to promote in group" });
+  }
+});
+
+app.put("/api/groupKick", checkAuth, async (req, res) => {
+  try {
+    const { targetUid, gid} = req.body;
+    const uid = req.user.uid;
+  
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+    if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
+    if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
+
+    const groupData2 = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,targetUidid]);//sanatize?
+    if (!groupData2.rows[0]) return res.status(404).json({ error: "found no user" });
+    if (groupData.rows[0].admin) return res.status(404).json({ error: "found user admin permission" });
+
+    const result = await db.query(
+      "UPDATE membership SET admin=TRUE WHERE gid=$1 and uid = $2 RETURNING *",
+      [gid, targetUid]
+    );
+
+
+    res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("Group kick ERROR", err);
+    res.status(500).json({ error: "Failed to kick from group" });
+  }
+});
+
+app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
+  try {
+    const {hours, gid} = req.body;
+    const uid = req.user.uid;
+  
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+    if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
+    if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
+
+    const medalData = await db.query("SELECT streak,deadline_date,complete FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid,uid]);
+    const today = new Date().setHours(0,0,0,0);
+    let streak = 0;
+    if (!medalData.rows[0] ){
+      const deadDate = new Date(medalData.rows[0].deadline_date).setHours(0,0,0,0);
+      if (today<=deadDate){
+        return res.status(404).json({ error: "already active medal" });
+      }
+      else{
+        const streakDate = deadDate;
+        streakDate.setDate(streakDate.getDate()+1);
+        if ((today<=streakDate)&&medalData.rows[0].complete){
+          streak=medalData.rows[0].streak+1;
+        }
+      }
+
+    }
+    const monthFuture = today;
+    const expectedMonth = (monthFuture.getMonth() + 1) % 12;
+    monthFuture.setMonth(monthFuture.getMonth() + 1); 
+    if ((monthFuture.getMonth() !== expectedMonth)) {
+        monthFuture.setDate(0);//last day of previous
+    }
+
+
+    const result = await db.query(
+        `INSERT INTO medals (gid,hours,complete,streak,created_date,deadline_date)
+        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [gid,hours,false,streak,today,monthFuture]
+      );
+      res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("Group kick ERROR", err);
+    res.status(500).json({ error: "Failed to kick from group" });
+  }
+});
+
 
 app.use(express.static("public"));
 
