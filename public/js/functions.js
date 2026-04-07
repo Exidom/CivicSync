@@ -1,4 +1,5 @@
 import { fetchWithAuth } from "/js/auth.js";
+import {uploadImage,deleteImage} from "/js/clin.js";
 
 // Loads the user's profile when entering a page, and updates it if submitted
 export async function initUserProfile() {
@@ -830,4 +831,229 @@ function participantCard(p, showKick, isCompleted = false) {
       ${isCompleted ? `<span> Hours Credited </span>` : ""}
     </div>
   `;
+}
+
+
+export function initEditGroup(fetchWithAuth,gid) {
+  const editBtn = document.getElementById("editGroupBtn");
+  const editForm = document.getElementById("editGroupForm");
+  const cancelBtn = document.getElementById("cancelEditGroupBtn");
+
+  editBtn.addEventListener("click", () => {
+    // Pre-fill with current values
+    document.getElementById("editGroupName").value = document.getElementById("group-name").textContent;
+    document.getElementById("editGroupIntro").value = document.getElementById("group-description").innerText;
+    editForm.style.display = "block";
+    editBtn.style.display = "none";
+  });
+
+  cancelBtn.addEventListener("click", () => {
+    editForm.style.display = "none";
+    editBtn.style.display = "block";
+  });
+
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const group_name = document.getElementById("editGroupName").value.trim();
+    const intro_text = document.getElementById("editGroupIntro").value.trim();
+
+    if (!group_name) { alert("Group name is required."); return; }
+
+    try {
+      const res = await fetchWithAuth("/api/groupUpdate", "PUT", { group_name, intro_text, gid });
+      if (res.error) { alert("Error updating group: " + res.error); return; }
+
+      // Update the displayed values
+      document.getElementById("group-name").textContent = res.group_name;
+      document.getElementById("group-description").innerHTML = `<p>${res.intro_text || ""}</p>`;
+
+      editForm.style.display = "none";
+      editBtn.style.display = "block";
+      alert("Group Information Saved!");
+    } catch (err) {
+      console.error("Failed to Update Group:", err);
+      alert("Failed to Update Group.");
+    }
+  });
+}
+
+
+async function uploadToSlotGroup(slotNum,gid){
+
+    const input=document.createElement("input");
+    input.type="file";
+    input.accept="image/*";
+
+    input.onchange = async ()=>{
+
+        const file=input.files[0];
+
+        if(!file) return;
+
+        try{
+
+            const result = await uploadImage(file,slotNum,gid);
+            location.reload();
+
+        }catch(err){
+
+            console.error(err);
+            alert("Upload failed");
+
+        }
+
+    };
+
+    input.click();
+}
+
+export async function fetchGroup(fetchWithAuth,gid) {
+
+  const permission = (((await fetchWithAuth("/api/baseGroupPermissions", "POST",{gid})).role)=="admin");
+
+  const data = await fetchWithAuth("/api/getGroupData", "POST",{ gid});
+
+  const orgNameEl = document.getElementById("group-name");
+  const orgDescEl = document.getElementById("group-description");
+
+  if (data && !data.error) {
+    orgNameEl.textContent = data.group_name;
+    orgDescEl.innerHTML = `<p>${data.intro_text || ""}</p>`;
+
+    document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
+      btn.disabled = false;
+    });
+    initEditGroup(fetchWithAuth,gid);
+
+      let i=1;
+      const slot = document.getElementById(`slot${i}`);
+      const img = document.getElementById(`image${i}`);
+
+      const link = data[`ilink${i}`];
+      const pid = data[`pid${i}`];
+
+      if(link){
+
+          img.src = link;
+          img.style.display="block";
+
+          if(permission){
+
+              const del = document.createElement("button");
+              del.innerText="Delete";
+
+              del.onclick = async ()=>{
+                  await deleteImage(pid,i,gid);
+
+                  location.reload();
+              };
+
+              slot.appendChild(del);
+          }
+
+      }
+      else{
+
+          img.style.display="none";
+
+          if(permission){
+
+              const uploadBtn=document.createElement("button");
+              uploadBtn.innerText="Upload Image";
+
+              uploadBtn.onclick = ()=>uploadToSlotGroup(i,gid);
+
+              slot.appendChild(uploadBtn);
+          }
+      }
+
+
+  } else {
+    orgNameEl.textContent = "Group does not exist";
+    orgDescEl.innerHTML = "";
+    noOrgSection.style.display = "block";
+    document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
+      if (btn.dataset.tab !== "Profile") btn.disabled = true;
+    });
+  }
+}
+
+
+async function handleKick(uid,gid) {
+    await fetchWithAuth("/api/groupKick", "POST",{uid,gid});
+}
+
+async function handlePromote(uid,gid) {
+   await fetchWithAuth("/api/groupPromote", "POST",{uid,gid});
+}
+
+export async function fetchMembers(fetchWithAuth,gid) {
+
+  const permission = (((await fetchWithAuth("/api/baseGroupPermissions", "POST",{gid})).role)=="admin");
+  const data = await fetchWithAuth("/api/getGroupMemberData", "POST",{ gid});
+
+  if (data && !data.error) {
+    
+    const container = document.getElementById('members-container');
+
+    container.innerHTML = '';
+
+    data.forEach(member => {
+        const isAdmin = member.admin === true;
+        const roleText = isAdmin ? 'Admin' : 'Member';
+        const uid = member.uid;
+
+        // Create the card element
+        const card = document.createElement('div');
+        card.className = 'card application-card large-card';
+        
+        // Build the inner HTML
+        let actionButtons = '';
+        
+         //todo clean up
+        if (permission && !isAdmin) {
+            actionButtons = `
+                <button class="kick-btn" data-uid="${uid}">Kick</button>
+                <button class="promote-btn" data-uid="${uid}">Promote</button>
+            `;
+        }
+        
+        //todo clean up, get hours from services
+        card.innerHTML = `
+            <div class="member-info">
+                <h4>${member.display_name}</h4>
+                <p>Role: ${roleText}</p>
+                <p>Hours: <span class="member-number" data-uid="${uid}">0</span></p>
+                <button class="account-btn" data-uid="${uid}">View Account</button>
+                ${actionButtons}
+            </div>
+        `;
+
+        //Set up Event Listeners
+        
+        // Account Button Listener
+        card.querySelector('.account-btn').addEventListener('click', () => {
+            console.log("Accessing UID:", uid);
+            //link to user
+        });
+
+        // Admin Action Listeners
+        if (permission && !isAdmin) {
+            card.querySelector('.kick-btn').addEventListener('click', () => {
+                handleKick(uid,gid);
+            });
+            card.querySelector('.promote-btn').addEventListener('click', () => {
+                handlePromote(uid,gid);
+            });
+        }
+
+        // Append to container
+        container.appendChild(card);
+    });
+
+
+  } else {
+    alert("failed to find members");
+  }
 }

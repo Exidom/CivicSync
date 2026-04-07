@@ -63,9 +63,11 @@ export async function fetchWithAuth(url, method = "GET", body = null) {
             window.location.href = "/login";
             return;//nothing
         }
+
         
         if (!response.ok) {
-            throw new Error(`Server Error: ${response.error}`);
+            const errorData = await response.json();//fixed
+            throw new Error(`Server Error: ${errorData.error}`);
         }
 
         return await response.json();

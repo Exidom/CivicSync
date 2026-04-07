@@ -280,3 +280,13 @@ textarea {
   align-items: center;
   box-sizing: border-box;
 }
+
+.slot{
+    margin-top:25px;
+}
+
+.slot img{
+    max-width:350px;
+    display:block;
+    border-radius:8px;
+}

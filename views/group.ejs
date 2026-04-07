@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>CivicSync Group Page</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <!-- TODO: Insert a logo, either ours or the org's stored logo -->
+      <div class="logo">LOGO</div>
+
+      <nav>
+        <a id="signUpEvents">Volunteer Now!</a>
+        <a id="createEvent">Need Volunteers?</a>
+        <a id="aboutUs">About Us</a>
+      </nav>
+
+      <!-- TODO: Display the users name and profile pic -->
+      <button id="logoutBtn" class = "logout-btn">Logout</button>
+
+    </header>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="container">
+
+      <!-- TABS -->
+      <div class="tab-vertical-container">
+        <div class="tab-vertical-buttons">
+          <button class="tablinks" data-tab="Profile">Group Profile</button>
+          <button class="tablinks" data-tab="Members">Group members</button>
+          <button class="tablinks" data-tab="Medals">Group members</button>
+        </div>
+
+        <div class="tab-vertical-content">
+          <div id="Profile" class="tabcontent">
+            <h1 id="group-name">Group Name</h1>
+            <section class="card large-card">
+              <div class="org-layout">
+                <div id="slot1" class="slot">
+                    <img id="image1"/>
+                </div>
+                <div id="group-description" class="org-text">
+                  <p>This is the group's bio, contact info, and links.</p>
+                </div>
+              </div>
+              <button id="editGroupBtn">Edit Organization</button>
+
+              <form id="editGroupForm" style="display:none;">
+                <label>Organization Name: <input type="text" id="editGroupName" required></label><br>
+                <label>Description:<br>
+                  <textarea id="editGroupIntro" rows="4" cols="40"></textarea>
+                </label><br>
+                <button type="submit">Save</button>
+                <button type="button" id="cancelEditGroupBtn">Cancel</button>
+              </form>
+            </section>
+
+          </div>
+
+          <div id="Members" class="tabcontent">
+            <h3>Members</h3>
+            <div id="members-container" class="card-container">
+                <div class="card placeholder"><p>No members yet.</p></div>
+            </div>
+          </div>
+
+          <div id="Medals" class="tabcontent">
+            <h3>Medals</h3>
+            <div id="medals-container" class="card-container">
+                <div class="card placeholder"><p>No medals yet.</p></div>
+            </div>
+          </div>
+        
+        </div>
+      
+      </div>
+
+      <h2>Other links for testing: </h2>
+      <div class="center">
+        <button id="createGroups" class="grey-btn">Create Groups</button>
+        <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
+        <button id="profileBtn" class="grey-btn">Edit Profile</button>
+      </div>
+
+    </main>
+
+    <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
+    <footer class="footer">
+      <div>Follow Us ● ● ● ●</div>
+      <div>Contact Us: email@email.com</div>
+    </footer>
+
+    <script type="module" src="/js/functions.js"></script>
+    <script type="module">
+      import { handleLogout, fetchWithAuth } from "/js/auth.js";
+      import { fetchGroup,fetchMembers} from "/js/functions.js";
+
+        document.addEventListener("DOMContentLoaded", async () => {
+
+        const openTab = sessionStorage.getItem("openTab");
+        if (openTab) {
+          sessionStorage.removeItem("openTab");
+          const tabBtn = document.querySelector(`.tab-vertical-buttons button[data-tab="${openTab}"]`);
+          if (tabBtn) tabBtn.click();
+        }
+        
+        // Initial page load
+        await fetchGroup(fetchWithAuth, localStorage.getItem('groupViewId'));
+        await fetchMembers(fetchWithAuth, localStorage.getItem('groupViewId'));
+
+
+        // Navigation
+        document.getElementById("profileBtn").onclick = () => window.location.href = "/userProfile";
+        document.getElementById("signUpEvents").onclick = () => window.location.href = "/signUpEvents";
+        document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
+        document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
+        document.getElementById("createGroups").onclick = () => window.location.href = "/createGroups";
+        document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
+        document.getElementById("logoutBtn").onclick = async () => {
+          await handleLogout();
+          window.location.href = "/dashboard";
+        };
+
+      });
+      
+    </script>
+  </body>
+</html>
