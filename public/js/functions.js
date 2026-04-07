@@ -62,11 +62,28 @@ export async function loadUserProfile() {
       groupSection.style.display = "block";
       noGroupSection.style.display = "none";
 
-      groupList.innerHTML = "";
+      const groupHours = await fetchWithAuth("/api/group-hours");
+
+      const hoursMap = {};
+      if (groupHours && Array.isArray(groupHours)) {
+        groupHours.forEach(g => {
+          hoursMap[g.gid] = g.total;
+        });
+      }
+
+      user.groups.sort((a, b) => (hoursMap[b.gid] || 0) - (hoursMap[a.gid] || 0));
+
       user.groups.forEach(g => {
         const div = document.createElement("div");
         div.className = "card";
-        div.innerHTML = `<h3>${g.group_name}</h3>`;
+
+        const totalHours = hoursMap[g.gid] ?? 0;
+
+        div.innerHTML = `
+          <h3>${g.group_name}</h3>
+          <p>Total Hours (All Members): ${totalHours}</p>
+        `;
+
         groupList.appendChild(div);
       });
 
@@ -120,6 +137,8 @@ export async function loadUserProfile() {
       noEventSection.style.display = "none";
     }
 
+    const userHours = await fetchWithAuth("/api/user-hours");
+    document.getElementById("totalHours").innerText = (userHours.total || 0) + " hours";
 
     return user;
 
@@ -239,68 +258,6 @@ function createEventSubmit() {
     } catch (err) {
       console.error("SUBMIT EVENT ERROR ", err)
       alert("Failed to create event");
-    }
-  });
-}
-
-// Combines event signup page functions
-export function initEventSignup(){
-  loadEventSignup();
-  submitEventSignup();
-  initJoinGroup();
-}
-
-// Determines the event signup page layout depending on group membership
-async function loadEventSignup() {
-  try {
-    const data = await fetchWithAuth("/api/eventsSignupData");
-
-    const eventSection = document.getElementById("eventSignupSection");
-    const noGroupSection = document.getElementById("noGroupEventSection");
-    const eventList = document.getElementById("eventSignupList");
-
-    if (data.hasGroup) {
-      eventSection.style.display = "block";
-      noGroupSection.style.display = "none";
-
-      eventList.innerHTML = "";
-
-      data.events.forEach(e => {
-        const div = document.createElement("div");
-        div.className = "card";
-
-        div.innerHTML = `<h3>${e.service_name}</h3>
-          <button class="joinEventBtn" data-id="${e.sid}">Join Event</button>`;
-
-        eventList.appendChild(div);
-      });
-
-    } else {
-      eventSection.style.display = "none";
-      noGroupSection.style.display = "block";
-    }
-
-  } catch (err) {
-    console.error("Failed to load event signup page", err);
-  }
-}
-
-// Handles the process of signing users up for events
-function submitEventSignup() {
-  document.addEventListener("click", async (e) => {
-    if (!e.target.classList.contains("joinEventBtn")) return;
-
-    const sid = e.target.dataset.id;
-
-    const confirmJoin = confirm("Join this event?");
-    if (!confirmJoin) return;
-
-    try {
-      await fetchWithAuth("/api/join-event", "POST", { sid });
-      alert("Joined event!");
-    } catch (err) {
-      console.error("SUBMIT SIGNUP ERROR ", err);
-      alert("Failed to join event");
     }
   });
 }
@@ -547,7 +504,7 @@ export function initEventActions(fetchWithAuth) {
 
     // Delete
     if (e.target.classList.contains("delete-event-btn")) {
-      if (!confirm("Are you sure you want to delete this event?")) return;
+      if (!confirm("Are you sure you want to delete this event? \n\nWarning: Deletion will remove any credited hours for users and groups. \nSelect edit to close applications or make the event private.")) return;
 
       try {
         const res = await fetchWithAuth(`/api/services/${sid}`, "DELETE");
@@ -788,21 +745,27 @@ async function loadParticipants(sid) {
   const approved = participants.filter(p => p.status === "accepted");
   const pending = participants.filter(p => p.status === "pending");
   const rejected = participants.filter(p => p.status === "rejected");
+  const completed = participants.filter(p => p.status === "completed");
 
   container.innerHTML = `
     ${approved.length > 0 ? `
-      <h3>Approved (${approved.length})</h3>
+      <h3>Approved (${approved.length}):</h3>
       ${approved.map(p => participantCard(p, true)).join("")}
     ` : ""}
 
     ${pending.length > 0 ? `
-      <h3>Pending</h3>
+      <h3>Pending:</h3>
       ${pending.map(p => participantCard(p, false)).join("")}
     ` : ""}
 
     ${rejected.length > 0 ? `
-      <h3>Rejected</h3>
+      <h3>Rejected:</h3>
       ${rejected.map(p => participantCard(p, false)).join("")}
+    ` : ""}
+
+    ${completed.length > 0 ? `
+      <h3>Completed:</h3>
+      ${completed.map(p => participantCard(p, false, true)).join("")}
     ` : ""}
   `;
 
@@ -820,9 +783,38 @@ async function loadParticipants(sid) {
       }
     });
   });
+
+  container.querySelectorAll(".complete-btn").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    const hours = prompt("Enter hours completed:");
+    if (!hours || isNaN(hours)) {
+      alert("Enter a valid number of hours");
+      return;
+    }
+
+    try {
+      const res = await fetchWithAuth("/api/participation/complete", "PUT", {
+        uid: btn.dataset.uid,
+        sid,
+        hours: parseInt(hours)
+      });
+
+      if (res.error) {
+        alert(res.error);
+        return;
+      }
+
+      await loadParticipants(sid);
+    } catch (err) {
+      console.error("Failed to credit participant hours:", err);
+      alert("Failed to mark users hours as completed.");
+    }
+  });
+});
+
 }
 
-function participantCard(p, showKick) {
+function participantCard(p, showKick, isCompleted = false) {
   const name = p.first_name
     ? `${p.first_name} ${p.last_name ? p.last_name[0] + "." : ""}`
     : p.display_name;
@@ -832,7 +824,10 @@ function participantCard(p, showKick) {
       <span>${name}</span>
       <span>Hours: ${p.hours}</span>
       <span class="app-status status-${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
-      ${showKick ? `<button class="kick-btn" data-uid="${p.uid}">Kick</button>` : ""}
+      ${showKick ? `
+        <button class="kick-btn" data-uid="${p.uid}">Kick</button>
+        <button class="complete-btn" data-uid="${p.uid}" data-sid="${p.sid}">Complete</button>` : ""}
+      ${isCompleted ? `<span> Hours Credited </span>` : ""}
     </div>
   `;
 }
