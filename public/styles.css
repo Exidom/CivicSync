@@ -67,8 +67,16 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 30px;
-  padding-top: 20px;
+  padding: 0px;
+}
+
+.container-dashboard{
+  background-color: #f5fafb;
+  padding: 0;
+}
+
+.container h1 {
+  color: #086375;
 }
 
 .container h2 {
@@ -76,6 +84,10 @@ body {
   font-size: 16px;
   font-weight: 500;
   margin: 20px 0 12px;
+}
+
+.container h3 {
+  color: #086375;
 }
 
 .page-title {
@@ -88,12 +100,115 @@ body {
   text-align: center;
 }
 
+/* DASHBOARD */
+.hero-banner {
+  background: #086375;
+  padding: 28px 32px;
+  text-align: center;
+}
+
+.hero-banner h1 {
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.hero-banner p {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.dashboard-body {
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.membership-card {
+  background: #ffffff;
+  border: 1px solid #c8e2e5;
+  border-radius: 10px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.membership-left h2 {
+  font-size: 18px;
+  font-weight: 500;
+  color: #086375;
+  margin-bottom: 4px;
+  align-items: left;
+}
+
+.membership-left p {
+  font-size: 12px;
+  color: #086375;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.section-header h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: #086375;
+  white-space: nowrap;
+}
+
+.section-line {
+  flex: 1;
+  height: 1px;
+  background: #086375;
+  opacity: 0.4;
+}
+
+.stories-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.story-card {
+  background: #ffffff;
+  border: 1px solid #c8e2e5;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.story-card strong {
+  color: #086375;
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.story-card .org-text p {
+  color: #086375;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
 /* CARDS */
 .card {
   background: white;
   padding: 20px;
   margin: 10px;
   border: 1px solid #A0CFD3;
+}
+
+.card h2 {
+  color: #086375;
 }
 
 .card.placeholder p {
@@ -561,6 +676,20 @@ textarea {
 .complete-btn:hover {
   background: #065260;
   font-weight: bold;
+}
+
+.edit-profile-btn {
+  background: #ffffff;
+  color: #086375;
+  border: 1px solid #A0CFD3;
+  border-radius: 6px;
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.edit-profile-btn:hover {
+  background: #f0f8f9;
 }
 
 /* TABS */
