@@ -751,7 +751,7 @@ textarea {
 }
 
 .profile-trigger:hover {
-  background: #f0f8f9;
+  background: #ffffff;
 }
 
 .avatar {
@@ -781,7 +781,7 @@ textarea {
 .chevron {
   width: 14px;
   height: 14px;
-  color: #666;
+  color: #086375;
   transition: transform 0.2s;
 }
 
@@ -830,14 +830,14 @@ textarea {
 .dh-email {
   font-size: 13px;
   font-weight: 500;
-  color: #111;
+  color: #086375;
   word-break: break-all;
 }
 
 .section-label {
   font-size: 11px;
-  font-weight: 600;
-  color: #aaa;
+  font-weight: bold;
+  color: #4a7a82;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   padding: 8px 12px 4px;
@@ -868,14 +868,12 @@ textarea {
   flex-shrink: 0;
 }
 
-.icon-github { background: #f0f0f0; }
-.icon-slack  { background: #e8f5e9; }
-.icon-jira   { background: #e3f0fc; }
-
 .item-title {
   font-size: 13px;
   font-weight: 500;
-  color: #111;
+  color: #086375;
+  border: #086375;
+  align-items: left;
 }
 
 .dropdown-divider {
