@@ -7,9 +7,9 @@
   </head>
   <body>
 
-    <!-- NAVBAR -->
+    <!-- NAVBAR
     <header class="navbar">
-      <!-- TODO: Insert a logo, either ours or the org's stored logo -->
+       TODO: Insert a logo, either ours or the org's stored logo
       <div class="logo">LOGO</div>
 
       <nav>
@@ -18,9 +18,67 @@
         <a id="aboutUs">About Us</a>
       </nav>
 
-      <!-- TODO: Display the users name and profile pic -->
+       TODO: Display the users name and profile pic
       <button id="logoutBtn" class = "logout-btn">Logout</button>
 
+    </header> -->
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <div class="logo">LOGO</div>
+
+      <nav>
+        <a href="dashboardLoggedIn">Home</a>
+        <a href="signUpEvents">Volunteer Now!</a>
+        <a href="createEvent">Need Volunteers?</a>
+      </nav>
+
+      <!-- Profile dropdown -->
+      <div class="profile-wrapper">
+        <button class="profile-trigger">
+          <div class="avatar" id="avatar-initial"></div>
+          <span class="profile-email" id="display-email"></span>
+          <svg class="chevron" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+
+        <div class="dropdown">
+          <div class="dropdown-header">
+            <div class="dh-email" id="header-email"></div>
+          </div>
+
+          <div class="section-label">User Information</div>
+
+          <a class="dropdown-item" href="userProfile">
+            <div class="item-icon icon-github"></div>
+            <div>
+              <div class="item-title">User Profile</div>
+            </div>
+          </a>
+
+          <a class="dropdown-item" href="viewGroup">
+            <div class="item-icon icon-slack"></div>
+            <div>
+              <div class="item-title">User Groups</div>
+            </div>
+          </a>
+
+          <a class="dropdown-item" href="viewOrganization">
+            <div class="item-icon icon-jira"></div>
+            <div>
+              <div class="item-title">User Organization</div>
+            </div>
+          </a>
+
+          <div class="dropdown-divider"></div>
+
+          <a class="dropdown-item sign-out" id="logoutBtn" href="#">
+            <div class="item-title">Logout</div>
+          </a>
+        </div>
+      </div>
     </header>
 
 
@@ -80,8 +138,8 @@
 
           <div id="Applications" class="tabcontent">
             <h3>User Applications</h3>
-            <div id="applications-container" class="card-container">
-              <div class="card placeholder"><p>No applications yet.</p></div>
+            <div id="applications-container" class="event-grid">
+              <div class="event-card placeholder"><p>No applications yet.</p></div>
             </div>
           </div>
 
@@ -120,13 +178,6 @@
         
         </div>
       
-      </div>
-
-      <h2>Other links for testing: </h2>
-      <div class="center">
-        <button id="createGroups" class="grey-btn">Create Groups</button>
-        <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
-        <button id="profileBtn" class="grey-btn">Edit Profile</button>
       </div>
 
     </main>
@@ -213,7 +264,17 @@
           }
         });
 
+        const user = await fetchWithAuth("/api/userProfileData");
+        if (user && user.display_name) {
+          const userEmail = user.display_name;
+          document.getElementById("display-email").textContent = userEmail;
+          document.getElementById("header-email").textContent = userEmail;
+          document.getElementById("avatar-initial").textContent = userEmail[0].toUpperCase();
+        }
+
         // Navigation
+        document.getElementById("viewOrganization").onclick = () => window.location.href = "/viewOrganization";
+        document.getElementById("viewGroup").onclick = () => window.location.href = "/viewGroup";
         document.getElementById("profileBtn").onclick = () => window.location.href = "/userProfile";
         document.getElementById("signUpEvents").onclick = () => window.location.href = "/signUpEvents";
         document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";

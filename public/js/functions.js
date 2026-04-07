@@ -570,7 +570,7 @@ export async function fetchApplications(fetchWithAuth) {
   const container = document.getElementById("applications-container");
 
   if (!applications || applications.error || applications.length === 0) {
-    container.innerHTML = `<div class="card placeholder"><p>No applications yet.</p></div>`;
+    container.innerHTML = `<div class="event-card placeholder"><p>No applications yet.</p></div>`;
     return;
   }
 
@@ -584,7 +584,7 @@ export async function fetchApplications(fetchWithAuth) {
   }, {});
 
   container.innerHTML = Object.entries(grouped).map(([sid, group]) => `
-    <div class="card">
+    <div class="event-card">
       <h3>${group.service_name}</h3>
       ${group.applications.map(app => {
         const name = app.first_name
