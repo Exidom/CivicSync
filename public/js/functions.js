@@ -26,16 +26,21 @@ export async function initUserProfile() {
       else if (formattedPhone.length === 11 && formattedPhone.startsWith("1")) {
         formattedPhone = "+" + formattedPhone;
       }
+      else {
+        formattedPhone = null;
+      }
 
       const profileData = {
         first_name: document.getElementById("firstName").value,
         last_name: document.getElementById("lastName").value,
-        phone_number: formattedPhone
+        phone_number: formattedPhone,
+        user_description: document.getElementById("userDescription").value
       };
 
       try {
         await fetchWithAuth("/update-profile", "POST", profileData);
         alert("Profile updated!");
+        location.reload();
       } catch (err) {
         console.error(err);
         alert("Update failed", err.message);
@@ -53,6 +58,7 @@ export async function loadUserProfile() {
     document.getElementById("firstName").value = user.first_name || "";
     document.getElementById("lastName").value = user.last_name || "";
     document.getElementById("phone").value = user.phone_number || "";
+    document.getElementById("userDescription").value = user.user_description || "";
 
 
     const groupSection = document.getElementById("groupSection");
@@ -60,7 +66,7 @@ export async function loadUserProfile() {
     const groupList = document.getElementById("groupList");
 
     if (user.hasGroup) {
-      groupSection.style.display = "block";
+      groupSection.style.display = "inline-block";
       noGroupSection.style.display = "none";
 
       const groupHours = await fetchWithAuth("/api/group-hours");
@@ -73,16 +79,18 @@ export async function loadUserProfile() {
       }
 
       user.groups.sort((a, b) => (hoursMap[b.gid] || 0) - (hoursMap[a.gid] || 0));
-
+      
+      groupList.innerHTML = "";
       user.groups.forEach(g => {
         const div = document.createElement("div");
         div.className = "card";
+        div.style = "border-radius: 8px; border: 1px solid #086375; margin-bottom: 20px;"
 
         const totalHours = hoursMap[g.gid] ?? 0;
 
         div.innerHTML = `
           <h3>${g.group_name}</h3>
-          <p>Total Hours (All Members): ${totalHours}</p>
+          <p>Total Group Hours: ${totalHours}</p>
         `;
 
         groupList.appendChild(div);
@@ -90,7 +98,7 @@ export async function loadUserProfile() {
 
     } else {
       groupSection.style.display = "none";
-      noGroupSection.style.display = "block";
+      noGroupSection.style.display = "inline-block";
     }
 
 
@@ -98,18 +106,14 @@ export async function loadUserProfile() {
     const noOrgSection = document.getElementById("noOrgSection");
 
     if (user.hasOrg) {
-      orgSection.style.display = "block";
+      orgSection.style.display = "inline-block";
       noOrgSection.style.display = "none";
 
       document.getElementById("orgName").innerText = user.org.org_name;
 
-    } else if (user.hasGroup) {
-      orgSection.style.display = "none";
-      noOrgSection.style.display = "block";
-
     } else {
       orgSection.style.display = "none";
-      noOrgSection.style.display = "none";
+      noOrgSection.style.display = "inline-block";
     }
 
 
@@ -118,20 +122,24 @@ export async function loadUserProfile() {
     const eventList = document.getElementById("eventList");
 
     if (user.hasEvent) {
-      eventSection.style.display = "block";
+      eventSection.style.display = "inline-block";
       noEventSection.style.display = "none";
 
-      eventList.innerHTML = "";
-      user.events.forEach (e => {
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `<h3>${e.service_name}</h3>`;
-        eventList.appendChild(div);
-      });
+      eventList.innerHTML = user.events.map(event => `
+      <div class="event-card" style="margin-bottom: 20px; max-width: 450px;">
+        <h3>${event.service_name}</h3>
+        <p>${event.org_name}</p>
+        <p>Start date: ${new Date(event.time_start).toLocaleString()}</p>
+        <p>Description: ${event.info_text || ""}</p>
+        <p>Hours: ${event.estimated_hours}</p>
+        <p>Status: ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}</p>
+        <button class="view-event-btn" data-sid="${event.sid}">View Event</button>
+      </div>
+    `).join("");
 
     } else if (user.hasGroup) {
       eventSection.style.display = "none";
-      noEventSection.style.display = "block";
+      noEventSection.style.display = "inline-block";
 
     } else {
       eventSection.style.display = "none";
@@ -139,7 +147,7 @@ export async function loadUserProfile() {
     }
 
     const userHours = await fetchWithAuth("/api/user-hours");
-    document.getElementById("totalHours").innerText = (userHours.total || 0) + " hours";
+    document.getElementById("totalHours").innerText = "You have " + (userHours.total || 0) + " completed service hours";
 
     return user;
 
@@ -207,6 +215,50 @@ export function initJoinGroup() {
       alert("Invalid code, or user already in this group");
     }
   });
+}
+
+// Loads the active medals belonging to a user's groups
+export async function loadMedals() {
+  try {
+    const medals = await fetchWithAuth("/api/userMedals");
+    const container = document.getElementById("medalsList");
+
+    if (!container) return;
+
+    if (!medals || medals.length === 0) {
+      container.innerHTML = "<p>No active medals.</p>";
+      return;
+    }
+
+    container.innerHTML = medals.map(m => {
+
+      const progress = m.group_total_hours;
+      const goal = m.hours;
+
+      const percent = Math.min((progress / goal) * 100, 100);
+
+      return `
+        <div class="card" style="margin-bottom: 20px;">
+          <h3>${m.group_name}</h3>
+
+          <p><strong>Goal:</strong> ${goal} hours</p>
+          <p><strong>Group Progress:</strong> ${progress} / ${goal}</p>
+          <p><strong>Your Contribution:</strong> ${m.user_hours}</p>
+
+          <p><strong>Deadline:</strong> ${new Date(m.deadline_date).toLocaleDateString()}</p>
+          <p><strong>Streak:</strong> ${m.streak}</p>
+          <p><strong>Status:</strong> ${m.complete ? "Completed!" : "In Progress"}</p>
+
+          <div style="background:#ddd; height:10px; border-radius:5px;">
+            <div style="width:${percent}%; background:#086375; height:10px; border-radius:5px;"></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+  } catch (err) {
+    console.error("Failed to load medals:", err);
+  }
 }
 
 // Combines create event page functions
@@ -460,7 +512,7 @@ export function initEventActions(fetchWithAuth) {
 
   container.addEventListener("click", async (e) => {
     const sid = e.target.dataset.sid;
-    const card = document.querySelector(`.card[data-sid="${sid}"]`);
+    const card = document.querySelector(`.event-card[data-sid="${sid}"]`);
 
     // Navigate to manage event page
     if (e.target.classList.contains("manage-event-btn")) {
@@ -686,7 +738,29 @@ export async function initEventDetails() {
     document.getElementById("event-time").textContent = new Date(event.time_start).toLocaleString();
     document.getElementById("event-hours").textContent = event.estimated_hours;
 
+    const groupData = await fetchWithAuth("/api/createGroupData");
+
+    const select = document.getElementById("groupSelect");
+    select.innerHTML = "";
+
     const joinBtn = document.getElementById("joinEventBtn");
+
+    if (!groupData.hasGroup || groupData.groups.length === 0) {
+      const option = document.createElement("option");
+      option.disabled = true;
+      select.appendChild(option);
+      joinBtn.textContent = "Join a group first";
+      joinBtn.disabled = true;
+    } 
+    
+    else {
+      groupData.groups.forEach(g => {
+        const option = document.createElement("option");
+        option.value = g.gid;
+        option.textContent = g.group_name;
+        select.appendChild(option);
+      });
+    }
 
     if (!event.applications_open || !event.visibility_public) {
       joinBtn.textContent = "Applications Closed";
@@ -696,7 +770,14 @@ export async function initEventDetails() {
 
     joinBtn.addEventListener("click", async () => {
       try {
-        const res = await fetchWithAuth("/api/applications", "POST", { sid });
+        const gid = select.value;
+
+        if (!gid) {
+          alert("Please select a group");
+          return;
+        }
+
+        const res = await fetchWithAuth("/api/applications", "POST", { sid, gid });
         if (res.error) { alert(res.error); return; }
         alert("Successfully applied!");
         joinBtn.textContent = "Applied!";

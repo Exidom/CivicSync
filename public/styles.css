@@ -5,7 +5,7 @@ html, body {
 
 body {
   font-family: Arial, sans-serif;
-  background-color: #ffffff;
+  background-color: #eaf4f5;
   display: flex;
   flex-direction: column;
 }
@@ -741,9 +741,8 @@ textarea {
 /* TABS */
 .tab-vertical-container {
   display: flex;
-  height: 800px;
+  flex: 1;
   border: 1px solid #b8d8dc;
-  border-radius: 6px;
   overflow: hidden;
 }
 
