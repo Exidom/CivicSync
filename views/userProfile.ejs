@@ -9,145 +9,252 @@
 
   <!-- NAVBAR -->
   <header class="navbar">
-    <!-- TODO: Insert a logo, either ours or the org's stored logo -->
     <div class="logo">LOGO</div>
 
     <nav>
-      <a id="signUpEvents">Volunteer Now!</a>
-      <a id="createEvent">Need Volunteers?</a>
-      <a id="aboutUs">About Us</a>
+      <a href="dashboardLoggedIn">Home</a>
+      <a href="signUpEvents">Volunteer Now!</a>
+      <a href="createEvent">Need Volunteers?</a>
     </nav>
 
-    <button id="logoutBtn" class="logout-btn">Logout</button>
+    <!-- Profile dropdown -->
+    <div class="profile-wrapper">
+      <button class="profile-trigger">
+        <div class="avatar" id="avatar-initial"></div>
+        <span class="profile-email" id="display-email"></span>
+        <svg class="chevron" viewBox="0 0 16 16" fill="none">
+          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="dropdown">
+        <div class="dropdown-header">
+          <div class="dh-email" id="header-email"></div>
+        </div>
+
+        <div class="section-label">User Information</div>
+
+        <a class="dropdown-item" href="userProfile">
+          <div>
+            <div class="item-title">User Profile</div>
+          </div>
+        </a>
+
+        <a class="dropdown-item" href="viewGroup">
+          <div>
+            <div class="item-title">User Groups</div>
+          </div>
+        </a>
+
+        <a class="dropdown-item" href="viewOrganization">
+          <div>
+            <div class="item-title">User Organization</div>
+          </div>
+        </a>
+
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item sign-out" id="logoutBtn">
+          <div class="item-title">Logout</div>
+        </a>
+      </div>
+    </div>
   </header>
 
   <!-- MAIN CONTENT -->
   <main class="container">
-
-    <h1>User Profile</h1>
-
-    <!-- TODO: Implement the pictures feature <img id="profile-pic" src="default-profile.png" alt="Profile Picture"> -->
+    <div class="tab-vertical-container">
     
-    <form id="profileForm" class="center">
-      
-      <label for="email">Email: </label>
-      <input type="email" id="email" readonly>
+      <!-- TABS -->
+      <div class="tab-vertical-buttons">
+        <button class="tablinks" data-tab="Profile">Edit Profile</button>
+        <button class="tablinks" data-tab="Groups">Hours & Groups</button>
+        <button class="tablinks" data-tab="Organization">Organization</button>
+        <button class="tablinks" data-tab="Events">Events</button>
+        <button class="tablinks" data-tab="Medals">Medals</button>
+        <button class="tablinks" data-tab="Leaderboard">Leaderboard</button>
+      </div>
 
-      <label for="firstName">First Name: </label>
-      <input type="text" id="firstName" placeholder="Enter your first name">
+      <div class="tab-vertical-content">
 
-      <label for="lastName">Last Name: </label>
-      <input type="text" id="lastName" placeholder="Enter your last name">
+        <div id="Profile" class="tabcontent">
+          <h1>User Profile</h1>
 
-      <label for="phone">Phone Number (must be 10 digits): </label>
-      <input type="tel" id="phone" placeholder="Enter your phone number">
+          <form id="profileForm" class="center">
+            <label>Email:</label>
+            <input type="email" id="email" readonly>
 
-      <button id="profileSubmit" type="submit">Save Profile</button>
-    </form>
+            <label>First Name:</label>
+            <input type="text" id="firstName">
 
-    <section class="card-container">
+            <label>Last Name:</label>
+            <input type="text" id="lastName">
 
-      <div id="groupSection" style="display: none;">
-        <div class="center">
-          <h2 class="section-title" style="padding-top: 20px;">Your Total Service Hours:</h2>
-          <h2 id="totalHours"></h2>
-          <h2 class="section-title" style="padding: 20px">Your Groups:</h2>
-          <div id="groupList"></div>
-          <button id="viewGroup" class="grey-btn" style="margin: 40px;">View Groups</button>
-          <h2 class="section-title" style="padding: 20px">Join more! </h2>
-          <div class="card">
-            <form id="groupInviteForm">
-              <input type="text" id="groupCode" style="margin-top: 20px;" placeholder="Enter your invite code">
-            </form>
-            <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
-          </div>
-          <h2 class="section-title" style="padding: 20px">Or, create your own! </h2>
-          <button id="createGroups" class="grey-btn">Create Groups</button>
-        </div>
-        
+            <label>Phone Number (must be 10 digits):</label>
+            <input type="tel" id="phone">
 
-        <div id="orgSection" style="display: none;">
-          <div class="center">
-            <h2 class="section-title" style="padding: 20px">Your Organization:</h2>
-            <div class="card" style="border: 10px solid #ccc">
-              <h3 id="orgName"></h3>
-              <button id="viewOrganization" class="grey-btn" style="margin-top: 80px">View Organization</button>
-            </div>
-          </div>
+            <label>Tell people a little bit about yourself:</label>
+            <textarea id="userDescription" rows="3" placeholder="User description"></textarea>
+
+            <button type="submit" class="view-event-btn">Save Profile</button>
+          </form>
         </div>
 
-        <div id="noOrgSection" style="display: none;">
-          <div class="center">
-            <h2 class="section-title" style="padding: 20px">You don't have an organization, create one here:</h2>
-            <div class="card" style="border: 10px solid #ccc">
-              <form id="createOrgForm">
-                <input type="text" id="orgNameInput" placeholder="Organization name" required>
-                <textarea id="orgIntroInput" rows="4" placeholder="Organization description"></textarea>
-                <button type="submit">Create Org</button>
+        <div id="Groups" class="tabcontent">
+          <div id="groupSection">
+            <h1>Your Hours:</h1>
+            <h3 id="totalHours" style="padding-bottom: 30px;"></h3>
+
+            <h1>Your Groups:</h1>
+            <div id="groupList" style="margin-bottom: 30px;"></div>
+
+            <button id="viewGroup" class="view-event-btn" style="margin-bottom: 30px;">View Groups</button>
+
+            <h1>Join more!</h1>
+            <div class="card" style ="border-radius: 8px; border: 1px solid #086375;">
+              <form id="groupInviteForm">
+                <input type="text" id="groupCode" placeholder="Enter invite code">
+                <button id="groupCodeSubmit" class="view-event-btn">Join Group</button>
               </form>
             </div>
+            <h1 style="margin-top: 50px;">Or, create your own!</h1>
+            <button id="createGroups" class="view-event-btn">Create Groups</button>
+          </div>
+
+          <div id="noGroupSection">
+            <div class="card" style="margin-top: 70px;">
+              <form id="groupInviteForm">
+                <p>Join a group to gain access to events!</p>
+                <input type="text" id="groupCode" placeholder="Enter invite code">
+                <button id="groupCodeSubmit" class="view-event-btn">Join Group</button>
+              </form>
+            </div>
+            <h1>Or, create your own!</h1>
+            <button id="createGroups" class="view-event-btn">Create Groups</button>
           </div>
         </div>
 
-      </div>
-    </section>
+        <div id="Organization" class="tabcontent">
+          <div id="orgSection">
+            <h1>Your Organization:</h1>
+            <div class="card" style="border-radius: 8px; border: 1px solid #086375;">
+              <h3 id="orgName" style="margin-bottom: 40px;"></h3>
+              <button class="view-event-btn" id="viewOrganization">View Organization</button>
+              <!-- TODO: Determine if we want a 'delete org' option -->
+            </div>
+          </div>
 
-
-    <div id="eventSection" style="display: none;">
-      <div class="center">
-        <h2 class="section-title">Your events:</h2>
-      </div>
-
-      <section class="card-container" style="flex:none;">
-        <div id="eventList"></div>
-      </section>
-    </div>
-
-    <div id="noEventSection" style="display: none;">
-      <div class="center" style="margin-bottom: 20px;">
-        <h2 class="section-title" style="padding: 20px">You have no current events, sign up here!</h2>
-        <button id="signUpEvents2" class="grey-btn">Sign up</button>
-      </div>
-    </div>
-
-
-    <div id="noGroupSection" style="display: none;">
-      <div class="center">
-        <h2 class="section-title" style="padding: 20px">Join a group to gain access to events and orgs! </h2>
-        <div class="card">
-          <form id="groupInviteForm">
-            <input type="text" id="groupCode" style="margin-top: 20px;" placeholder="Enter your invite code">
-          </form>
-          <button id="groupCodeSubmit" style="margin-top: 20px;" type="submit">Submit</button>
+          <div id="noOrgSection">
+            <h3>You don't have an organization, create one here:</h2>
+            <form id="createOrgForm">
+              <input type="text" id="orgNameInput" placeholder="Organization name">
+              <textarea id="orgIntroInput" rows="4" placeholder="Organization description"></textarea>
+              <button type="submit">Create Org</button>
+            </form>
+          </div>
         </div>
-        <h2 class="section-title" style="padding: 20px">Or, create your own! </h2>
-        <button id="createGroups2" class="grey-btn">Create Groups</button>
+
+        <div id="Events" class="tabcontent">
+          <div id="eventSection">
+            <h1>Your Events:</h1>
+            <div id="eventList"></div>
+          </div>
+
+          <div id="noEventSection">
+            <h1>You have no current events. Sign up here!</h1>
+            <button id="signUpEvents" class="view-event-btn">Sign up for events</button>
+          </div>
+        </div>
+
+        <div id="Medals" class="tabcontent">
+          <h2>Your Medals: </h2>
+          <div id="medalsList"></div>
+        </div>
+
+        <div id="Leaderboard" class="tabcontent">
+          <h2>Leaderboard</h2>
+          <p>(Coming soon)</p>
+        </div>
       </div>
-    </div>
-
-
-    <h2>Other links for testing: </h2>
-    <div class="center">
-      <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
-      <button id="viewGroup" class="grey-btn">View Group</button>
-      <button id="viewOrganization" class="grey-btn">View Organization</button>
     </div>
   </main>
 
-  <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
+    <!-- TODO: Implement the pictures <img id="profile-pic" src="default-profile.png" alt="Profile Picture"> -->
+    
+
+  <!-- TODO: Add links to any social media pages we create-->
   <footer class="footer">
     <div>Follow Us: ● ● ● ●</div>
     <div>Contact Us: contactus@civicsync.org</div>
   </footer>
 
   <script type="module">
-    import { handleLogout } from "/js/auth.js"; // your Google auth helper
-    import { initUserProfile, initCreateOrg, initJoinGroup } from "/js/functions.js";
+    import { handleLogout, fetchWithAuth } from "/js/auth.js"; // your Google auth helper
+    import { initUserProfile, initCreateOrg, initJoinGroup, loadMedals } from "/js/functions.js";
 
-    document.addEventListener("DOMContentLoaded", () => {
-      initUserProfile();
+    document.addEventListener("DOMContentLoaded", async () => {
+
+      const openTab = sessionStorage.getItem("openTab");
+      if (openTab) {
+        sessionStorage.removeItem("openTab");
+        const tabBtn = document.querySelector(`.tab-vertical-buttons button[data-tab="${openTab}"]`);
+        if (tabBtn) tabBtn.click();
+      }
+
+      await initUserProfile();
       initCreateOrg();
       initJoinGroup();
+      await loadMedals();
+
+      // Page navigation
+      const routes = {
+        viewGroup: "/viewGroup",
+        createGroups: "/createGroups",
+        viewOrganization: "/viewOrganization",
+        signUpEvents: "/signUpEvents"
+      };
+      Object.entries(routes).forEach(([id, path]) => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener("click", () => {
+            window.location.href = path;
+          });
+        }
+      });
+
+      // Event navigation
+      const eventList = document.getElementById("eventList");
+
+      if (eventList) {
+        eventList.addEventListener("click", (e) => {
+          if (e.target.classList.contains("view-event-btn")) {
+            const sid = e.target.dataset.sid;
+
+            sessionStorage.setItem("selectedSid", sid);
+            sessionStorage.setItem("openTab", "Events"); 
+
+            window.location.href = "/eventDetails";
+          }
+        });
+      }
+
+      // Navbar user info
+      const user = await fetchWithAuth("/api/userProfileData");
+
+      if (user && user.display_name) {
+        const email = user.display_name;
+
+        document.getElementById("display-email").textContent = email;
+        document.getElementById("header-email").textContent = email;
+        document.getElementById("avatar-initial").textContent = email[0].toUpperCase();
+      }
+
+      document.getElementById("logoutBtn").onclick = async () => {
+        await handleLogout();
+        window.location.href = "/dashboard";
+      };
+
     });
 
     //   if (user.photoURL) {
@@ -171,50 +278,6 @@
     // document.getElementById("userName").innerText = user.name;
     // document.getElementById("userPic").src = user.picture;
     // TODO: Need to get user info to appear by profile picture!
-
-    // Logout Button
-    document.getElementById("logoutBtn").onclick = async () => {
-        await handleLogout();
-        window.location.href = "/dashboard";
-    };
-
-    //Navbar links
-    document.getElementById("signUpEvents").onclick = async () => {
-        window.location.href = "/signUpEvents";
-    };
-
-    document.getElementById("createEvent").onclick = async () => {
-        window.location.href = "/createEvent";
-    };
-
-    document.getElementById("aboutUs").onclick = async () => {
-        window.location.href = "/aboutUs";
-    };
-
-    document.getElementById("signUpEvents2").onclick = async () => {
-        window.location.href = "/signUpEvents";
-    };
-
-    document.getElementById("createGroups").onclick = async () => {
-        window.location.href = "/createGroups";
-    };
-
-    // Testing Buttons
-    document.getElementById("dashboardLoggedIn").onclick = async () => {
-        window.location.href = "/dashboardLoggedIn";
-    };
-
-    document.getElementById("createGroups2").onclick = async () => {
-        window.location.href = "/createGroups";
-    };
-
-    document.getElementById("viewGroup").onclick = async () => {
-        window.location.href = "/viewGroup";
-    };
-
-    document.getElementById("viewOrganization").onclick = async () => {
-        window.location.href = "/viewOrganization";
-    };
 
   </script>
 </body>

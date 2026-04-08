@@ -137,15 +137,15 @@ app.get("/time", checkAuth, async (req, res) => {
 //testing
 app.post("/update-profile", checkAuth, async (req, res) => {
   try{
-    const { first_name, last_name, phone_number } = req.body;
+    const { first_name, last_name, phone_number, user_description } = req.body;
     const { uid } = req.user;
 
     console.log("Updating profile for: ", uid);
     console.log(req.body);
 
     await db.query(
-      "UPDATE users SET first_name = $1, last_name = $2, phone_number = $3 WHERE uid = $4",
-      [first_name, last_name, phone_number, uid]
+      "UPDATE users SET first_name = $1, last_name = $2, phone_number = $3, user_description = $4 WHERE uid = $5",
+      [first_name, last_name, phone_number, user_description, uid]
     )
 
     res.json({ 
@@ -642,7 +642,12 @@ app.get("/api/userProfileData", checkAuth, async (req, res) => {
     // Only people in groups can sign up for events
     if (groups.length > 0) {
       const eventData = await db.query(
-        "SELECT s.* FROM services s JOIN participation p ON s.sid = p.sid WHERE p.uid = $1",
+        `SELECT s.*, o.org_name, p.status 
+        FROM services s 
+        JOIN participation p ON s.sid = p.sid 
+        JOIN orgs o ON s.oid = o.oid
+        WHERE p.uid = $1
+        ORDER BY s.time_start ASC`,
         [uid]
       );
       events = eventData.rows;
@@ -1470,8 +1475,61 @@ app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
   }
 });
 
+// Finds the medals (goals) of any group the user belongs to
+app.get("/api/userMedals", checkAuth, async (req, res) => {
+  const uid = req.user.uid;
 
-// Mark hours as completed for tracking
+  try {
+    const result = await db.query(
+      `SELECT 
+        m.mid,
+        m.gid,
+        g.group_name,
+        m.hours,
+        m.complete,
+        m.streak,
+        m.created_date,
+        m.deadline_date,
+
+        COALESCE(um.hours_contributed, 0) AS user_hours,
+
+        COALESCE(SUM(p.hours), 0) AS group_total_hours,
+
+        COUNT(DISTINCT mem.uid) AS member_count
+
+      FROM medals m
+
+      JOIN groups g ON m.gid = g.gid
+      JOIN membership mem ON mem.gid = m.gid
+
+      LEFT JOIN participation p
+        ON p.gid = m.gid
+        AND p.status = 'completed'
+        AND p.credited_at BETWEEN m.created_date AND m.deadline_date
+
+      LEFT JOIN user_medals um
+        ON um.mid = m.mid AND um.uid = $1
+
+      WHERE mem.uid = $1
+
+      GROUP BY 
+        m.mid, g.group_name, um.hours_contributed
+
+      ORDER BY m.deadline_date DESC`,
+      [uid]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error("Error fetching medals:", err);
+    res.status(500).json({ error: "Failed to fetch medals" });
+  }
+});
+
+// Mark hours as completed for tracking, automatically updates user_medals,
+// AND marks the medal as complete if the goal was reached.
+// TODO: determine how streaks will be updated
 app.put("/api/participation/complete", checkAuth, async (req, res) => {
   const { uid, sid, hours } = req.body;
 
@@ -1484,6 +1542,49 @@ app.put("/api/participation/complete", checkAuth, async (req, res) => {
        WHERE uid = $2 AND sid = $3`,
       [hours, uid, sid]
     );
+
+    // Finds any active medals for this group
+    const medals = await db.query(
+      `SELECT * FROM medals
+      WHERE gid = (
+        SELECT gid FROM participation WHERE uid = $1 AND sid = $2
+      )
+      AND complete = false`,
+      [uid, sid]
+    );
+
+    for (const medal of medals.rows) {
+
+      // Updates the users contribution
+      await db.query(
+        `INSERT INTO user_medals (uid, mid, hours_contributed)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (uid, mid)
+        DO UPDATE SET hours_contributed = user_medals.hours_contributed + $3`,
+        [uid, medal.mid, hours]
+      );
+
+      // Recalculates the group total
+      const total = await db.query(
+        `SELECT COALESCE(SUM(hours), 0) AS total
+        FROM participation
+        WHERE gid = $1
+          AND status = 'completed'
+          AND credited_at BETWEEN $2 AND $3`,
+        [medal.gid, medal.created_date, medal.deadline_date]
+      );
+
+      const groupTotal = total.rows[0].total;
+
+      // Checks if completed
+      if (groupTotal >= medal.hours) {
+        await db.query(
+          `UPDATE medals SET complete = true WHERE mid = $1`,
+          [medal.mid]
+        );
+      }
+
+    }
 
     res.json({ success: true });
   } catch (err) {
@@ -1535,4 +1636,4 @@ app.use(express.static("public"));
 
 
 app.listen(3000, () => console.log("Server running on port 3000"));
-console.log("Server running on: http://localhost:3000/login");
+console.log("Server running on: http://localhost:3000/dashboard");

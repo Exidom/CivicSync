@@ -80,24 +80,29 @@
   </footer>
 
   <script type="module">
+    import { handleGoogleLogin, fetchWithAuth } from "/js/auth.js";
     
     // Login Button
     document.getElementById("loginBtn").onclick = async () => {
-        window.location.href = "/login";
+      await handleGoogleLogin();
+      window.location.href = "/dashboardLoggedIn";
     };
 
     // Sign up Button
     document.getElementById("signUpBtn").onclick = async () => {
-        window.location.href = "/login";
+      await handleGoogleLogin();
+      window.location.href = "/dashboardLoggedIn";
     };
 
     //Navbar links
     document.getElementById("signUpEvents").onclick = async () => {
-        window.location.href = "/login";
+      await handleGoogleLogin();
+      window.location.href = "/signUpEvents";
     };
 
     document.getElementById("createEvent").onclick = async () => {
-        window.location.href = "/login";
+      await handleGoogleLogin();
+      window.location.href = "/createEvent";
     };
 
     document.getElementById("dashboard").onclick = async () => {
