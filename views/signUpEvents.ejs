@@ -7,43 +7,87 @@
 </head>
 <body>
 
+<!-- NAVBAR -->
   <header class="navbar">
     <div class="logo">LOGO</div>
+
     <nav>
-      <a id="createEvent">Need Volunteers?</a>
-      <a id="aboutUs">About Us</a>
+      <a href="dashboardLoggedIn">Home</a>
+      <a href="signUpEvents">Volunteer Now!</a>
+      <a href="createEvent">Need Volunteers?</a>
     </nav>
-    <button id="logoutBtn" class="logout-btn">Logout</button>
+
+    <!-- Profile dropdown -->
+    <div class="profile-wrapper">
+      <button class="profile-trigger">
+        <div class="avatar" id="avatar-initial"></div>
+        <span class="profile-email" id="display-email"></span>
+        <svg class="chevron" viewBox="0 0 16 16" fill="none">
+          <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      <div class="dropdown">
+        <div class="dropdown-header">
+          <div class="dh-email" id="header-email"></div>
+        </div>
+
+        <div class="section-label">User Information</div>
+
+        <a class="dropdown-item" href="userProfile">
+          <div>
+            <div class="item-title">User Profile</div>
+          </div>
+        </a>
+
+        <a class="dropdown-item" href="viewGroup">
+          <div>
+            <div class="item-title">User Groups</div>
+          </div>
+        </a>
+
+        <a class="dropdown-item" href="viewOrganization">
+          <div>
+            <div class="item-title">User Organization</div>
+          </div>
+        </a>
+
+        <div class="dropdown-divider"></div>
+
+        <a class="dropdown-item sign-out" id="logoutBtn">
+          <div class="item-title">Logout</div>
+        </a>
+      </div>
+    </div>
   </header>
 
   <main class="container">
-    <h1>Upcoming Events</h1>
-    <div id="eventSignupSection" style="display: none;">
-      <section class="event-grid" id="eventSignupList"></section>
+
+    <div class="hero-banner">
+      <h1>Upcoming Events</h1>
+      <p>Find and sign up for volunteering opportunities near you!</p>
     </div>
 
-    <div id="noGroupEventSection" style="display: none;">
-      <section class="card-container">
-        <div class="center">
-          <h2 class="section-title" style="padding: 20px">Join a group to sign up for events:</h2>
-          <div class="card" style="border: 1px solid #ccc; padding: 20px;">
-            <form id="groupInviteForm">
-              <input type="text" id="groupCode" placeholder="Enter your invite code">
-            </form>
-            <button id="groupCodeSubmit" style="margin-top: 20px;" type="button">Submit</button>
+    <div class="dashboard-body">
+
+      <div id="eventSignupSection" style="display:none;">
+        <section class="event-grid" id="eventSignupList"></section>
+      </div>
+
+      <div id="noGroupEventSection" style="display:none;">
+        <div class="no-group">
+          <div class="no-group-card">
+            <h2>Join a group to see events</h2>
+            <p>You need to be part of a group before you can sign up for volunteering events. Enter your invite code below.</p>
+            <input class="invite-input" type="text" id="groupCode" placeholder="Enter your invite code">
+            <button id="groupCodeSubmit" class="submit-btn">Submit</button>
           </div>
         </div>
-      </section>
+      </div>
+
     </div>
 
-    <h2>Other links for testing:</h2>
-    <div class="center">
-      <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
-      <button id="userProfileBtn" class="grey-btn">User Profile</button>
-      <button id="createGroups" class="grey-btn">Create Groups</button>
-      <button id="viewGroup" class="grey-btn">View Group</button>
-      <button id="viewOrganization" class="grey-btn">View Organization</button>
-    </div>
   </main>
 
   <footer class="footer">
@@ -52,7 +96,7 @@
   </footer>
 
   <script type="module">
-    import { handleLogout } from "/js/auth.js";
+    import { handleLogout, fetchWithAuth } from "/js/auth.js";
     import { initSignUpEvents, initJoinGroup } from "/js/functions.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -60,14 +104,22 @@
       initJoinGroup();
     });
 
+    const user = await fetchWithAuth("/api/userProfileData");
+    if (user && user.display_name) {
+      const userEmail = user.display_name;
+      document.getElementById("display-email").textContent = userEmail;
+      document.getElementById("header-email").textContent = userEmail;
+      document.getElementById("avatar-initial").textContent = userEmail[0].toUpperCase();
+    }
+
     document.getElementById("logoutBtn").onclick = async () => { await handleLogout(); window.location.href = "/dashboard"; };
-    document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
-    document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
-    document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
-    document.getElementById("userProfileBtn").onclick = () => window.location.href = "/userProfile";
-    document.getElementById("createGroups").onclick = () => window.location.href = "/createGroups";
-    document.getElementById("viewGroup").onclick = () => window.location.href = "/viewGroup";
-    document.getElementById("viewOrganization").onclick = () => window.location.href = "/viewOrganization";
+    // document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
+    // document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
+    // document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
+    // document.getElementById("userProfileBtn").onclick = () => window.location.href = "/userProfile";
+    // document.getElementById("createGroups").onclick = () => window.location.href = "/createGroups";
+    // document.getElementById("viewGroup").onclick = () => window.location.href = "/viewGroup";
+    // document.getElementById("viewOrganization").onclick = () => window.location.href = "/viewOrganization";
   </script>
 </body>
 </html>
