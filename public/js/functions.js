@@ -468,7 +468,10 @@ export async function fetchEvents(fetchWithAuth) {
     return;
   }
 
-  container.innerHTML = events.map(event => `
+  const now = new Date();
+  container.innerHTML = events
+    .filter(event => new Date(event.time_start) > now)
+    .map(event => `
       <div class="event-card" data-sid="${event.sid}">
         <div class="event-view">
           <h3>${event.service_name}</h3>
@@ -702,16 +705,20 @@ export async function initSignUpEvents() {
       return;
     }
 
-    list.innerHTML = events.map(event => `
-      <div class="event-card">
-        <h3>${event.service_name}</h3>
-        <p>${event.org_name}</p>
-        <p>${new Date(event.time_start).toLocaleString()}</p>
-        <p>${event.info_text || ""}</p>
-        <p>Hours: ${event.estimated_hours}</p>
-        <button class="view-event-btn" data-sid="${event.sid}">View Event</button>
-      </div>
-    `).join("");
+    const now = new Date();
+
+    list.innerHTML = events
+      .filter(event => new Date(event.time_start) > now)  // only future events
+      .map(event => `
+        <div class="event-card">
+          <h3>${event.service_name}</h3>
+          <p>${event.org_name}</p>
+          <p>${new Date(event.time_start).toLocaleString()}</p>
+          <p>${event.info_text || ""}</p>
+          <p>Hours: ${event.estimated_hours}</p>
+          <button class="view-event-btn" data-sid="${event.sid}">View Event</button>
+        </div>
+      `).join("");
 
     list.addEventListener("click", (e) => {
       if (!e.target.classList.contains("view-event-btn")) return;
