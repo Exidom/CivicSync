@@ -781,6 +781,7 @@ app.put("/api/services/:sid", checkAuth, async (req, res) => {
 });
 
 // Deletes Current Events
+// TODO: remove user_medals for removed events, or make a new function to update medals accordingly
 app.delete("/api/services/:sid", checkAuth, async (req, res) => {
   const { sid } = req.params;
   const uid = req.user.uid;
@@ -1583,7 +1584,8 @@ app.get("/api/userMedals", checkAuth, async (req, res) => {
 // AND marks the medal as complete if the goal was reached.
 // TODO: determine how streaks will be updated
 app.put("/api/participation/complete", checkAuth, async (req, res) => {
-  const { uid, sid, hours } = req.body;
+  const { sid, hours } = req.body;
+  const uid = req.user.uid;
 
   try {
     await db.query(
@@ -1595,14 +1597,23 @@ app.put("/api/participation/complete", checkAuth, async (req, res) => {
       [hours, uid, sid]
     );
 
-    // Finds any active medals for this group
+    // Fixed bug where gid wasn't tracking
+    const participationRow = await db.query(
+      `SELECT gid FROM participation WHERE uid = $1 AND sid = $2`,
+      [uid, sid]
+    );
+
+    if (!participationRow.rows[0]) {
+      return res.status(400).json({ error: "Participation not found" });
+    }
+
+    const gid = participationRow.rows[0].gid;
+
+    // Finds active medals for this group
     const medals = await db.query(
       `SELECT * FROM medals
-      WHERE gid = (
-        SELECT gid FROM participation WHERE uid = $1 AND sid = $2
-      )
-      AND complete = false`,
-      [uid, sid]
+      WHERE gid = $1 AND complete = false`,
+      [gid]
     );
 
     for (const medal of medals.rows) {
@@ -1664,16 +1675,17 @@ app.get("/api/user-hours", checkAuth, async (req, res) => {
   }
 });
 
-// Tracks the total number of hours completed by all users in a group
+// Tracks the total number of hours completed by all users in a group, and the active users contribution
 app.get("/api/group-hours", checkAuth, async (req, res) => {
   const uid = req.user.uid;
 
   try{
     const result = await db.query(
-      `SELECT p.gid, COALESCE(SUM(p.hours), 0) AS total
-      FROM participation p
-      WHERE p.status = 'completed' AND p.gid IN (SELECT gid FROM membership WHERE uid = $1)
-      GROUP BY p.gid`,
+      `SELECT g.gid, COALESCE(SUM(p.hours), 0) AS total,
+      COALESCE(SUM(CASE WHEN p.uid = $1 THEN p.hours ELSE 0 END), 0) AS user_contribution
+      FROM groups g JOIN membership m ON g.gid = m.gid
+      LEFT JOIN participation p ON p.gid = g.gid AND p.status = 'completed'
+      WHERE m.uid = $1 GROUP BY g.gid`,
       [uid]
     );
 
@@ -1681,6 +1693,33 @@ app.get("/api/group-hours", checkAuth, async (req, res) => {
   } catch (err) {
     console.error("Error finding completed group hours:", err);
     res.status(500).json({ error: "Failed to calculate groups hours"});
+  }
+});
+
+app.get("/api/user-leaderboards", checkAuth, async (req, res) => {
+  const uid = req.user.uid;
+
+  try {
+    const result = await db.query(
+      `SELECT m.gid, g.group_name, u.uid, u.display_name, 
+      COALESCE(SUM(p.hours), 0) AS total_hours
+      FROM membership m
+      JOIN groups g ON m.gid = g.gid
+      JOIN membership m2 ON m.gid = m2.gid
+      JOIN users u ON m2.uid = u.uid
+      LEFT JOIN participation p ON p.uid = u.uid
+      AND p.gid = m.gid AND p.status = 'completed'
+      WHERE m.uid = $1 
+      GROUP BY m.gid, g.group_name, u.uid, u.display_name
+      HAVING COALESCE(SUM(p.hours), 0) > 0
+      ORDER BY m.gid, total_hours DESC`,
+      [uid]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error("Leaderboard error:", err);
+    res.status(500).json({ error: "Failed to fetch leaderboards" });
   }
 });
 

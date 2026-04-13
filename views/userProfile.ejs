@@ -9,12 +9,14 @@
 
   <!-- NAVBAR -->
   <header class="navbar">
-    <div class="logo">LOGO</div>
+    <div class="nav-left">
+      <img src="logo.png" alt="Logo" class="nav-logo" onclick="window.location.href='/dashboardLoggedIn'">
+    </div>
 
     <nav>
       <a href="dashboardLoggedIn">Home</a>
       <a href="signUpEvents">Volunteer Now!</a>
-      <a href="createEvent">Need Volunteers?</a>
+      <a id="createEvent">Need Volunteers?</a>
     </nav>
 
     <!-- Profile dropdown -->
@@ -41,7 +43,7 @@
           </div>
         </a>
 
-        <a class="dropdown-item" href="viewGroup">
+        <a class="dropdown-item" id="viewGroups">
           <div>
             <div class="item-title">User Groups</div>
           </div>
@@ -109,8 +111,6 @@
             <h1>Your Groups:</h1>
             <div id="groupList" style="margin-bottom: 30px;"></div>
 
-            <button id="viewGroup" class="view-event-btn" style="margin-bottom: 30px;">View Groups</button>
-
             <h1>Join more!</h1>
             <div class="card" style ="border-radius: 8px; border: 1px solid #086375;">
               <form id="groupInviteForm">
@@ -168,13 +168,13 @@
         </div>
 
         <div id="Medals" class="tabcontent">
-          <h2>Your Medals: </h2>
+          <h1>Your Medals: </h1>
           <div id="medalsList"></div>
         </div>
 
         <div id="Leaderboard" class="tabcontent">
-          <h2>Leaderboard</h2>
-          <p>(Coming soon)</p>
+          <h1>Leaderboards:</h1>
+          <div id="leaderboardList"></div>
         </div>
       </div>
     </div>
@@ -191,7 +191,7 @@
 
   <script type="module">
     import { handleLogout, fetchWithAuth } from "/js/auth.js"; // your Google auth helper
-    import { initUserProfile, initCreateOrg, initJoinGroup, loadMedals } from "/js/functions.js";
+    import { initUserProfile, initCreateOrg, initJoinGroup, loadMedals, loadLeaderboards } from "/js/functions.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
 
@@ -206,6 +206,7 @@
       initCreateOrg();
       initJoinGroup();
       await loadMedals();
+      await loadLeaderboards();
 
       // Page navigation
       const routes = {
@@ -222,6 +223,25 @@
           });
         }
       });
+
+      // Group navigation
+      const groupList = document.getElementById("groupList");
+
+      if (groupList) {
+        groupList.addEventListener("click", (e) => {
+          if (e.target.classList.contains("view-group-btn")) {
+            const gid = e.target.dataset.gid;
+
+            // store selected group
+            localStorage.setItem("groupViewId", gid);
+
+            // Remember current tab
+            sessionStorage.setItem("openTab", "Groups");
+
+            window.location.href = "/group";
+          }
+        });
+      }
 
       // Event navigation
       const eventList = document.getElementById("eventList");
@@ -254,6 +274,16 @@
         await handleLogout();
         window.location.href = "/dashboard";
       };
+
+      document.getElementById("createEvent").onclick = async () => {
+        sessionStorage.setItem("openTab", "CreateEvent");
+        window.location.href = "/viewOrganization";
+      }
+
+      document.getElementById("viewGroups").onclick = async () => {
+        sessionStorage.setItem("openTab", "Groups");
+        window.location.href = "/userProfile";
+      }
 
     });
 

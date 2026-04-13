@@ -25,7 +25,7 @@ body {
   align-items: center;
   background: #eaf4f5;
   border-bottom: 1px solid #A0CFD3;
-  padding: 30px;
+  padding: 15px;
 }
 
 .navbar nav {
@@ -51,9 +51,13 @@ body {
   text-decoration: underline;
 }
 
-.logo {
-  color: #086375;
-  font-weight: bold;
+.nav-left {
+  display: flex;
+  align-items: center;
+}
+.nav-logo {
+  height: 100px;
+  cursor: pointer;
 }
 
 .user-box {
@@ -562,8 +566,10 @@ textarea {
   padding: 5px 12px;
   font-size: 12px;
   cursor: pointer;
-  margin-right: 6px;
+  margin-left: 3px;
+  margin-right: 3px;
   margin-top: 8px;
+  margin-bottom: 8px;
 }
 
 .manage-event-btn:hover {
@@ -579,7 +585,9 @@ textarea {
   padding: 5px 12px;
   font-size: 12px;
   cursor: pointer;
-  margin-right: 6px;
+  margin-left: 3px;
+  margin-right: 3px;
+  margin-bottom: 8px;
 }
 
 .edit-event-btn:hover {
@@ -595,6 +603,8 @@ textarea {
   padding: 5px 12px;
   font-size: 12px;
   cursor: pointer;
+  margin-left: 3px;
+  margin-right: 3px;
 }
 
 .delete-event-btn:hover {
@@ -723,7 +733,7 @@ textarea {
   background: #065260;
 }
 
-.view-event-btn {
+.view-event-btn, .view-group-btn, .default-btn {
   margin-top: auto;
   background: #ffffff;
   color: #086375;
@@ -734,7 +744,8 @@ textarea {
   cursor: pointer;
 }
 
-.view-event-btn:hover {
+.view-event-btn:hover, .view-group-btn:hover,
+.default-btn:hover {
   background: #f0f8f9;
 }
 
@@ -774,7 +785,8 @@ textarea {
   border-color: #A0CFD3;
 }
 
-.tab-vertical-buttons button.active {
+.tab-vertical-buttons button.active,
+.default-btn.active {
   background-color: #ffffff;
   border-color: #086375;
   font-weight: bold;
