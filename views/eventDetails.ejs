@@ -9,12 +9,14 @@
 
   <!-- NAVBAR -->
   <header class="navbar">
-    <div class="logo">LOGO</div>
+    <div class="nav-left">
+      <img src="logo.png" alt="Logo" class="nav-logo" onclick="window.location.href='/dashboardLoggedIn'">
+    </div>
 
     <nav>
       <a href="dashboardLoggedIn">Home</a>
       <a href="signUpEvents">Volunteer Now!</a>
-      <a href="createEvent">Need Volunteers?</a>
+      <a id="createEvent">Need Volunteers?</a>
     </nav>
 
     <!-- Profile dropdown -->
@@ -41,7 +43,7 @@
           </div>
         </a>
 
-        <a class="dropdown-item" href="viewGroup">
+        <a class="dropdown-item" id="viewGroups">
           <div>
             <div class="item-title">User Groups</div>
           </div>
@@ -63,7 +65,7 @@
   </header>
 
   <main class="container">
-    <button id="backBtn" class="grey-btn" style="margin-bottom: 20px;">← Back</button>
+    <button id="backBtn" class="default-btn" style="margin: 20px;">← Back to Events</button>
 
     <section class="card large-card">
       <h1 id="event-name"></h1>
@@ -109,11 +111,15 @@
 
     document.getElementById("backBtn").onclick = () => window.location.href = "/signUpEvents";
     document.getElementById("logoutBtn").onclick = async () => { await handleLogout(); window.location.href = "/dashboard"; };
-    // document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
-    // document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
-    // document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
-    // document.getElementById("userProfileBtn").onclick = () => window.location.href = "/userProfile";
-    // document.getElementById("viewOrganization").onclick = () => window.location.href = "/viewOrganization";
+    document.getElementById("createEvent").onclick = async () => {
+      sessionStorage.setItem("openTab", "CreateEvent");
+      window.location.href = "/viewOrganization";
+    }
+    document.getElementById("viewGroups").onclick = async () => {
+      sessionStorage.setItem("openTab", "Groups");
+      window.location.href = "/userProfile";
+    }
+    
   </script>
 </body>
 </html>

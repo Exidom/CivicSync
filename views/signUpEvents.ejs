@@ -9,12 +9,14 @@
 
 <!-- NAVBAR -->
   <header class="navbar">
-    <div class="logo">LOGO</div>
+    <div class="nav-left">
+      <img src="logo.png" alt="Logo" class="nav-logo" onclick="window.location.href='/dashboardLoggedIn'">
+    </div>
 
     <nav>
       <a href="dashboardLoggedIn">Home</a>
       <a href="signUpEvents">Volunteer Now!</a>
-      <a href="createEvent">Need Volunteers?</a>
+      <a id="createEvent">Need Volunteers?</a>
     </nav>
 
     <!-- Profile dropdown -->
@@ -41,7 +43,7 @@
           </div>
         </a>
 
-        <a class="dropdown-item" href="viewGroup">
+        <a class="dropdown-item" id="viewGroups">
           <div>
             <div class="item-title">User Groups</div>
           </div>
@@ -70,6 +72,18 @@
     </div>
 
     <div class="dashboard-body">
+
+      <div style="margin-bottom: 15px;">
+        <input type="text" id="eventSearch" placeholder="Search events..." style="padding: 8px; width: 250px;">
+
+        <div id="sortControls" style="margin-top: 10px;">
+          <button class="default-btn" data-sort="earliest">Earliest</button>
+          <button class="default-btn" data-sort="leastHours">Least Hours</button>
+          <button class="default-btn" data-sort="mostHours">Most Hours</button>
+          <button class="default-btn" data-sort="eventName">Event Name (A-Z)</button>
+          <button class="default-btn" data-sort="orgName">Org Name (A-Z)</button>
+        </div>
+      </div>
 
       <div id="eventSignupSection" style="display:none;">
         <section class="event-grid" id="eventSignupList"></section>
@@ -113,13 +127,17 @@
     }
 
     document.getElementById("logoutBtn").onclick = async () => { await handleLogout(); window.location.href = "/dashboard"; };
-    // document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
-    // document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
-    // document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
-    // document.getElementById("userProfileBtn").onclick = () => window.location.href = "/userProfile";
-    // document.getElementById("createGroups").onclick = () => window.location.href = "/createGroups";
-    // document.getElementById("viewGroup").onclick = () => window.location.href = "/viewGroup";
-    // document.getElementById("viewOrganization").onclick = () => window.location.href = "/viewOrganization";
+
+    document.getElementById("createEvent").onclick = async () => {
+      sessionStorage.setItem("openTab", "CreateEvent");
+      window.location.href = "/viewOrganization";
+    }
+
+    document.getElementById("viewGroups").onclick = async () => {
+      sessionStorage.setItem("openTab", "Groups");
+      window.location.href = "/userProfile";
+    }
+
   </script>
 </body>
 </html>

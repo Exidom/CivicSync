@@ -65,6 +65,9 @@ export async function loadUserProfile() {
     const noGroupSection = document.getElementById("noGroupSection");
     const groupList = document.getElementById("groupList");
 
+    const userHours = await fetchWithAuth("/api/user-hours");
+    document.getElementById("totalHours").innerText = "You have " + (userHours.total || 0) + " completed service hours";
+
     if (user.hasGroup) {
       groupSection.style.display = "inline-block";
       noGroupSection.style.display = "none";
@@ -72,9 +75,11 @@ export async function loadUserProfile() {
       const groupHours = await fetchWithAuth("/api/group-hours");
 
       const hoursMap = {};
+      const userContributionMap = {};
       if (groupHours && Array.isArray(groupHours)) {
         groupHours.forEach(g => {
           hoursMap[g.gid] = g.total;
+          userContributionMap[g.gid] = g.user_contribution;
         });
       }
 
@@ -87,10 +92,13 @@ export async function loadUserProfile() {
         div.style = "border-radius: 8px; border: 1px solid #086375; margin-bottom: 20px;"
 
         const totalHours = hoursMap[g.gid] ?? 0;
+        const userContribution = userContributionMap[g.gid] ?? 0;
 
         div.innerHTML = `
           <h3>${g.group_name}</h3>
           <p>Total Group Hours: ${totalHours}</p>
+          <p>Your contribution: ${userContribution}</p>
+          <button class="view-group-btn" style="margin-top: 20px;" data-gid="${g.gid}">View Group</button>
         `;
 
         groupList.appendChild(div);
@@ -145,9 +153,6 @@ export async function loadUserProfile() {
       eventSection.style.display = "none";
       noEventSection.style.display = "none";
     }
-
-    const userHours = await fetchWithAuth("/api/user-hours");
-    document.getElementById("totalHours").innerText = "You have " + (userHours.total || 0) + " completed service hours";
 
     return user;
 
@@ -258,6 +263,57 @@ export async function loadMedals() {
 
   } catch (err) {
     console.error("Failed to load medals:", err);
+  }
+}
+
+// Loads the users' group's active leaderboards
+export async function loadLeaderboards() {
+  try {
+    const data = await fetchWithAuth("/api/user-leaderboards");
+    const container = document.getElementById("leaderboardList");
+
+    if (!data || data.length === 0) {
+      container.innerHTML = "<p>No leaderboard data yet.</p>";
+      return;
+    }
+
+    // group data by gid
+    const grouped = {};
+
+    data.forEach(row => {
+      if (!grouped[row.gid]) {
+        grouped[row.gid] = {
+          group_name: row.group_name,
+          members: []
+        };
+      }
+
+      grouped[row.gid].members.push(row);
+    });
+
+    // render each group leaderboard
+    container.innerHTML = Object.values(grouped).map(group => `
+      <div class="card" style="margin-bottom: 20px;">
+        <h3>${group.group_name}</h3>
+
+        ${group.members.map((user, index) => {
+          const medal =
+            index === 0 ? "🥇" :
+            index === 1 ? "🥈" :
+            index === 2 ? "🥉" : "";
+
+          return `
+            <p>
+              ${medal} #${index + 1} ${user.display_name}
+              — ${user.total_hours} hours
+            </p>
+          `;
+        }).join("")}
+      </div>
+    `).join("");
+
+  } catch (err) {
+    console.error("Failed to load leaderboards:", err);
   }
 }
 
@@ -487,7 +543,7 @@ export async function fetchEvents(fetchWithAuth) {
       <div class="event-edit" style="display:none;">
         <label>Service Name: <input type="text" name="service_name" value="${event.service_name}"></label><br>
         <label>Description:<br><textarea name="info_text" rows="3">${event.info_text || ""}</textarea></label><br>
-        <label>Start Date/Time: <input type="datetime-local" name="time_start" value="${event.time_start.slice(0, 16)}"></label><br>
+        <label>Start Date/Time: <input type="datetime-local" name="time_start" data-time="${event.time_start}"></label><br>
         <label>Volunteers Needed: <input type="number" name="estimated_volunteers" value="${event.estimated_volunteers}" min="1"></label><br>
         <label>Hours: <input type="number" name="estimated_hours" value="${event.estimated_hours}" min="1"></label><br>
         <label>Visible to Public:
@@ -507,6 +563,19 @@ export async function fetchEvents(fetchWithAuth) {
       </div>
     </div>
   `).join("");
+  // Adjusts edit display for local time
+  document.querySelectorAll("input[name='time_start']").forEach(input => {
+  const utc = input.dataset.time;
+  if (!utc) return;
+
+  const date = new Date(utc);
+
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16);
+
+  input.value = local;
+  });
 }
 
 // Delete and Edit functionality in the current events
@@ -538,10 +607,19 @@ export function initEventActions(fetchWithAuth) {
     // Save edits
     if (e.target.classList.contains("save-event-btn")) {
       const editForm = card.querySelector(".event-edit");
+
+      // Adjusts displayed local time back to UTC for the database:
+      const timeInput = editForm.querySelector("[name=time_start]").value;
+      if (!timeInput) {
+        alert("Please enter a valid date/time");
+        return;
+      }
+      const time_start = new Date(timeInput).toISOString();
+
       const payload = {
         service_name: editForm.querySelector("[name=service_name]").value.trim(),
         info_text: editForm.querySelector("[name=info_text]").value.trim(),
-        time_start: editForm.querySelector("[name=time_start]").value,
+        time_start: time_start,
         estimated_volunteers: parseInt(editForm.querySelector("[name=estimated_volunteers]").value),
         estimated_hours: parseInt(editForm.querySelector("[name=estimated_hours]").value),
         visibility_public: editForm.querySelector("[name=visibility_public]").value === "true",
@@ -707,9 +785,51 @@ export async function initSignUpEvents() {
 
     const now = new Date();
 
-    list.innerHTML = events
-      .filter(event => new Date(event.time_start) > now)  // only future events
-      .map(event => `
+    // let allEvents = events;
+    let currentSort = "earliest";
+
+    function renderEvents() {
+      let filtered = events.filter(event => new Date(event.time_start) > now)  // only future events
+
+      // Search bar
+      const searchValue = document.getElementById("eventSearch")?.value?.toLowerCase() || "";
+      if (searchValue) {
+        filtered = filtered.filter(e =>
+          e.service_name.toLowerCase().includes(searchValue) ||
+          e.org_name.toLowerCase().includes(searchValue)
+        );
+      }
+
+      // Tag based sort
+      switch (currentSort) {
+        case "leastHours":
+          filtered.sort((a, b) => a.estimated_hours - b.estimated_hours);
+          break;
+
+        case "mostHours":
+          filtered.sort((a, b) => b.estimated_hours - a.estimated_hours);
+          break;
+
+        case "eventName":
+          filtered.sort((a, b) =>
+            a.service_name.localeCompare(b.service_name)
+          );
+          break;
+
+        case "orgName":
+          filtered.sort((a, b) =>
+            a.org_name.localeCompare(b.org_name)
+          );
+          break;
+
+        case "earliest":
+        default:
+          filtered.sort((a, b) =>
+            new Date(a.time_start) - new Date(b.time_start)
+          );
+          break;
+      }
+      list.innerHTML = filtered.map(event => `
         <div class="event-card">
           <h3>${event.service_name}</h3>
           <p>${event.org_name}</p>
@@ -719,7 +839,35 @@ export async function initSignUpEvents() {
           <button class="view-event-btn" data-sid="${event.sid}">View Event</button>
         </div>
       `).join("");
+    }
 
+    renderEvents();
+
+    // Display the default active tag (earliest)
+    document.querySelectorAll("#sortControls button").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.sort === currentSort);
+    });
+
+    // Sorting tags
+    document.getElementById("sortControls")?.addEventListener("click", (e) => {
+      if (e.target.tagName === "BUTTON") {
+        currentSort = e.target.dataset.sort;
+
+        // Display the active tag
+        document.querySelectorAll("#sortControls button").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.sort === currentSort);
+        });
+
+        renderEvents();
+      }
+    });
+
+    // Search typing (live filter)
+    document.getElementById("eventSearch")?.addEventListener("input", () => {
+      renderEvents();
+    });
+
+    // Event details navigaion
     list.addEventListener("click", (e) => {
       if (!e.target.classList.contains("view-event-btn")) return;
       sessionStorage.setItem("selectedSid", e.target.dataset.sid);
