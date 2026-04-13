@@ -9,11 +9,12 @@
 
   <!-- NAVBAR -->
   <header class="navbar">
-    <!-- TODO: Insert a logo, either ours or the org's stored logo -->
-    <div class="logo">LOGO</div>
+    <div class="nav-left">
+      <img src="logo.png" alt="Logo" class="nav-logo" style="cursor: default;">
+    </div>
 
     <nav>
-      <a id="dashboard">Home</a>
+      <a>Home</a>
       <a id="signUpEvents">Volunteer Now!</a>
       <a id="createEvent">Need Volunteers?</a>
     </nav>
@@ -104,10 +105,6 @@
       await handleGoogleLogin();
       window.location.href = "/createEvent";
     };
-
-    document.getElementById("dashboard").onclick = async () => {
-      window.location.href = "/dashboard";
-    }
 
   </script>
 </body>
