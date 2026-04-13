@@ -1070,7 +1070,11 @@ async function handlePromote(uid,gid) {
    await fetchWithAuth("/api/groupPromote", "POST",{uid,gid});
 }
 
-export async function fetchMembers(fetchWithAuth,gid) {
+async function handleCreateMedal(gid,hours){
+  fetchWithAuth("/api/groupMedalCreate", "POST",{hours,gid});
+}
+
+export async function fetchMembersMedals(fetchWithAuth,gid) {
 
   const permission = (((await fetchWithAuth("/api/baseGroupPermissions", "POST",{gid})).role)=="admin");
   const data = await fetchWithAuth("/api/getGroupMemberData", "POST",{ gid});
@@ -1137,5 +1141,86 @@ export async function fetchMembers(fetchWithAuth,gid) {
 
   } else {
     alert("failed to find members");
+  }
+
+  const dataM = await fetchWithAuth("/api/groupMedalGet", "POST",{ gid});
+  if (dataM && !dataM.error) {
+    
+    const container = document.getElementById('medals-container');
+    const today = new Date();
+    
+    container.innerHTML = '';
+
+    const newestMedal = dataM.length > 0 ? dataM[0] : null;
+    const isActive = newestMedal && new Date(newestMedal.deadline_date) >= today;
+
+    // 1. Create Medal Section (Admin only + No active medal)
+    if (permission && !isActive) {
+        const createWrapper = document.createElement('div');
+        createWrapper.className = 'create-medal-controls';
+        
+        createWrapper.innerHTML = `
+            <input type="number" id="new-medal-hours" placeholder="Enter hours..." min="1">
+            <button id="submit-medal-btn">Create New Medal</button>
+        `;
+        
+        container.appendChild(createWrapper);
+
+        document.getElementById('submit-medal-btn').addEventListener('click', () => {
+            const hoursValue = document.getElementById('new-medal-hours').value;
+            if (hoursValue) {
+                handleCreateMedal(gid, hoursValue);
+            } else {
+                alert("Please enter hours for the new medal.");
+            }
+        });
+    }
+
+    // 2. Render Medal Cards
+    dataM.forEach((medal, index) => {
+        const mid = medal.mid;
+        const isCompleted = medal.complete ? "Completed" : "In Progress";
+        const startDate = new Date(medal.created_date).toLocaleDateString();
+        const endDate = new Date(medal.deadline_date).toLocaleDateString();
+        const isThisActive = index === 0 && new Date(medal.deadline_date) >= today;
+
+        // Get image source from your function
+        const imgSrc = medalImage(medal.hours);
+
+        const card = document.createElement('div');
+        card.className = `card application-card ${isThisActive ? 'active-medal' : ''}`;
+        
+        let adminActions = '';
+        if (permission && isThisActive) {
+            adminActions = `<button class="cancel-btn" data-mid="${mid}">Cancel Medal</button>`;
+        }
+
+        card.innerHTML = `
+            <div class="medal-card-content">
+                <img src="${imgSrc}" alt="Medal Icon" class="medal-icon">
+                <div class="medal-info">
+                    <h4>Medal #${mid} ${isThisActive ? '(Active)' : ''}</h4>
+                    <p><strong>Status:</strong> ${isCompleted}</p>
+                    <p><strong>Progress:</strong> <span class="medal-progress" data-mid="${mid}">0</span>%</p>
+                    <p><strong>Target:</strong> ${medal.hours} Hours</p>
+                    <p><strong>Streak:</strong> ${medal.streak} Days</p>
+                    <p><small>${startDate} - ${endDate}</small></p>
+                    ${adminActions}
+                </div>
+            </div>
+        `;
+
+        if (permission && isThisActive) {
+            card.querySelector('.cancel-btn').addEventListener('click', () => {
+                handleCancelMedal(mid, gid);
+            });
+        }
+
+        container.appendChild(card);
+    });
+
+
+  } else {
+    alert("failed to find medals");
   }
 }

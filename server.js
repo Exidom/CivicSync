@@ -1440,7 +1440,7 @@ app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
     const medalData = await db.query("SELECT streak,deadline_date,complete FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid,uid]);
     const today = new Date().setHours(0,0,0,0);
     let streak = 0;
-    if (!medalData.rows[0] ){
+    if (medalData.rows[0] ){
       const deadDate = new Date(medalData.rows[0].deadline_date).setHours(0,0,0,0);
       if (today<=deadDate){
         return res.status(404).json({ error: "already active medal" });
@@ -1470,8 +1470,60 @@ app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
       res.json(result.rows[0]);
 
   } catch (err) {
-    console.error("Group kick ERROR", err);
-    res.status(500).json({ error: "Failed to kick from group" });
+    console.error("Group medal create error", err);
+    res.status(500).json({ error: "Failed to create medal" });
+  }
+});
+
+app.post("/api/groupMedalCancel", checkAuth, async (req, res) => {
+  try {
+    const {gid} = req.body;
+    const uid = req.user.uid;
+  
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+    if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
+    if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
+
+    const medalData = await db.query("SELECT mid,deadline_date,complete FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid,uid]);
+    if (!medalData.rows[0] ){
+      return res.status(404).json({ error: "no active medal" });
+    }
+   
+    const today = new Date().setHours(0,0,0,0);
+    const deadDate = new Date(medalData.rows[0].deadline_date).setHours(0,0,0,0);
+    if(today.getTime()>=deadDate.getTime()){
+      return res.status(404).json({ error: "medal expires today or before" });
+    }
+    if(medalData.rows[0].complete){
+      return res.status(404).json({ error: "medal already finished" });
+    }
+
+    const result = await db.query(
+        `UPDATE medals SET deadline_date = $1 WHERE mid = $2 RETURNING *`,
+        [today,medalData.rows[0].mid]
+      );
+      res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("Group medal cancel error", err);
+    res.status(500).json({ error: "Failed to cancel medal" });
+  }
+});
+
+app.post("/api/groupMedalGet", checkAuth, async (req, res) => {
+  try {
+    const {gid} = req.body;
+    const uid = req.user.uid;
+  
+
+    const medalData = await db.query("SELECT * FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid]);
+
+    res.json(medalData.rows);
+   
+    
+  } catch (err) {
+    console.error("Group medal get error", err);
+    res.status(500).json({ error: "Failed to get medals" });
   }
 });
 

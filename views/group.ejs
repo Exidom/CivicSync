@@ -32,7 +32,7 @@
         <div class="tab-vertical-buttons">
           <button class="tablinks" data-tab="Profile">Group Profile</button>
           <button class="tablinks" data-tab="Members">Group members</button>
-          <button class="tablinks" data-tab="Medals">Group members</button>
+          <button class="tablinks" data-tab="Medals">Group medals</button>
         </div>
 
         <div class="tab-vertical-content">
@@ -97,7 +97,7 @@
     <script type="module" src="/js/functions.js"></script>
     <script type="module">
       import { handleLogout, fetchWithAuth } from "/js/auth.js";
-      import { fetchGroup,fetchMembers} from "/js/functions.js";
+      import { fetchGroup,fetchMembersMedals} from "/js/functions.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
 
@@ -110,7 +110,7 @@
         
         // Initial page load
         await fetchGroup(fetchWithAuth, localStorage.getItem('groupViewId'));
-        await fetchMembers(fetchWithAuth, localStorage.getItem('groupViewId'));
+        await fetchMembersMedals(fetchWithAuth, localStorage.getItem('groupViewId'));
 
 
         // Navigation
