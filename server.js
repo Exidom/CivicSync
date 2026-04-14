@@ -1409,9 +1409,9 @@ app.put("/api/groupKick", checkAuth, async (req, res) => {
   
     const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
     if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
-    if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
+    if ((!groupData.rows[0].admin) && (targetUid!=uid)) return res.status(404).json({ error: "found no permission" });
 
-    const groupData2 = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,targetUidid]);//sanatize?
+    const groupData2 = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,targetUid]);//sanatize?
     if (!groupData2.rows[0]) return res.status(404).json({ error: "found no user" });
     if (groupData.rows[0].admin) return res.status(404).json({ error: "found user admin permission" });
 
@@ -1434,20 +1434,22 @@ app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
     const {hours, gid} = req.body;
     const uid = req.user.uid;
   
-    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
+    const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);
     if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
     if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
 
-    const medalData = await db.query("SELECT streak,deadline_date,complete FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid,uid]);
-    const today = new Date().setHours(0,0,0,0);
+    const medalData = await db.query("SELECT streak,deadline_date,complete FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid]);
+    const today = new Date();
+    today.setHours(0,0,0,0);
     let streak = 0;
     if (medalData.rows[0] ){
-      const deadDate = new Date(medalData.rows[0].deadline_date).setHours(0,0,0,0);
+      const deadDate = new Date(medalData.rows[0].deadline_date);
+      deadDate.setHours(0,0,0,0);
       if (today<=deadDate){
-        return res.status(404).json({ error: "already active medal" });
+        return res.status(403).json({ error: "already active medal" });
       }
       else{
-        const streakDate = deadDate;
+        const streakDate = new Date(deadDate);
         streakDate.setDate(streakDate.getDate()+1);
         if ((today<=streakDate)&&medalData.rows[0].complete){
           streak=medalData.rows[0].streak+1;
@@ -1455,7 +1457,7 @@ app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
       }
 
     }
-    const monthFuture = today;
+    const monthFuture = new Date(today);
     const expectedMonth = (monthFuture.getMonth() + 1) % 12;
     monthFuture.setMonth(monthFuture.getMonth() + 1); 
     if ((monthFuture.getMonth() !== expectedMonth)) {
@@ -1485,15 +1487,17 @@ app.post("/api/groupMedalCancel", checkAuth, async (req, res) => {
     if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
     if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
 
-    const medalData = await db.query("SELECT mid,deadline_date,complete FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid,uid]);
+    const medalData = await db.query("SELECT mid,deadline_date,complete FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid]);
     if (!medalData.rows[0] ){
       return res.status(404).json({ error: "no active medal" });
     }
    
-    const today = new Date().setHours(0,0,0,0);
-    const deadDate = new Date(medalData.rows[0].deadline_date).setHours(0,0,0,0);
+    const today = new Date();
+    today.setHours(0,0,0,0)
+    const deadDate = new Date(medalData.rows[0].deadline_date);
+    deadDate.setHours(0,0,0,0)
     if(today.getTime()>=deadDate.getTime()){
-      return res.status(404).json({ error: "medal expires today or before" });
+      return res.status(403).json({ error: "medal expires today or before" });
     }
     if(medalData.rows[0].complete){
       return res.status(404).json({ error: "medal already finished" });
@@ -1720,6 +1724,46 @@ app.get("/api/user-leaderboards", checkAuth, async (req, res) => {
   } catch (err) {
     console.error("Leaderboard error:", err);
     res.status(500).json({ error: "Failed to fetch leaderboards" });
+  }
+});
+
+app.post("/api/group-hours", checkAuth, async (req, res) => {
+  // 1. Destructure and set defaults
+  let { targetUid, gid, startTime, endTime } = req.body;
+  
+  // 2. Handle Wildcards (Convert empty strings to null for SQL logic)
+  const filterUid = (targetUid) ? targetUid : null;
+  
+  let filterStart = null;
+  let filterEnd = null;
+
+
+  if (startTime) {
+    // Standardize dates to ISO strings for PostgreSQL/MySQL compatibility
+    filterStart = new Date(startTime);
+    filterEnd = new Date(endTime);
+    filterStart.setHours(0, 0, 0, 0);
+    filterEnd.setHours(23, 59, 59, 999);
+  }
+ 
+
+  try {
+    const query = `
+      SELECT COALESCE(SUM(hours), 0) AS total
+      FROM participation
+      WHERE gid = $1 
+        AND status = 'completed'
+        AND (uid = $2 OR $2 IS NULL)
+        AND (credited_at BETWEEN $3 AND $4 OR $3 IS NULL);
+    `;
+
+    const values = [gid, filterUid, filterStart, filterEnd];
+    const result = await db.query(query, values);
+
+    res.json({ total: result.rows[0].total });
+  } catch (err) {
+    console.error("Error finding completed group hours:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
