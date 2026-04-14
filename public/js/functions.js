@@ -252,7 +252,7 @@ export async function loadMedals() {
 
           <p><strong>Deadline:</strong> ${new Date(m.deadline_date).toLocaleDateString()}</p>
           <p><strong>Streak:</strong> ${m.streak}</p>
-          <p><strong>Status:</strong> ${m.complete ? "Completed!" : "In Progress"}</p>
+          <p><strong>Status:</strong> ${m.complete ? "Completed!" : "Incomplete"}</p>
 
           <div style="background:#ddd; height:10px; border-radius:5px;">
             <div style="width:${percent}%; background:#086375; height:10px; border-radius:5px;"></div>
@@ -1078,7 +1078,7 @@ export function initEditGroup(fetchWithAuth,gid) {
 
   editBtn.addEventListener("click", () => {
     // Pre-fill with current values
-    document.getElementById("editGroupName").value = document.getElementById("group-name").textContent;
+    document.getElementById("editGroupName").value = '';
     document.getElementById("editGroupIntro").value = document.getElementById("group-description").innerText;
     editForm.style.display = "block";
     editBtn.style.display = "none";
@@ -1145,18 +1145,76 @@ async function uploadToSlotGroup(slotNum,gid){
     input.click();
 }
 
-export async function fetchGroup(fetchWithAuth,gid) {
 
-  const permission = (((await fetchWithAuth("/api/baseGroupPermissions", "POST",{gid})).role)=="admin");
 
-  const data = await fetchWithAuth("/api/getGroupData", "POST",{ gid});
+async function handleKick(uid,gid) {
+    await fetchWithAuth("/api/groupKick", "POST",{uid,gid});
+    location.reload();
+}
+
+async function handlePromote(uid,gid) {
+   await fetchWithAuth("/api/groupPromote", "POST",{uid,gid});
+   location.reload();
+}
+
+// New helper to fetch progress (since /api/groupMedalGet doesn't return totals)
+// You might want to update your API to return progress automatically
+async function handleCancelMedal(mid, gid) {
+    if(!confirm("Are you sure you want to cancel this medal?")) return;
+    const res = await fetchWithAuth("/api/groupMedalCancel", "POST", { gid });
+    if (res.status == 403){
+      alert("already expires today");
+    }
+    location.reload();
+}
+
+// HELPER: Fixed handleCreateMedal with proper await
+async function handleCreateMedal(gid, hours) {
+    try {
+        const res = await fetchWithAuth("/api/groupMedalCreate", "POST", { hours, gid });
+        if (res.status == 403){
+          alert("already active medal");
+        }
+        location.reload();
+    } catch (err) {
+        console.error("Create medal error:", err);
+    }
+}
+
+// HELPER: Leave Group (Kick yourself)
+async function handleLeaveGroup(gid) {
+    if (!confirm("Are you sure you want to leave this group?")) return;
+    const user = await fetchWithAuth("/api/userProfileData");
+    await fetchWithAuth("/api/groupKick", "PUT", { targetUid: user.uid, gid });
+    window.location.href = "/userProfile";
+}
+
+export async function fetchGroup(fetchWithAuth, gid) {
+  const permData = await fetchWithAuth("/api/baseGroupPermissions", "POST", { gid });
+  const isAdmin = permData.role === "admin";
+  const data = await fetchWithAuth("/api/getGroupData", "POST", { gid });
 
   const orgNameEl = document.getElementById("group-name");
   const orgDescEl = document.getElementById("group-description");
+  const editBtn = document.getElementById("editGroupBtn");
 
   if (data && !data.error) {
-    orgNameEl.textContent = data.group_name;
+    // Only show Edit button to admins
+    editBtn.style.display = isAdmin ? "block" : "none";
+    
+    // Add Invite Code display for admins
+    orgNameEl.innerHTML = `${data.group_name} ${isAdmin ? `<br><small style="font-size: 14px; color: #666;">Invite Code: <strong>${data.invite_code || 'N/A'}</strong></small>` : ''}`;
     orgDescEl.innerHTML = `<p>${data.intro_text || ""}</p>`;
+
+    // Add Leave Button if it doesn't exist
+    if (!document.getElementById('leaveGroupBtn')) {
+        const leaveBtn = document.createElement('button');
+        leaveBtn.id = 'leaveGroupBtn';
+        leaveBtn.innerText = "Leave Group";
+        leaveBtn.style.backgroundColor = "#ff4444";
+        leaveBtn.onclick = () => handleLeaveGroup(gid);
+        editBtn.parentNode.insertBefore(leaveBtn, editBtn.nextSibling);
+    }
 
     document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
       btn.disabled = false;
@@ -1175,7 +1233,7 @@ export async function fetchGroup(fetchWithAuth,gid) {
           img.src = link;
           img.style.display="block";
 
-          if(permission){
+          if(isAdmin){
 
               const del = document.createElement("button");
               del.innerText="Delete";
@@ -1194,7 +1252,7 @@ export async function fetchGroup(fetchWithAuth,gid) {
 
           img.style.display="none";
 
-          if(permission){
+          if(isAdmin){
 
               const uploadBtn=document.createElement("button");
               uploadBtn.innerText="Upload Image";
@@ -1216,81 +1274,111 @@ export async function fetchGroup(fetchWithAuth,gid) {
   }
 }
 
+export async function fetchMembersMedals(fetchWithAuth, gid) {
+  const permData = await fetchWithAuth("/api/baseGroupPermissions", "POST", { gid });
+  const permission = permData.role === "admin";
+  
 
-async function handleKick(uid,gid) {
-    await fetchWithAuth("/api/groupKick", "POST",{uid,gid});
-}
+  // 2. Medals rendering (Exact copy of User Profile styling)
+  const dataM = await fetchWithAuth("/api/groupMedalGet", "POST", { gid });
+  const container = document.getElementById('medals-container');
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  let startActive = '';
+  let endActive = '';
+  
+  if (dataM && container) {
+    const isActive = dataM[0] && (new Date(dataM[0].deadline_date)).getTime >= today.getTime;
 
-async function handlePromote(uid,gid) {
-   await fetchWithAuth("/api/groupPromote", "POST",{uid,gid});
-}
+    if(isActive){
+      startActive=dataM[0].created_date;
+      endActive=dataM[0].deadline_date;
+    }
 
-export async function fetchMembers(fetchWithAuth,gid) {
+    // 1. Build the HTML string for EVERYTHING first
+    let fullHTML = '';
 
-  const permission = (((await fetchWithAuth("/api/baseGroupPermissions", "POST",{gid})).role)=="admin");
-  const data = await fetchWithAuth("/api/getGroupMemberData", "POST",{ gid});
-
-  if (data && !data.error) {
-    
-    const container = document.getElementById('members-container');
-
-    container.innerHTML = '';
-
-    data.forEach(member => {
-        const isAdmin = member.admin === true;
-        const roleText = isAdmin ? 'Admin' : 'Member';
-        const uid = member.uid;
-
-        // Create the card element
-        const card = document.createElement('div');
-        card.className = 'card application-card large-card';
-        
-        // Build the inner HTML
-        let actionButtons = '';
-        
-         //todo clean up
-        if (permission && !isAdmin) {
-            actionButtons = `
-                <button class="kick-btn" data-uid="${uid}">Kick</button>
-                <button class="promote-btn" data-uid="${uid}">Promote</button>
-            `;
-        }
-        
-        //todo clean up, get hours from services
-        card.innerHTML = `
-            <div class="member-info">
-                <h4>${member.display_name}</h4>
-                <p>Role: ${roleText}</p>
-                <p>Hours: <span class="member-number" data-uid="${uid}">0</span></p>
-                <button class="account-btn" data-uid="${uid}">View Account</button>
-                ${actionButtons}
+    if (permission && !isActive) {
+        fullHTML += `
+            <div class="card" id="create-medal-card">
+                <h3>Set New Goal</h3>
+                <input type="number" id="new-medal-hours" placeholder="Hours" style="width: 80px">
+                <button id="submit-medal-btn">Create</button>
             </div>
         `;
+    }
 
-        //Set up Event Listeners
-        
-        // Account Button Listener
-        card.querySelector('.account-btn').addEventListener('click', () => {
-            console.log("Accessing UID:", uid);
-            //link to user
-        });
+    const medalHtmlPromises = dataM.map(async (m) => {
+      const hourData =  await fetchWithAuth("/api/group-hours", "POST", { targetUid:null,gid:gid,startTime:((m.created_date)),endTime:((m.deadline_date))});
+      const group_total_hours = hourData.total;
+      const progress = parseFloat(group_total_hours);
+      const goal = m.hours;
+      const percent = Math.min((progress / goal) * 100, 100);
 
-        // Admin Action Listeners
-        if (permission && !isAdmin) {
-            card.querySelector('.kick-btn').addEventListener('click', () => {
-                handleKick(uid,gid);
-            });
-            card.querySelector('.promote-btn').addEventListener('click', () => {
-                handlePromote(uid,gid);
-            });
-        }
+      return `
+        <div class="card" style="margin-bottom: 20px; position: relative;">
+          <h3>Group Medal</h3>
+          <p><strong>Goal:</strong> ${goal} hours</p>
+          <p><strong>Group Progress:</strong> ${progress} / ${goal}</p>
+          <p><strong>Deadline:</strong> ${new Date(m.deadline_date).toLocaleDateString()}</p>
+          <p><strong>Streak:</strong> ${m.streak}</p>
+          <p><strong>Status:</strong> ${m.complete ? "Completed!" : "Incomplete"}</p>
 
-        // Append to container
-        container.appendChild(card);
+          <div style="background:#ddd; height:10px; border-radius:5px; margin: 10px 0;">
+            <div style="width:${percent}%; background:#086375; height:10px; border-radius:5px;"></div>
+          </div>
+          ${(permission && !m.complete && new Date(m.deadline_date) >= today) ? 
+            `<button class="cancel-medal-btn" data-mid="${m.mid}" style="font-size:10px; color:red; border:none; background:none; cursor:pointer;">Cancel Medal</button>` : ''}
+        </div>
+      `;
     });
 
+    const medalHtmlArray = await Promise.all(medalHtmlPromises);
 
-  } else {
-    alert("failed to find members");
+    container.innerHTML = [fullHTML,medalHtmlArray.join("")].join("");
+
+    // 3. NOW attach listeners to the elements that actually exist in the DOM
+    const submitBtn = document.getElementById('submit-medal-btn');
+    if (submitBtn) {
+        submitBtn.onclick = () => {
+            const h = document.getElementById('new-medal-hours').value;
+            if (!h) return alert("Please enter hours");
+            handleCreateMedal(gid, h);
+        };
+    }
+
+    // Attach listeners for cancel buttons (since there are multiple)
+    document.querySelectorAll('.cancel-medal-btn').forEach(btn => {
+        btn.onclick = () => handleCancelMedal(btn.dataset.mid, gid);
+    });
+
+    // 1. Members rendering (Same as before but with your preferred card class)
+    const memberData = await fetchWithAuth("/api/getGroupMemberData", "POST", { gid });
+    const memContainer = document.getElementById('members-container');
+    if (memberData && memContainer) {
+        memContainer.innerHTML = '';
+        const memberHtmlPromises = memberData.map(async(m) => {
+            const totalH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:startActive,endTime:endActive})).total;
+            const currentH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:null,endTime:null})).total;
+
+            return `
+              <div class="card" style="margin-bottom: 20px; position: relative;">
+              <h4>${m.display_name}</h4>
+              <p>Role: ${m.admin ? 'Admin' : 'Member'}</p>
+              <p>Total hours: ${totalH}</p>
+              ${(isActive) ? `
+                <p>Hours for current medal: ${currentH}</p>
+              ` : ''}
+              ${(permission && !m.admin) ? `
+                  <button onclick="handleKick('${m.uid}', '${gid}')">Kick</button>
+                  <button onclick="handlePromote('${m.uid}', '${gid}')">Promote</button>
+              ` : ''}
+            `;
+        });
+        const memberHtmlArray = await Promise.all(memberHtmlPromises);
+
+        memContainer.innerHTML = memberHtmlArray.join("");
+    }
   }
+
 }

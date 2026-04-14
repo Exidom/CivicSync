@@ -7,21 +7,60 @@
   </head>
   <body>
 
-    <!-- NAVBAR -->
     <header class="navbar">
       <div class="nav-left">
         <img src="logo.png" alt="Logo" class="nav-logo" onclick="window.location.href='/dashboardLoggedIn'">
       </div>
 
       <nav>
-        <a id="signUpEvents">Volunteer Now!</a>
+        <a href="dashboardLoggedIn">Home</a>
+        <a href="signUpEvents">Volunteer Now!</a>
         <a id="createEvent">Need Volunteers?</a>
-        <a id="aboutUs">About Us</a>
       </nav>
 
-      <!-- TODO: Display the users name and profile pic -->
-      <button id="logoutBtn" class = "logout-btn">Logout</button>
+      <!-- Profile dropdown -->
+      <div class="profile-wrapper">
+        <button class="profile-trigger">
+          <div class="avatar" id="avatar-initial"></div>
+          <span class="profile-email" id="display-email"></span>
+          <svg class="chevron" viewBox="0 0 16 16" fill="none">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
 
+        <div class="dropdown">
+          <div class="dropdown-header">
+            <div class="dh-email" id="header-email"></div>
+          </div>
+
+          <div class="section-label">User Information</div>
+
+          <a class="dropdown-item" href="userProfile">
+            <div>
+              <div class="item-title">User Profile</div>
+            </div>
+          </a>
+
+          <a class="dropdown-item" id="viewGroups">
+            <div>
+              <div class="item-title">User Groups</div>
+            </div>
+          </a>
+
+          <a class="dropdown-item" href="viewOrganization">
+            <div>
+              <div class="item-title">User Organization</div>
+            </div>
+          </a>
+
+          <div class="dropdown-divider"></div>
+
+          <a class="dropdown-item sign-out" id="logoutBtn">
+            <div class="item-title">Logout</div>
+          </a>
+        </div>
+      </div>
     </header>
 
 
@@ -33,7 +72,7 @@
         <div class="tab-vertical-buttons">
           <button class="tablinks" data-tab="Profile">Group Profile</button>
           <button class="tablinks" data-tab="Members">Group members</button>
-          <button class="tablinks" data-tab="Medals">Group members</button>
+          <button class="tablinks" data-tab="Medals">Group medals</button>
         </div>
 
         <div class="tab-vertical-content">
@@ -80,13 +119,6 @@
       
       </div>
 
-      <h2>Other links for testing: </h2>
-      <div class="center">
-        <button id="createGroups" class="grey-btn">Create Groups</button>
-        <button id="dashboardLoggedIn" class="grey-btn">Dashboard Logged In</button>
-        <button id="profileBtn" class="grey-btn">Edit Profile</button>
-      </div>
-
     </main>
 
     <!-- TODO: Add a working email to contact, and links to any social media pages we create-->
@@ -98,7 +130,7 @@
     <script type="module" src="/js/functions.js"></script>
     <script type="module">
       import { handleLogout, fetchWithAuth } from "/js/auth.js";
-      import { fetchGroup,fetchMembers} from "/js/functions.js";
+      import { fetchGroup,fetchMembersMedals} from "/js/functions.js";
 
         document.addEventListener("DOMContentLoaded", async () => {
 
@@ -111,21 +143,31 @@
         
         // Initial page load
         await fetchGroup(fetchWithAuth, localStorage.getItem('groupViewId'));
-        await fetchMembers(fetchWithAuth, localStorage.getItem('groupViewId'));
+        await fetchMembersMedals(fetchWithAuth, localStorage.getItem('groupViewId'));
 
+        const user = await fetchWithAuth("/api/userProfileData");
+        if (user && user.display_name) {
+          const userEmail = user.display_name;
+          document.getElementById("display-email").textContent = userEmail;
+          document.getElementById("header-email").textContent = userEmail;
+          document.getElementById("avatar-initial").textContent = userEmail[0].toUpperCase();
+        }
 
-        // Navigation
-        document.getElementById("profileBtn").onclick = () => window.location.href = "/userProfile";
-        document.getElementById("signUpEvents").onclick = () => window.location.href = "/signUpEvents";
-        document.getElementById("createEvent").onclick = () => window.location.href = "/createEvent";
-        document.getElementById("aboutUs").onclick = () => window.location.href = "/aboutUs";
-        document.getElementById("createGroups").onclick = () => window.location.href = "/createGroups";
-        document.getElementById("dashboardLoggedIn").onclick = () => window.location.href = "/dashboardLoggedIn";
         document.getElementById("logoutBtn").onclick = async () => {
           await handleLogout();
           window.location.href = "/dashboard";
         };
 
+        document.getElementById("createEvent").onclick = async () => {
+          sessionStorage.setItem("openTab", "CreateEvent");
+          window.location.href = "/viewOrganization";
+        }
+
+        document.getElementById("viewGroups").onclick = async () => {
+          sessionStorage.setItem("openTab", "Groups");
+          window.location.href = "/userProfile";
+        }
+        
       });
       
     </script>
