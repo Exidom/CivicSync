@@ -1157,8 +1157,6 @@ async function handlePromote(uid,gid) {
    location.reload();
 }
 
-// New helper to fetch progress (since /api/groupMedalGet doesn't return totals)
-// You might want to update your API to return progress automatically
 async function handleCancelMedal(mid, gid) {
     if(!confirm("Are you sure you want to cancel this medal?")) return;
     const res = await fetchWithAuth("/api/groupMedalCancel", "POST", { gid });
@@ -1168,7 +1166,6 @@ async function handleCancelMedal(mid, gid) {
     location.reload();
 }
 
-// HELPER: Fixed handleCreateMedal with proper await
 async function handleCreateMedal(gid, hours) {
     try {
         const res = await fetchWithAuth("/api/groupMedalCreate", "POST", { hours, gid });
@@ -1181,7 +1178,6 @@ async function handleCreateMedal(gid, hours) {
     }
 }
 
-// HELPER: Leave Group (Kick yourself)
 async function handleLeaveGroup(gid) {
     if (!confirm("Are you sure you want to leave this group?")) return;
     const user = await fetchWithAuth("/api/userProfileData");
@@ -1279,7 +1275,6 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
   const permission = permData.role === "admin";
   
 
-  // 2. Medals rendering (Exact copy of User Profile styling)
   const dataM = await fetchWithAuth("/api/groupMedalGet", "POST", { gid });
   const container = document.getElementById('medals-container');
   const today = new Date();
@@ -1295,7 +1290,6 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
       endActive=dataM[0].deadline_date;
     }
 
-    // 1. Build the HTML string for EVERYTHING first
     let fullHTML = '';
 
     if (permission && !isActive) {
@@ -1337,7 +1331,6 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
 
     container.innerHTML = [fullHTML,medalHtmlArray.join("")].join("");
 
-    // 3. NOW attach listeners to the elements that actually exist in the DOM
     const submitBtn = document.getElementById('submit-medal-btn');
     if (submitBtn) {
         submitBtn.onclick = () => {
@@ -1347,12 +1340,12 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
         };
     }
 
-    // Attach listeners for cancel buttons (since there are multiple)
+
     document.querySelectorAll('.cancel-medal-btn').forEach(btn => {
         btn.onclick = () => handleCancelMedal(btn.dataset.mid, gid);
     });
 
-    // 1. Members rendering (Same as before but with your preferred card class)
+    //Members rendering
     const memberData = await fetchWithAuth("/api/getGroupMemberData", "POST", { gid });
     const memContainer = document.getElementById('members-container');
     if (memberData && memContainer) {

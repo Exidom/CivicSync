@@ -1728,10 +1728,8 @@ app.get("/api/user-leaderboards", checkAuth, async (req, res) => {
 });
 
 app.post("/api/group-hours", checkAuth, async (req, res) => {
-  // 1. Destructure and set defaults
+
   let { targetUid, gid, startTime, endTime } = req.body;
-  
-  // 2. Handle Wildcards (Convert empty strings to null for SQL logic)
   const filterUid = (targetUid) ? targetUid : null;
   
   let filterStart = null;
