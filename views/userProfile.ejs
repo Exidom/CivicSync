@@ -99,7 +99,7 @@
             <label>Tell people a little bit about yourself:</label>
             <textarea id="userDescription" rows="3" placeholder="User description"></textarea>
 
-            <button type="submit" class="view-event-btn">Save Profile</button>
+            <button type="submit" class="default-btn">Save Profile</button>
           </form>
         </div>
 
@@ -109,38 +109,50 @@
             <h3 id="totalHours" style="padding-bottom: 30px;"></h3>
 
             <h1>Your Groups:</h1>
-            <div id="groupList" style="margin-bottom: 30px;"></div>
+            <div class="event-grid" id="groupList"></div>
 
             <h1>Join more!</h1>
-            <div class="card" style ="border-radius: 8px; border: 1px solid #086375;">
+            <div class="card" style ="border-radius: 8px; border: 1px solid #086375; width: 250px; margin: 0 auto;">
               <form id="groupInviteForm">
                 <input type="text" id="groupCode" placeholder="Enter invite code">
-                <button id="groupCodeSubmit" class="view-event-btn">Join Group</button>
+                <button type = submit class="default-btn">Join Group</button>
               </form>
             </div>
             <h1 style="margin-top: 50px;">Or, create your own!</h1>
-            <button id="createGroups" class="view-event-btn">Create Groups</button>
+            <div class="card" style ="border-radius: 8px; border: 1px solid #086375; width: 250px; margin: 0 auto;">
+              <form id="createGroupForm">
+                <input type="text" id="group_name" placeholder="Group Name" required />
+                <textarea id="group_intro_text" rows="4" placeholder="Intro Text"></textarea>
+                <button type="submit" class="default-btn">Create Group</button>
+              </form>
+            </div>
           </div>
 
           <div id="noGroupSection">
-            <div class="card" style="margin-top: 70px;">
+            <div class="card" style ="border-radius: 8px; border: 1px solid #086375; width: 250px; margin: 0 auto;">
               <form id="groupInviteForm">
                 <p>Join a group to gain access to events!</p>
                 <input type="text" id="groupCode" placeholder="Enter invite code">
-                <button id="groupCodeSubmit" class="view-event-btn">Join Group</button>
+                <button type= "submit" class="defualt-btn">Join Group</button>
               </form>
             </div>
             <h1>Or, create your own!</h1>
-            <button id="createGroups" class="view-event-btn">Create Groups</button>
+            <div class="card" style ="border-radius: 8px; border: 1px solid #086375; width: 250px; margin: 0 auto;">
+              <form id="createGroupForm">
+                <input type="text" id="group_name" placeholder="Group Name" required />
+                <textarea id="group_intro_text" rows="4" placeholder="Intro Text"></textarea>
+                <button type="submit" class="default-btn">Create Group</button>
+              </form>
+            </div>
           </div>
         </div>
 
         <div id="Organization" class="tabcontent">
           <div id="orgSection">
-            <h1>Your Organization:</h1>
-            <div class="card" style="border-radius: 8px; border: 1px solid #086375;">
-              <h3 id="orgName" style="margin-bottom: 40px;"></h3>
-              <button class="view-event-btn" id="viewOrganization">View Organization</button>
+            <h1 style="margin-bottom: 40px;">Your Organization:</h1>
+            <div class="card" style="border-radius: 8px; border: 1px solid #086375; min-height: 200px; min-width: 300px;">
+              <h3 id="orgName" style="margin-bottom: 100px;"></h3>
+              <button class="default-btn" id="viewOrganization">View Organization</button>
               <!-- TODO: Determine if we want a 'delete org' option -->
             </div>
           </div>
@@ -158,12 +170,12 @@
         <div id="Events" class="tabcontent">
           <div id="eventSection">
             <h1>Your Events:</h1>
-            <div id="eventList"></div>
+            <div class="event-grid" id="eventList"></div>
           </div>
 
           <div id="noEventSection">
             <h1>You have no current events. Sign up here!</h1>
-            <button id="signUpEvents" class="view-event-btn">Sign up for events</button>
+            <button href="signUpEvents" class="view-event-btn">Sign up for events</button>
           </div>
         </div>
 
@@ -174,7 +186,7 @@
 
         <div id="Leaderboard" class="tabcontent">
           <h1>Leaderboards:</h1>
-          <div id="leaderboardList"></div>
+          <div id="leaderboardList" class="event-grid" style="gap: 0px;"></div>
         </div>
       </div>
     </div>
@@ -191,7 +203,7 @@
 
   <script type="module">
     import { handleLogout, fetchWithAuth } from "/js/auth.js"; // your Google auth helper
-    import { initUserProfile, initCreateOrg, initJoinGroup, loadMedals, loadLeaderboards } from "/js/functions.js";
+    import { initUserProfile, initCreateOrg, initJoinGroup, submitNewGroup, loadMedals, loadLeaderboards } from "/js/functions.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
 
@@ -205,6 +217,7 @@
       await initUserProfile();
       initCreateOrg();
       initJoinGroup();
+      submitNewGroup();
       await loadMedals();
       await loadLeaderboards();
 

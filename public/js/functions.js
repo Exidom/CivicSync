@@ -1,6 +1,12 @@
 import { fetchWithAuth } from "/js/auth.js";
 import {uploadImage,deleteImage} from "/js/clin.js";
 
+// Handles the current event view on the viewOrganization page
+let showAllEvents = false;
+export function setShowAllEvents(value) {
+  showAllEvents = value;
+}
+
 // Loads the user's profile when entering a page, and updates it if submitted
 export async function initUserProfile() {
   const user = await loadUserProfile();
@@ -69,7 +75,7 @@ export async function loadUserProfile() {
     document.getElementById("totalHours").innerText = "You have " + (userHours.total || 0) + " completed service hours";
 
     if (user.hasGroup) {
-      groupSection.style.display = "inline-block";
+      groupSection.style.display = "grid";
       noGroupSection.style.display = "none";
 
       const groupHours = await fetchWithAuth("/api/group-hours");
@@ -89,7 +95,7 @@ export async function loadUserProfile() {
       user.groups.forEach(g => {
         const div = document.createElement("div");
         div.className = "card";
-        div.style = "border-radius: 8px; border: 1px solid #086375; margin-bottom: 20px;"
+        div.style = "border-radius: 8px; border: 1px solid #086375; min-width: 200px; margin: 0 auto; overflow-y: auto;"
 
         const totalHours = hoursMap[g.gid] ?? 0;
         const userContribution = userContributionMap[g.gid] ?? 0;
@@ -98,7 +104,7 @@ export async function loadUserProfile() {
           <h3>${g.group_name}</h3>
           <p>Total Group Hours: ${totalHours}</p>
           <p>Your contribution: ${userContribution}</p>
-          <button class="view-group-btn" style="margin-top: 20px;" data-gid="${g.gid}">View Group</button>
+          <button style="margin-top: 30px;" class="view-group-btn" data-gid="${g.gid}">View Group</button>
         `;
 
         groupList.appendChild(div);
@@ -114,14 +120,12 @@ export async function loadUserProfile() {
     const noOrgSection = document.getElementById("noOrgSection");
 
     if (user.hasOrg) {
-      orgSection.style.display = "inline-block";
       noOrgSection.style.display = "none";
 
       document.getElementById("orgName").innerText = user.org.org_name;
 
     } else {
       orgSection.style.display = "none";
-      noOrgSection.style.display = "inline-block";
     }
 
 
@@ -130,11 +134,10 @@ export async function loadUserProfile() {
     const eventList = document.getElementById("eventList");
 
     if (user.hasEvent) {
-      eventSection.style.display = "inline-block";
       noEventSection.style.display = "none";
 
       eventList.innerHTML = user.events.map(event => `
-      <div class="event-card" style="margin-bottom: 20px; max-width: 450px;">
+      <div class="event-card">
         <h3>${event.service_name}</h3>
         <p>${event.org_name}</p>
         <p>Start date: ${new Date(event.time_start).toLocaleString()}</p>
@@ -196,12 +199,14 @@ export function initCreateOrg() {
 
 // Handles users joining existing groups
 export function initJoinGroup() {
-  const button = document.getElementById("groupCodeSubmit");
-  if (!button) return;
+  const form = document.getElementById("groupInviteForm");
+  if (!form) return;
 
-  button.addEventListener("click", async () => {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
     const code = document.getElementById("groupCode").value.trim();
-  
+
     if (!code) {
       alert("Enter an invite code");
       return;
@@ -243,7 +248,7 @@ export async function loadMedals() {
       const percent = Math.min((progress / goal) * 100, 100);
 
       return `
-        <div class="card" style="margin-bottom: 20px;">
+        <div class="card" style="border-radius: 8px; border: 1px solid #086375; max-width: 600px; margin: 0 auto 20px auto;">
           <h3>${m.group_name}</h3>
 
           <p><strong>Goal:</strong> ${goal} hours</p>
@@ -293,7 +298,7 @@ export async function loadLeaderboards() {
 
     // render each group leaderboard
     container.innerHTML = Object.values(grouped).map(group => `
-      <div class="card" style="margin-bottom: 20px;">
+      <div class="card" style="border-radius: 8px; border: 1px solid #086375; max-height: 250px; overflow-y: auto;">
         <h3>${group.group_name}</h3>
 
         ${group.members.map((user, index) => {
@@ -304,7 +309,7 @@ export async function loadLeaderboards() {
 
           return `
             <p>
-              ${medal} #${index + 1} ${user.display_name}
+              ${medal} #${index + 1}: ${user.display_name}
               — ${user.total_hours} hours
             </p>
           `;
@@ -372,48 +377,47 @@ function createEventSubmit() {
 }
 
 // Combines create group page functions
-export function initCreateGroups() {
-  loadCreateGroup();
-  submitNewGroup();
-  initJoinGroup(); 
-}
+// export function initCreateGroups() {
+//   submitNewGroup();
+//   initJoinGroup(); 
+// }
 
 // Displays a users groups if they are a part of any:
-async function loadCreateGroup() {
-  try {
-    const data = await fetchWithAuth("/api/createGroupData");
+// async function loadCreateGroup() {
+//   try {
+//     const data = await fetchWithAuth("/api/createGroupData");
 
-    const hasGroupSection = document.getElementById("hasGroupSection");
-    const noGroupSection = document.getElementById("noGroupSection");
-    const groupList = document.getElementById("groupList");
+//     const hasGroupSection = document.getElementById("hasGroupSection");
+//     const noGroupSection = document.getElementById("noGroupSection");
+//     const groupList = document.getElementById("groupList");
 
-    if (data.hasGroup) {
-      hasGroupSection.style.display = "block";
-      noGroupSection.style.display = "block"; 
+//     if (data.hasGroup) {
+//       hasGroupSection.style.display = "block";
+//       noGroupSection.style.display = "block"; 
 
-      groupList.innerHTML = "";
+//       groupList.innerHTML = "";
 
-      data.groups.forEach(g => {
-        const div = document.createElement("div");
-        div.className = "card";
+//       data.groups.forEach(g => {
+//         const div = document.createElement("div");
+//         div.className = "card";
 
-        div.innerHTML = `<h2>${g.group_name}</h2>`;
+//         div.innerHTML = `<h2>${g.group_name}</h2>`;
 
-        groupList.appendChild(div);
-      });
+//         groupList.appendChild(div);
+//       });
 
-    } else {
-      hasGroupSection.style.display = "none";
-      noGroupSection.style.display = "block";
-    }
+//     } else {
+//       hasGroupSection.style.display = "none";
+//       noGroupSection.style.display = "block";
+//     }
 
-  } catch (err) {
-    console.error("Failed to load create groups page", err);
-  }
-}
+//   } catch (err) {
+//     console.error("Failed to load create groups page", err);
+//   }
+// }
 
 // Creates New Groups  
-function submitNewGroup() {
+export function submitNewGroup() {
   const form = document.getElementById("createGroupForm");
   if (!form) return;
 
@@ -526,7 +530,7 @@ export async function fetchEvents(fetchWithAuth) {
 
   const now = new Date();
   container.innerHTML = events
-    .filter(event => new Date(event.time_start) > now)
+    .filter(event => { if (showAllEvents) return true; return new Date(event.time_start) > now; })
     .map(event => `
       <div class="event-card" data-sid="${event.sid}">
         <div class="event-view">
@@ -537,7 +541,7 @@ export async function fetchEvents(fetchWithAuth) {
           <p>${event.visibility_public ? "Public" : "Private"} &nbsp;|&nbsp; Applications: ${event.applications_open ? "Open" : "Closed"}</p>
           <button class="manage-event-btn" data-sid="${event.sid}">Manage Event</button>
           <button class="edit-event-btn" data-sid="${event.sid}">Edit</button>
-          <button class="delete-event-btn" data-sid="${event.sid}">Delete</button>
+          <button class="delete-event-btn" data-sid="${event.sid}" ${event.has_completed_hours ? "disabled title='Cannot delete: users have completed hours'" : ""}>Delete</button>
         </div>
 
       <div class="event-edit" style="display:none;">
@@ -639,7 +643,7 @@ export function initEventActions(fetchWithAuth) {
 
     // Delete
     if (e.target.classList.contains("delete-event-btn")) {
-      if (!confirm("Are you sure you want to delete this event? \n\nWarning: Deletion will remove any credited hours for users and groups. \nSelect edit to close applications or make the event private.")) return;
+      if (!confirm("Are you sure you want to delete this event?")) return;
 
       try {
         const res = await fetchWithAuth(`/api/services/${sid}`, "DELETE");
@@ -1147,21 +1151,40 @@ async function uploadToSlotGroup(slotNum,gid){
 
 
 
-async function handleKick(uid,gid) {
-    await fetchWithAuth("/api/groupKick", "POST",{uid,gid});
-    location.reload();
+window.handleKick = async function(targetUid,gid) {
+  try {
+  const res = await fetchWithAuth("/api/groupKick", "PUT", {
+    targetUid,
+    gid
+  });
+
+  if (res.error) {
+    alert(res.error);
+    return;
+  }
+
+  await fetchMembersMedals(fetchWithAuth, gid);
+
+  } catch (err) {
+    console.error("Kick failed:", err);
+  }
 }
 
-async function handlePromote(uid,gid) {
-   await fetchWithAuth("/api/groupPromote", "POST",{uid,gid});
+window.handlePromote = async function (targetUid,gid) {
+   const res = await fetchWithAuth("/api/groupPromote", "PUT",{targetUid,gid});
+   if (res.error) {
+    alert(res.error);
+    return;
+   }
    location.reload();
 }
 
-async function handleCancelMedal(mid, gid) {
+window.handleCancelMedal = async function (mid, gid) {
     if(!confirm("Are you sure you want to cancel this medal?")) return;
-    const res = await fetchWithAuth("/api/groupMedalCancel", "POST", { gid });
-    if (res.status == 403){
-      alert("already expires today");
+    const res = await fetchWithAuth("/api/groupMedalCancel", "POST", { gid, mid });
+    if (res.error) {
+      alert(res.error);
+      return;
     }
     location.reload();
 }
@@ -1178,9 +1201,10 @@ async function handleCreateMedal(gid, hours) {
     }
 }
 
-async function handleLeaveGroup(gid) {
+window.handleLeaveGroup = async function (gid) {
     if (!confirm("Are you sure you want to leave this group?")) return;
     const user = await fetchWithAuth("/api/userProfileData");
+    console.log("Leave: ", user.uid);
     await fetchWithAuth("/api/groupKick", "PUT", { targetUid: user.uid, gid });
     window.location.href = "/userProfile";
 }
@@ -1283,7 +1307,7 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
   let endActive = '';
   
   if (dataM && container) {
-    const isActive = dataM[0] && (new Date(dataM[0].deadline_date)).getTime >= today.getTime;
+    const isActive = dataM[0] && (new Date(dataM[0].deadline_date)).getTime() >= today.getTime();
 
     if(isActive){
       startActive=dataM[0].created_date;
@@ -1366,6 +1390,7 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
                   <button onclick="handleKick('${m.uid}', '${gid}')">Kick</button>
                   <button onclick="handlePromote('${m.uid}', '${gid}')">Promote</button>
               ` : ''}
+              </div>
             `;
         });
         const memberHtmlArray = await Promise.all(memberHtmlPromises);

@@ -743,7 +743,8 @@ app.get("/api/services", checkAuth, async (req, res) => {
     const oid = orgData.rows[0].oid;
 
     const result = await db.query(
-      "SELECT * FROM services WHERE oid = $1 ORDER BY time_start ASC",
+      `SELECT *, EXISTS (SELECT 1 FROM participation p WHERE p.sid = s.sid AND p.status = 'completed') AS has_completed_hours
+      FROM services s WHERE oid = $1 ORDER BY time_start ASC`,
       [oid]
     );
 
@@ -781,7 +782,6 @@ app.put("/api/services/:sid", checkAuth, async (req, res) => {
 });
 
 // Deletes Current Events
-// TODO: remove user_medals for removed events, or make a new function to update medals accordingly
 app.delete("/api/services/:sid", checkAuth, async (req, res) => {
   const { sid } = req.params;
   const uid = req.user.uid;
@@ -1413,10 +1413,11 @@ app.put("/api/groupKick", checkAuth, async (req, res) => {
 
     const groupData2 = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,targetUid]);//sanatize?
     if (!groupData2.rows[0]) return res.status(404).json({ error: "found no user" });
-    if (groupData.rows[0].admin) return res.status(404).json({ error: "found user admin permission" });
+    // This line prevented anyone from leaving a group:
+    // if (groupData.rows[0].admin) return res.status(404).json({ error: "found user admin permission" });
 
     const result = await db.query(
-      "UPDATE membership SET admin=TRUE WHERE gid=$1 and uid = $2 RETURNING *",
+      "DELETE FROM membership WHERE gid=$1 and uid = $2 RETURNING *",
       [gid, targetUid]
     );
 
@@ -1480,14 +1481,14 @@ app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
 
 app.post("/api/groupMedalCancel", checkAuth, async (req, res) => {
   try {
-    const {gid} = req.body;
+    const {gid, mid} = req.body;
     const uid = req.user.uid;
   
     const groupData = await db.query("SELECT admin FROM membership WHERE gid = $1 AND uid = $2", [gid,uid]);//sanatize?
     if (!groupData.rows[0]) return res.status(404).json({ error: "found no permission" });
     if (!groupData.rows[0].admin) return res.status(404).json({ error: "found no permission" });
 
-    const medalData = await db.query("SELECT mid,deadline_date,complete FROM medals WHERE gid = $1 ORDER BY deadline_date DESC", [gid]);
+    const medalData = await db.query("SELECT mid,deadline_date,complete FROM medals WHERE mid = $1 AND gid = $2", [mid, gid]);
     if (!medalData.rows[0] ){
       return res.status(404).json({ error: "no active medal" });
     }
@@ -1503,10 +1504,22 @@ app.post("/api/groupMedalCancel", checkAuth, async (req, res) => {
       return res.status(404).json({ error: "medal already finished" });
     }
 
+    // const yesterday = new Date(today);
+    // yesterday.setDate(today.getDate() - 1);
+    // const result = await db.query(
+    //     `UPDATE medals SET deadline_date = $1 WHERE mid = $2 RETURNING *`,
+    //     [yesterday,mid]
+    //   );
+
+    await db.query(
+      `DELETE FROM user_medals WHERE mid = $1`,
+      [mid]
+    );
+
     const result = await db.query(
-        `UPDATE medals SET deadline_date = $1 WHERE mid = $2 RETURNING *`,
-        [today,medalData.rows[0].mid]
-      );
+      `DELETE FROM medals WHERE mid = $1 RETURNING *`,
+      [mid]
+    );
       res.json(result.rows[0]);
 
   } catch (err) {
@@ -1588,8 +1601,7 @@ app.get("/api/userMedals", checkAuth, async (req, res) => {
 // AND marks the medal as complete if the goal was reached.
 // TODO: determine how streaks will be updated
 app.put("/api/participation/complete", checkAuth, async (req, res) => {
-  const { sid, hours } = req.body;
-  const uid = req.user.uid;
+  const { uid, sid, hours } = req.body;
 
   try {
     await db.query(
@@ -1615,8 +1627,7 @@ app.put("/api/participation/complete", checkAuth, async (req, res) => {
 
     // Finds active medals for this group
     const medals = await db.query(
-      `SELECT * FROM medals
-      WHERE gid = $1 AND complete = false`,
+      `SELECT * FROM medals WHERE gid = $1`,
       [gid]
     );
 
@@ -1686,10 +1697,10 @@ app.get("/api/group-hours", checkAuth, async (req, res) => {
   try{
     const result = await db.query(
       `SELECT g.gid, COALESCE(SUM(p.hours), 0) AS total,
-      COALESCE(SUM(CASE WHEN p.uid = $1 THEN p.hours ELSE 0 END), 0) AS user_contribution
+      COALESCE(SUM(p.hours) FILTER (WHERE p.uid = $1), 0) AS user_contribution
       FROM groups g JOIN membership m ON g.gid = m.gid
       LEFT JOIN participation p ON p.gid = g.gid AND p.status = 'completed'
-      WHERE m.uid = $1 GROUP BY g.gid`,
+      WHERE m.uid = $1 GROUP BY g.gid;`,
       [uid]
     );
 
@@ -1715,7 +1726,6 @@ app.get("/api/user-leaderboards", checkAuth, async (req, res) => {
       AND p.gid = m.gid AND p.status = 'completed'
       WHERE m.uid = $1 
       GROUP BY m.gid, g.group_name, u.uid, u.display_name
-      HAVING COALESCE(SUM(p.hours), 0) > 0
       ORDER BY m.gid, total_hours DESC`,
       [uid]
     );
