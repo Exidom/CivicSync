@@ -791,8 +791,16 @@ app.delete("/api/services/:sid", checkAuth, async (req, res) => {
     if (!orgData.rows[0]) return res.status(403).json({ error: "No organization found" });
     const oid = orgData.rows[0].oid;
 
+    // Stores gid for medal updates
+    const gidResult = await db.query(
+      `SELECT DISTINCT gid FROM participation WHERE sid = $1`,
+      [sid]
+    );
+
+    const gids = gidResult.rows.map(r => r.gid);
+
     // Removes any participants before deleting to avoid errors
-    await db.query ("DELETE FROM participation WHERE sid = $1 RETURNING *", [sid]);
+    await db.query ("DELETE FROM participation WHERE sid = $1", [sid]);
 
     const result = await db.query(
       "DELETE FROM services WHERE sid=$1 AND oid=$2 RETURNING *",
@@ -800,6 +808,12 @@ app.delete("/api/services/:sid", checkAuth, async (req, res) => {
     );
 
     if (!result.rows[0]) return res.status(404).json({ error: "Event not found or unauthorized" });
+
+    // Recompute medals after event deletion, if we change the events to always be allowed to be disabled
+    for (const gid of gids) {
+      await recomputeUserMedalsForGroup(gid);
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error("Error deleting service:", err);
@@ -1430,6 +1444,59 @@ app.put("/api/groupKick", checkAuth, async (req, res) => {
   }
 });
 
+// Recomputes medals when needed
+async function recomputeUserMedalsForGroup(gid) {
+
+  const medals = await db.query(
+    `SELECT * FROM medals WHERE gid = $1`,
+    [gid]
+  );
+
+  for (const medal of medals.rows) {
+
+    // Compute contributions per user 
+    const contributions = await db.query(
+      `SELECT uid, COALESCE(SUM(hours), 0) AS total
+      FROM participation
+      WHERE gid = $1
+        AND status = 'completed'
+        AND credited_at BETWEEN $2 AND $3
+      GROUP BY uid`,
+      [gid, medal.created_date, medal.deadline_date]
+    );
+
+    for (const row of contributions.rows) {
+      await db.query(
+        `INSERT INTO user_medals (uid, mid, hours_contributed)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (uid, mid)
+        DO UPDATE SET hours_contributed = $3`,
+        [row.uid, medal.mid, row.total]
+      );
+    }
+
+    // Compute group total
+    const total = await db.query(
+      `SELECT COALESCE(SUM(hours), 0) AS total
+      FROM participation
+      WHERE gid = $1
+        AND status = 'completed'
+        AND credited_at BETWEEN $2 AND $3`,
+      [gid, medal.created_date, medal.deadline_date]
+    );
+
+    const groupTotal = total.rows[0].total;
+
+    // 3. Update completion status BOTH ways
+    await db.query(
+      `UPDATE medals
+      SET complete = $1
+      WHERE mid = $2`,
+      [groupTotal >= medal.hours, medal.mid]
+    );
+  }
+}
+
 app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
   try {
     const {hours, gid} = req.body;
@@ -1471,6 +1538,9 @@ app.post("/api/groupMedalCreate", checkAuth, async (req, res) => {
         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
         [gid,hours,false,streak,today,monthFuture]
       );
+
+      await recomputeUserMedalsForGroup(gid);
+
       res.json(result.rows[0]);
 
   } catch (err) {
@@ -1606,10 +1676,10 @@ app.put("/api/participation/complete", checkAuth, async (req, res) => {
   try {
     await db.query(
       `UPDATE participation
-       SET status = 'completed',
-           hours = $1,
-           credited_at = NOW()
-       WHERE uid = $2 AND sid = $3`,
+      SET status = 'completed',
+        hours = $1,
+        credited_at = NOW()
+      WHERE uid = $2 AND sid = $3`,
       [hours, uid, sid]
     );
 
@@ -1625,44 +1695,8 @@ app.put("/api/participation/complete", checkAuth, async (req, res) => {
 
     const gid = participationRow.rows[0].gid;
 
-    // Finds active medals for this group
-    const medals = await db.query(
-      `SELECT * FROM medals WHERE gid = $1`,
-      [gid]
-    );
-
-    for (const medal of medals.rows) {
-
-      // Updates the users contribution
-      await db.query(
-        `INSERT INTO user_medals (uid, mid, hours_contributed)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (uid, mid)
-        DO UPDATE SET hours_contributed = user_medals.hours_contributed + $3`,
-        [uid, medal.mid, hours]
-      );
-
-      // Recalculates the group total
-      const total = await db.query(
-        `SELECT COALESCE(SUM(hours), 0) AS total
-        FROM participation
-        WHERE gid = $1
-          AND status = 'completed'
-          AND credited_at BETWEEN $2 AND $3`,
-        [medal.gid, medal.created_date, medal.deadline_date]
-      );
-
-      const groupTotal = total.rows[0].total;
-
-      // Checks if completed
-      if (groupTotal >= medal.hours) {
-        await db.query(
-          `UPDATE medals SET complete = true WHERE mid = $1`,
-          [medal.mid]
-        );
-      }
-
-    }
+    // Updates the users contribution
+    await recomputeUserMedalsForGroup(gid);
 
     res.json({ success: true });
   } catch (err) {
