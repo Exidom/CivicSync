@@ -143,7 +143,11 @@
           </div>
 
           <div id="Events" class="tabcontent">
-            <h3 id="upcomingEventsTitle">Upcoming Events</h3>
+            <h3 id="upcomingEventsTitle">Events:</h3>
+            <select id="eventFilter">
+              <option value="current">Current Events</option>
+              <option value="all">All Events</option>
+            </select>
             <div id="events-container" class="event-grid">
               <div class="event-card placeholder"><p>No events yet.</p></div>
             </div>
@@ -190,7 +194,7 @@
     <script type="module" src="/js/functions.js"></script>
     <script type="module">
       import { handleLogout, fetchWithAuth } from "/js/auth.js";
-      import { fetchOrg, fetchEvents, initEventActions, initEditOrg, fetchApplications, initApplicationActions } from "/js/functions.js";
+      import { fetchOrg, fetchEvents, setShowAllEvents, initEventActions, initEditOrg, fetchApplications, initApplicationActions } from "/js/functions.js";
 
       document.addEventListener("DOMContentLoaded", async () => {
 
@@ -208,6 +212,16 @@
         initApplicationActions(fetchWithAuth);
         initEventActions(fetchWithAuth);
         initEditOrg(fetchWithAuth);
+
+        // Current event display toggle:
+        const filter = document.getElementById("eventFilter");
+
+        filter.addEventListener("change", async (e) => {
+          const showAll = e.target.value === "all";
+
+          setShowAllEvents(showAll);
+          await fetchEvents(fetchWithAuth);
+        });
 
         // Create Org form
         document.getElementById("createOrgForm").addEventListener("submit", async (e) => {
