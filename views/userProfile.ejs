@@ -130,17 +130,17 @@
 
           <div id="noGroupSection">
             <div class="card" style ="border-radius: 8px; border: 1px solid #086375; width: 250px; margin: 0 auto;">
-              <form id="groupInviteForm">
+              <form id="newGroupInviteForm">
                 <p>Join a group to gain access to events!</p>
-                <input type="text" id="groupCode" placeholder="Enter invite code">
+                <input type="text" id="new_group_code" placeholder="Enter invite code">
                 <button type= "submit" class="defualt-btn">Join Group</button>
               </form>
             </div>
             <h1>Or, create your own!</h1>
             <div class="card" style ="border-radius: 8px; border: 1px solid #086375; width: 250px; margin: 0 auto;">
-              <form id="createGroupForm">
-                <input type="text" id="group_name" placeholder="Group Name" required />
-                <textarea id="group_intro_text" rows="4" placeholder="Intro Text"></textarea>
+              <form id="newCreateGroupForm">
+                <input type="text" id="new_group_name" placeholder="Group Name" required />
+                <textarea id="new_group_intro_text" rows="4" placeholder="Intro Text"></textarea>
                 <button type="submit" class="default-btn">Create Group</button>
               </form>
             </div>
@@ -203,7 +203,7 @@
 
   <script type="module">
     import { handleLogout, fetchWithAuth } from "/js/auth.js"; // your Google auth helper
-    import { initUserProfile, initCreateOrg, initJoinGroup, submitNewGroup, loadMedals, loadLeaderboards } from "/js/functions.js";
+    import { initUserProfile, initCreateOrg, initJoinGroup, initJoinGroupNEW, submitNewGroup, NEWsubmitNewGroup, loadMedals, loadLeaderboards } from "/js/functions.js";
 
     document.addEventListener("DOMContentLoaded", async () => {
 
@@ -217,7 +217,9 @@
       await initUserProfile();
       initCreateOrg();
       initJoinGroup();
+      initJoinGroupNEW();
       submitNewGroup();
+      NEWsubmitNewGroup();
       await loadMedals();
       await loadLeaderboards();
 

@@ -227,6 +227,36 @@ export function initJoinGroup() {
   });
 }
 
+// Handles NEW users joining existing groups
+export function initJoinGroupNEW() {
+  const form = document.getElementById("newGroupInviteForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const code = document.getElementById("new_group_code").value.trim();
+
+    if (!code) {
+      alert("Enter an invite code");
+      return;
+    }
+
+    try {
+      await fetchWithAuth("/api/join-group", "POST", {
+        invite_code: code
+      });
+
+      alert("Joined group!");
+      location.reload();
+
+    } catch (err) {
+      console.error("INIT JOIN GROUP ERROR", err)
+      alert("Invalid code, or user already in this group");
+    }
+  });
+}
+
 // Loads the active medals belonging to a user's groups
 export async function loadMedals() {
   try {
@@ -442,6 +472,34 @@ export function submitNewGroup() {
     }
   });
 }
+
+// Creates New Groups FOR NEW USERS 
+export function NEWsubmitNewGroup() {
+  const form = document.getElementById("newCreateGroupForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const groupData = {
+      group_name: document.getElementById("new_group_name").value,
+      intro_text: document.getElementById("new_group_intro_text").value
+    };
+
+    try {
+      // Use fetchWithAuth to get Firebase token
+      await fetchWithAuth("/api/groups", "POST", groupData);
+
+      alert("Group Created!");
+      location.reload();
+
+    } catch (err) {
+      console.error("SUBMIT NEW GROUP ERROR ", err);
+      alert("Failed to create group")
+    }
+  });
+}
+
 
 // Loads organization information
 export async function loadOrganization() {
