@@ -290,9 +290,16 @@
           window.location.href = "/dashboard";
         };
 
-        document.getElementById("createEvent").onclick = async () => {
-          sessionStorage.setItem("openTab", "CreateEvent");
+        if (!user.hasOrg) {
+          document.getElementById("createEvent").onclick = async () => {
           window.location.href = "/viewOrganization";
+          }
+        }
+        else {
+          document.getElementById("createEvent").onclick = async () => {
+            sessionStorage.setItem("openTab", "CreateEvent");
+            window.location.href = "/viewOrganization";
+          }
         }
 
         document.getElementById("viewGroups").onclick = async () => {
