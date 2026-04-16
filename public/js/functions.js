@@ -1505,8 +1505,8 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
     if (memberData && memContainer) {
         memContainer.innerHTML = '';
         const memberHtmlPromises = memberData.map(async(m) => {
-            const totalH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:startActive,endTime:endActive})).total;
-            const currentH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:null,endTime:null})).total;
+            const currentH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:startActive,endTime:endActive})).total;
+            const totalH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:null,endTime:null})).total;
 
             return `
               <div class="card" style="margin-bottom: 20px; position: relative;">
