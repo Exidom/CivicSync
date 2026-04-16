@@ -353,58 +353,58 @@ export async function loadLeaderboards() {
 }
 
 // Combines create event page functions
-export function initCreateEvent() {
-  loadCreateEvent();
-  createEventSubmit();
-}
+// export function initCreateEvent() {
+//   loadCreateEvent();
+//   createEventSubmit();
+// }
 
 // Determines the create event page layout depending on org ownership
-async function loadCreateEvent() {
-  try {
-    const data = await fetchWithAuth("/api/createEventData");
+// async function loadCreateEvent() {
+//   try {
+//     const data = await fetchWithAuth("/api/createEventData");
 
-    const formSection = document.getElementById("eventFormSection");
-    const noOrgSection = document.getElementById("noOrgEventSection");
+//     const formSection = document.getElementById("eventFormSection");
+//     const noOrgSection = document.getElementById("noOrgEventSection");
 
-    if (data.hasOrg) {
-      formSection.style.display = "block";
-      noOrgSection.style.display = "none";
-    } else {
-      formSection.style.display = "none";
-      noOrgSection.style.display = "block";
-    }
+//     if (data.hasOrg) {
+//       formSection.style.display = "block";
+//       noOrgSection.style.display = "none";
+//     } else {
+//       formSection.style.display = "none";
+//       noOrgSection.style.display = "block";
+//     }
 
-  } catch (err) {
-    console.error("Failed to load create event page", err);
-  }
-}
+//   } catch (err) {
+//     console.error("Failed to load create event page", err);
+//   }
+// }
 
 // Handles the submission of new events
-function createEventSubmit() {
-  const form = document.getElementById("createEventForm");
-  if (!form) return;
+// function createEventSubmit() {
+//   const form = document.getElementById("createEventForm");
+//   if (!form) return;
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+//   form.addEventListener("submit", async (e) => {
+//     e.preventDefault();
 
-    const eventData = {
-      event_name: document.getElementById("event_name").value,
-      event_date: document.getElementById("event_date").value,
-      event_description: document.getElementById("event_description").value
-    };
+//     const eventData = {
+//       event_name: document.getElementById("event_name").value,
+//       event_date: document.getElementById("event_date").value,
+//       event_description: document.getElementById("event_description").value
+//     };
 
-    try {
-      await fetchWithAuth("/api/events", "POST", eventData);
+//     try {
+//       await fetchWithAuth("/api/events", "POST", eventData);
 
-      alert("Event Created!");
-      form.reset();
+//       alert("Event Created!");
+//       form.reset();
 
-    } catch (err) {
-      console.error("SUBMIT EVENT ERROR ", err)
-      alert("Failed to create event");
-    }
-  });
-}
+//     } catch (err) {
+//       console.error("SUBMIT EVENT ERROR ", err)
+//       alert("Failed to create event");
+//     }
+//   });
+// }
 
 // Combines create group page functions
 // export function initCreateGroups() {
@@ -889,7 +889,6 @@ export async function initSignUpEvents() {
 
     const now = new Date();
 
-    // let allEvents = events;
     let currentSort = "earliest";
 
     function renderEvents() {
