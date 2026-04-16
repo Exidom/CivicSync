@@ -78,14 +78,14 @@ export async function loadUserProfile() {
       groupSection.style.display = "grid";
       noGroupSection.style.display = "none";
 
-      const groupHours = await fetchWithAuth("/api/group-hours");
+      const groupHours = await fetchWithAuth("/api/group-hours");//todo, make real (remove if 0?)
 
       const hoursMap = {};
       const userContributionMap = {};
       if (groupHours && Array.isArray(groupHours)) {
         groupHours.forEach(g => {
           hoursMap[g.gid] = g.total;
-          userContributionMap[g.gid] = g.user_contribution;
+          userContributionMap[g.gid] = g.user_contribution;//todo, make real (remove if 0?)
         });
       }
 

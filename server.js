@@ -224,7 +224,8 @@ app.post("/delete-image", checkAuth, async (req, res) => {
     if (!pid.startsWith(`user_uploads/${req.user.uid}`)) {
       return res.status(403).json({ error: "Unauthorized" });
     }
-    
+
+
     await cloudinary.uploader.destroy(pid);
 
     let tableType = "user";
