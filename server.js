@@ -201,6 +201,12 @@ app.post("/delete-image", checkAuth, async (req, res) => {
       org: "orgs"
     };
 
+    const targets = {
+      user: "uid",
+      org: "founder_id"
+    };
+
+
     if(group!=null){
       //todo check if user is admin
       const query = `
@@ -218,7 +224,8 @@ app.post("/delete-image", checkAuth, async (req, res) => {
     if (!pid.startsWith(`user_uploads/${req.user.uid}`)) {
       return res.status(403).json({ error: "Unauthorized" });
     }
-    
+
+
     await cloudinary.uploader.destroy(pid);
 
     let tableType = "user";
@@ -234,15 +241,18 @@ app.post("/delete-image", checkAuth, async (req, res) => {
       return res.status(400).json({ error: "spot incorrect" });
     }
 
+
     const table = tables[tableType];
+    const target = targets[tableType];
 
     const query = `
       UPDATE ${table}
       SET ${iLinkCol} = $1,
           ${pidCol} = $2
-      WHERE uid = $3 AND
+      WHERE ${target} = $3 AND
       ${pidCol} = $4
     `;
+
     await db.query(query, [null, null, req.user.uid,pid]);
     res.json({ 
       success: true 
@@ -288,6 +298,11 @@ app.post("/set-ilink", checkAuth, async (req, res) => {
       org: "orgs"
   };
 
+  const targets = {
+      user: "uid",
+      org: "founder_id"
+  };
+
 
 
   try {
@@ -322,13 +337,17 @@ app.post("/set-ilink", checkAuth, async (req, res) => {
     }
 
     const table = tables[tableType];
+    const target = targets[tableType];
+
+
 
 
     const query1 = `
       SELECT ${pidCol}
       FROM ${table}
-      WHERE uid = $1
+      WHERE ${target} = $1
     `;
+
 
     prevRow = await db.query(query1, [uid]);
     prev = prevRow.rows[0][pidCol];
@@ -342,7 +361,7 @@ app.post("/set-ilink", checkAuth, async (req, res) => {
       UPDATE ${table}
       SET ${iLinkCol} = $1,
           ${pidCol} = $2
-      WHERE uid = $3
+      WHERE ${target} = $3
     `;
 
     await db.query(query, [iLink, pid, uid]);
@@ -639,7 +658,7 @@ app.get("/api/userProfileData", checkAuth, async (req, res) => {
     
     let events = [];
     // Only people in groups can sign up for events
-    if (groups.length > 0) {
+    
       const eventData = await db.query(
         `SELECT s.*, o.org_name, p.status 
         FROM services s 
@@ -650,7 +669,6 @@ app.get("/api/userProfileData", checkAuth, async (req, res) => {
         [uid]
       );
       events = eventData.rows;
-    }
 
     res.json({
       ...user,
@@ -675,7 +693,7 @@ app.get("/api/getOrganizationData", checkAuth, async (req, res) => {
 
     // Query orgs where this user is the founder
     const orgData = await db.query(
-      "SELECT org_name, intro_text FROM orgs WHERE founder_id = $1",
+      "SELECT * FROM orgs WHERE founder_id = $1",
       [uid]
     );
 

@@ -78,14 +78,14 @@ export async function loadUserProfile() {
       groupSection.style.display = "grid";
       noGroupSection.style.display = "none";
 
-      const groupHours = await fetchWithAuth("/api/group-hours");
+      const groupHours = await fetchWithAuth("/api/group-hours");//todo, make real (remove if 0?)
 
       const hoursMap = {};
       const userContributionMap = {};
       if (groupHours && Array.isArray(groupHours)) {
         groupHours.forEach(g => {
           hoursMap[g.gid] = g.total;
-          userContributionMap[g.gid] = g.user_contribution;
+          userContributionMap[g.gid] = g.user_contribution;//todo, make real (remove if 0?)
         });
       }
 
@@ -564,6 +564,48 @@ export async function fetchOrg(fetchWithAuth) {
     document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
       btn.disabled = false;
     });
+
+    //image
+    let i=1;
+      const slot = document.getElementById(`slot${i}`);
+      const img = document.getElementById(`image${i}`);
+
+      const link = data[`ilink${i}`];
+      const pid = data[`pid${i}`];
+
+      if(link){
+
+          img.src = link;
+          img.style.display="block";
+
+              const del = document.createElement("button");
+              del.innerText="Delete";
+
+              del.onclick = async ()=>{
+                  await deleteImage(pid,i+3);
+
+                  location.reload();
+              };
+
+              slot.appendChild(del);
+
+      }
+      else{
+
+          img.style.display="none";
+
+
+              const uploadBtn=document.createElement("button");
+              uploadBtn.innerText="Upload Image";
+
+              uploadBtn.onclick = ()=>uploadImageUser(i+3);
+
+              slot.appendChild(uploadBtn);
+      }
+
+
+
+
     initEditOrg(fetchWithAuth); // only init when org exists
   } else {
     orgNameEl.textContent = "";
@@ -1178,6 +1220,36 @@ export function initEditGroup(fetchWithAuth,gid) {
 }
 
 
+async function uploadImageUser(slotNum){
+
+    const input=document.createElement("input");
+    input.type="file";
+    input.accept="image/*";
+
+    input.onchange = async ()=>{
+
+        const file=input.files[0];
+
+        if(!file) return;
+
+        try{
+
+            const result = await uploadImage(file,slotNum);
+            location.reload();
+
+        }catch(err){
+
+            console.error(err);
+            alert("Upload failed");
+
+        }
+
+    };
+
+    input.click();
+}
+
+
 async function uploadToSlotGroup(slotNum,gid){
 
     const input=document.createElement("input");
@@ -1433,8 +1505,8 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
     if (memberData && memContainer) {
         memContainer.innerHTML = '';
         const memberHtmlPromises = memberData.map(async(m) => {
-            const totalH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:startActive,endTime:endActive})).total;
-            const currentH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:null,endTime:null})).total;
+            const currentH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:startActive,endTime:endActive})).total;
+            const totalH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:null,endTime:null})).total;
 
             return `
               <div class="card" style="margin-bottom: 20px; position: relative;">

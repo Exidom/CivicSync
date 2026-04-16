@@ -98,7 +98,9 @@
             <h1 id="org-name">Organization Name</h1>
             <section class="card large-card">
               <div class="org-layout">
-                <div id="org-image" class="org-image"></div>
+                <div id="slot1" class="slot">
+                    <img id="image1"/>
+                </div>
                 <div id="org-description" class="org-text">
                   <p>This is the organization's bio, contact info, and links.</p>
                 </div>
@@ -211,7 +213,7 @@
         await fetchApplications(fetchWithAuth);
         initApplicationActions(fetchWithAuth);
         initEventActions(fetchWithAuth);
-        initEditOrg(fetchWithAuth);
+        //initEditOrg(fetchWithAuth); in fetch org
 
         // Current event display toggle:
         const filter = document.getElementById("eventFilter");
