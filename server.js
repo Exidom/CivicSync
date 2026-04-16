@@ -658,7 +658,7 @@ app.get("/api/userProfileData", checkAuth, async (req, res) => {
     
     let events = [];
     // Only people in groups can sign up for events
-    if (groups.length > 0) {
+    
       const eventData = await db.query(
         `SELECT s.*, o.org_name, p.status 
         FROM services s 
@@ -669,7 +669,6 @@ app.get("/api/userProfileData", checkAuth, async (req, res) => {
         [uid]
       );
       events = eventData.rows;
-    }
 
     res.json({
       ...user,
