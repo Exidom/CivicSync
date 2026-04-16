@@ -515,35 +515,35 @@ app.post("/api/orgs", checkAuth, async (req, res) => {
 
 
 // For Event Creation
-app.post("/api/events", checkAuth, async (req, res) => {
-  try {
-    const { event_name, event_date, event_descripton } = req.body;
-    const uid = req.user.uid;
+// app.post("/api/events", checkAuth, async (req, res) => {
+//   try {
+//     const { event_name, event_date, event_descripton } = req.body;
+//     const uid = req.user.uid;
 
-    // Ensure only orgs create events
-    const orgData = await db.query(
-      "SELECT * FROM orgs WHERE founder_id = $1",
-      [uid]
-    );
+//     // Ensure only orgs create events
+//     const orgData = await db.query(
+//       "SELECT * FROM orgs WHERE founder_id = $1",
+//       [uid]
+//     );
 
-    if (orgData.rows.length === 0) {
-      return res.status(403).json({ error: "You must own an organization to create events" });
-    }
+//     if (orgData.rows.length === 0) {
+//       return res.status(403).json({ error: "You must own an organization to create events" });
+//     }
 
-    const org = orgData.rows[0];
+//     const org = orgData.rows[0];
 
-    const result = await db.query(
-      "INSERT INTO services (service_name, oid, info_text, date) VALUES ($1, $2, $3, $4) RETURNING *",
-      [event_name, org.oid, event_descripton, event_date]
-    );
+//     const result = await db.query(
+//       "INSERT INTO services (service_name, oid, info_text, date) VALUES ($1, $2, $3, $4) RETURNING *",
+//       [event_name, org.oid, event_descripton, event_date]
+//     );
 
-    res.json(result.rows[0]);
+//     res.json(result.rows[0]);
 
-  } catch (err) {
-    console.error("EVENT CREATION ERROR ", err);
-    res.status(500).json({ error: "Failed to create event" });
-  }
-});
+//   } catch (err) {
+//     console.error("EVENT CREATION ERROR ", err);
+//     res.status(500).json({ error: "Failed to create event" });
+//   }
+// });
 
 // Gets org info for createEvent
 app.get("/api/createEventData", checkAuth, async (req, res) => {
