@@ -564,6 +564,48 @@ export async function fetchOrg(fetchWithAuth) {
     document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
       btn.disabled = false;
     });
+
+    //image
+    let i=1;
+      const slot = document.getElementById(`slot${i}`);
+      const img = document.getElementById(`image${i}`);
+
+      const link = data[`ilink${i}`];
+      const pid = data[`pid${i}`];
+
+      if(link){
+
+          img.src = link;
+          img.style.display="block";
+
+              const del = document.createElement("button");
+              del.innerText="Delete";
+
+              del.onclick = async ()=>{
+                  await deleteImage(pid,i+3);
+
+                  location.reload();
+              };
+
+              slot.appendChild(del);
+
+      }
+      else{
+
+          img.style.display="none";
+
+
+              const uploadBtn=document.createElement("button");
+              uploadBtn.innerText="Upload Image";
+
+              uploadBtn.onclick = ()=>uploadImageUser(i+3);
+
+              slot.appendChild(uploadBtn);
+      }
+
+
+
+
     initEditOrg(fetchWithAuth); // only init when org exists
   } else {
     orgNameEl.textContent = "";
@@ -1175,6 +1217,36 @@ export function initEditGroup(fetchWithAuth,gid) {
       alert("Failed to Update Group.");
     }
   });
+}
+
+
+async function uploadImageUser(slotNum){
+
+    const input=document.createElement("input");
+    input.type="file";
+    input.accept="image/*";
+
+    input.onchange = async ()=>{
+
+        const file=input.files[0];
+
+        if(!file) return;
+
+        try{
+
+            const result = await uploadImage(file,slotNum);
+            location.reload();
+
+        }catch(err){
+
+            console.error(err);
+            alert("Upload failed");
+
+        }
+
+    };
+
+    input.click();
 }
 
 
