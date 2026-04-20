@@ -352,100 +352,6 @@ export async function loadLeaderboards() {
   }
 }
 
-// Combines create event page functions
-// export function initCreateEvent() {
-//   loadCreateEvent();
-//   createEventSubmit();
-// }
-
-// Determines the create event page layout depending on org ownership
-// async function loadCreateEvent() {
-//   try {
-//     const data = await fetchWithAuth("/api/createEventData");
-
-//     const formSection = document.getElementById("eventFormSection");
-//     const noOrgSection = document.getElementById("noOrgEventSection");
-
-//     if (data.hasOrg) {
-//       formSection.style.display = "block";
-//       noOrgSection.style.display = "none";
-//     } else {
-//       formSection.style.display = "none";
-//       noOrgSection.style.display = "block";
-//     }
-
-//   } catch (err) {
-//     console.error("Failed to load create event page", err);
-//   }
-// }
-
-// Handles the submission of new events
-// function createEventSubmit() {
-//   const form = document.getElementById("createEventForm");
-//   if (!form) return;
-
-//   form.addEventListener("submit", async (e) => {
-//     e.preventDefault();
-
-//     const eventData = {
-//       event_name: document.getElementById("event_name").value,
-//       event_date: document.getElementById("event_date").value,
-//       event_description: document.getElementById("event_description").value
-//     };
-
-//     try {
-//       await fetchWithAuth("/api/events", "POST", eventData);
-
-//       alert("Event Created!");
-//       form.reset();
-
-//     } catch (err) {
-//       console.error("SUBMIT EVENT ERROR ", err)
-//       alert("Failed to create event");
-//     }
-//   });
-// }
-
-// Combines create group page functions
-// export function initCreateGroups() {
-//   submitNewGroup();
-//   initJoinGroup(); 
-// }
-
-// Displays a users groups if they are a part of any:
-// async function loadCreateGroup() {
-//   try {
-//     const data = await fetchWithAuth("/api/createGroupData");
-
-//     const hasGroupSection = document.getElementById("hasGroupSection");
-//     const noGroupSection = document.getElementById("noGroupSection");
-//     const groupList = document.getElementById("groupList");
-
-//     if (data.hasGroup) {
-//       hasGroupSection.style.display = "block";
-//       noGroupSection.style.display = "block"; 
-
-//       groupList.innerHTML = "";
-
-//       data.groups.forEach(g => {
-//         const div = document.createElement("div");
-//         div.className = "card";
-
-//         div.innerHTML = `<h2>${g.group_name}</h2>`;
-
-//         groupList.appendChild(div);
-//       });
-
-//     } else {
-//       hasGroupSection.style.display = "none";
-//       noGroupSection.style.display = "block";
-//     }
-
-//   } catch (err) {
-//     console.error("Failed to load create groups page", err);
-//   }
-// }
-
 // Creates New Groups  
 export function submitNewGroup() {
   const form = document.getElementById("createGroupForm");
@@ -579,6 +485,7 @@ export async function fetchOrg(fetchWithAuth) {
           img.style.display="block";
 
               const del = document.createElement("button");
+              del.className="reject-btn"
               del.innerText="Delete";
 
               del.onclick = async ()=>{
@@ -597,6 +504,7 @@ export async function fetchOrg(fetchWithAuth) {
 
               const uploadBtn=document.createElement("button");
               uploadBtn.innerText="Upload Image";
+              uploadBtn.className="default-btn";
 
               uploadBtn.onclick = ()=>uploadImageUser(i+3);
 
@@ -774,6 +682,7 @@ export function initEditOrg(fetchWithAuth) {
   cancelBtn.addEventListener("click", () => {
     editForm.style.display = "none";
     editBtn.style.display = "block";
+    editBtn.style.margin = "0 auto";
   });
 
   editForm.addEventListener("submit", async (e) => {
@@ -1360,7 +1269,7 @@ export async function fetchGroup(fetchWithAuth, gid) {
         const leaveBtn = document.createElement('button');
         leaveBtn.id = 'leaveGroupBtn';
         leaveBtn.innerText = "Leave Group";
-        leaveBtn.style.backgroundColor = "#ff4444";
+        leaveBtn.className = "reject-btn";
         leaveBtn.onclick = () => handleLeaveGroup(gid);
         editBtn.parentNode.insertBefore(leaveBtn, editBtn.nextSibling);
     }
@@ -1385,6 +1294,7 @@ export async function fetchGroup(fetchWithAuth, gid) {
           if(isAdmin){
 
               const del = document.createElement("button");
+              del.className="reject-btn";
               del.innerText="Delete";
 
               del.onclick = async ()=>{
@@ -1405,6 +1315,7 @@ export async function fetchGroup(fetchWithAuth, gid) {
 
               const uploadBtn=document.createElement("button");
               uploadBtn.innerText="Upload Image";
+              uploadBtn.className="default-btn";
 
               uploadBtn.onclick = ()=>uploadToSlotGroup(i,gid);
 
@@ -1447,7 +1358,7 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
 
     if (permission && !isActive) {
         fullHTML += `
-            <div class="card" id="create-medal-card">
+            <div class="card" id="create-medal-card" style="border-radius: 8px;">
                 <h3>Set New Goal</h3>
                 <input type="number" id="new-medal-hours" placeholder="Hours" style="width: 80px">
                 <button id="submit-medal-btn">Create</button>
@@ -1463,7 +1374,7 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
       const percent = Math.min((progress / goal) * 100, 100);
 
       return `
-        <div class="card" style="margin-bottom: 20px; position: relative;">
+        <div class="card" style="margin-bottom: 20px; position: relative; border-radius: 8px;">
           <h3>Group Medal</h3>
           <p><strong>Goal:</strong> ${goal} hours</p>
           <p><strong>Group Progress:</strong> ${progress} / ${goal}</p>
@@ -1508,7 +1419,7 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
             const totalH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:null,endTime:null})).total;
 
             return `
-              <div class="card" style="margin-bottom: 20px; position: relative;">
+              <div class="card" style="margin-bottom: 20px; position: relative; border-radius: 8px;">
               <h4>${m.display_name}</h4>
               <p>Role: ${m.admin ? 'Admin' : 'Member'}</p>
               <p>Total hours: ${totalH}</p>

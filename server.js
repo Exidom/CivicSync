@@ -157,9 +157,6 @@ app.post("/update-profile", checkAuth, async (req, res) => {
   }
 });
 
-
-
-
 //sig for user, to be stored as user's
 app.post("/cloudinary-signature", checkAuth, async (req, res) => {
   try {
@@ -482,8 +479,6 @@ app.post("/api/join-group", checkAuth, async (req, res) => {
   }
 });
 
-// TODO: Create an app.post function to change a users permissions to admin
-
 // For Org Creation
 app.post("/api/orgs", checkAuth, async (req, res) => {
   try {
@@ -512,38 +507,6 @@ app.post("/api/orgs", checkAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to create org" });
   }
 });
-
-
-// For Event Creation
-// app.post("/api/events", checkAuth, async (req, res) => {
-//   try {
-//     const { event_name, event_date, event_descripton } = req.body;
-//     const uid = req.user.uid;
-
-//     // Ensure only orgs create events
-//     const orgData = await db.query(
-//       "SELECT * FROM orgs WHERE founder_id = $1",
-//       [uid]
-//     );
-
-//     if (orgData.rows.length === 0) {
-//       return res.status(403).json({ error: "You must own an organization to create events" });
-//     }
-
-//     const org = orgData.rows[0];
-
-//     const result = await db.query(
-//       "INSERT INTO services (service_name, oid, info_text, date) VALUES ($1, $2, $3, $4) RETURNING *",
-//       [event_name, org.oid, event_descripton, event_date]
-//     );
-
-//     res.json(result.rows[0]);
-
-//   } catch (err) {
-//     console.error("EVENT CREATION ERROR ", err);
-//     res.status(500).json({ error: "Failed to create event" });
-//   }
-// });
 
 // Gets org info for createEvent
 app.get("/api/createEventData", checkAuth, async (req, res) => {
@@ -624,8 +587,6 @@ app.get("/api/createGroupData", checkAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to load group data" });
   }
 });
-
-// TODO: Implement a leave-group feature
 
 // Handles collecting user data from the database
 app.get("/api/userProfileData", checkAuth, async (req, res) => {
@@ -1675,7 +1636,6 @@ app.get("/api/userMedals", checkAuth, async (req, res) => {
 
 // Mark hours as completed for tracking, automatically updates user_medals,
 // AND marks the medal as complete if the goal was reached.
-// TODO: determine how streaks will be updated
 app.put("/api/participation/complete", checkAuth, async (req, res) => {
   const { uid, sid, hours } = req.body;
 
