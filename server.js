@@ -8,12 +8,9 @@ let serviceAccount;
 try {
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {
     serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-  } else {
-    serviceAccount = require("./test/key.json"); // Make sure this path is correct locally
-  }
+  } 
 } catch (err) {
   console.error("CRITICAL: Firebase Service Account Parse Error:", err.message);
-  // This prevents the whole server from crashing so you can at least see the log
   serviceAccount = {}; 
 }
 
