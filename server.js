@@ -3,8 +3,14 @@ const db = require('./db');
 
 
 const admin = require("firebase-admin");
+
+const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT 
+  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) 
+  : require(".test/key.json");
+
+
 admin.initializeApp({
-  credential: admin.credential.applicationDefault()//uses env
+  credential: admin.credential.cert(serviceAccount)
 });
 
 const cloudinary = require("cloudinary").v2;
@@ -25,9 +31,14 @@ const cors = require('cors');
 app.use(cors());
 
 
+
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
+});
+
+app.get("/", (req, res) => {
+  res.redirect("/dashboard"); 
 });
 
 app.get("/login", (req, res) => {
