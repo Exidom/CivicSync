@@ -21,7 +21,6 @@ app.use(express.static('public'));
 app.set("view engine", "ejs");
 
 const cors = require('cors');
-app.use(cors());
 
 app.use(cors({
   origin: "https://civicsync-bwt7.onrender.com",
