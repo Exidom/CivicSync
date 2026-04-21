@@ -24,7 +24,7 @@ const cors = require('cors');
 app.use(cors());
 
 app.use(cors({
-  origin: "https://CivicSync.onrender.com",
+  origin: "https://civicsync-bwt7.onrender.com",
   methods: ["GET", "POST","PUT","DELETE"]
 }));
 
