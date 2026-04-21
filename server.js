@@ -23,6 +23,11 @@ app.set("view engine", "ejs");
 const cors = require('cors');
 app.use(cors());
 
+app.use(cors({
+  origin: "https://CivicSync.onrender.com",
+  methods: ["GET", "POST","PUT","DELETE"]
+}));
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -1770,6 +1775,6 @@ app.use(express.static("public"));
 
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
