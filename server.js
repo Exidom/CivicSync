@@ -1769,5 +1769,7 @@ app.post("/api/group-hours", checkAuth, async (req, res) => {
 app.use(express.static("public"));
 
 
-app.listen(3000, () => console.log("Server running on port 3000"));
-console.log("Server running on: http://localhost:3000/dashboard");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
