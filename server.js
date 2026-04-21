@@ -1,13 +1,21 @@
-
+const path = require('path'); // Ensure this is at the very top
 const db = require('./db');
 
 
 const admin = require("firebase-admin");
 
-const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT 
-  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT) 
-  : require(".test/key.json");
-
+let serviceAccount;
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    serviceAccount = require("./test/key.json"); // Make sure this path is correct locally
+  }
+} catch (err) {
+  console.error("CRITICAL: Firebase Service Account Parse Error:", err.message);
+  // This prevents the whole server from crashing so you can at least see the log
+  serviceAccount = {}; 
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount)
@@ -25,9 +33,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static('public'));
 
-const path = require('path');
-app.set("views", path.join(__dirname, "public", "views"));
-app.set("view engine", "ejs");
+
+
+app.set('views', path.join(__dirname, 'public', 'views'));
+app.set('view engine', 'ejs');
 
 const cors = require('cors');
 
