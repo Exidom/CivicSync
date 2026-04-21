@@ -22,14 +22,7 @@ app.set("view engine", "ejs");
 
 const cors = require('cors');
 app.use(cors());
-/*todo
-app.use(cors({
-  origin: [
-    "https://domain.com"
-  ],
-  methods: ["GET","POST"]
-}));
-*/
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -205,7 +198,6 @@ app.post("/delete-image", checkAuth, async (req, res) => {
 
 
     if(group!=null){
-      //todo check if user is admin
       const query = `
         UPDATE groups
         SET iLink${spot} = $1,
@@ -305,7 +297,6 @@ app.post("/set-ilink", checkAuth, async (req, res) => {
   try {
 
     if(group!=null){
-      //todo check if user is admin
       const query = `
         UPDATE groups
         SET iLink${x} = $1,
