@@ -22,10 +22,7 @@ app.set("view engine", "ejs");
 
 const cors = require('cors');
 
-app.use(cors({
-  origin: "https://civicsync-bwt7.onrender.com",
-  methods: ["GET", "POST","PUT","DELETE"]
-}));
+app.use(cors());
 
 
 app.use((err, req, res, next) => {
