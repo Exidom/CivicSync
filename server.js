@@ -1,4 +1,4 @@
-const path = require('path'); // Ensure this is at the very top
+
 const db = require('./db');
 
 
@@ -34,8 +34,6 @@ app.use(express.json());
 app.use(express.static('public'));
 
 
-
-app.set('views', path.join(__dirname, 'public', 'views'));
 app.set('view engine', 'ejs');
 
 const cors = require('cors');
