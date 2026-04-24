@@ -3,8 +3,19 @@ const db = require('./db');
 
 
 const admin = require("firebase-admin");
+
+let serviceAccount;
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } 
+} catch (err) {
+  console.error("CRITICAL: Firebase Service Account Parse Error:", err.message);
+  serviceAccount = {}; 
+}
+
 admin.initializeApp({
-  credential: admin.credential.applicationDefault()//uses env
+  credential: admin.credential.cert(serviceAccount)
 });
 
 const cloudinary = require("cloudinary").v2;
@@ -18,22 +29,23 @@ const express = require("express");
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
-app.set("view engine", "ejs");
+
+
+app.set('view engine', 'ejs');
 
 const cors = require('cors');
+
 app.use(cors());
-/*todo
-app.use(cors({
-  origin: [
-    "https://domain.com"
-  ],
-  methods: ["GET","POST"]
-}));
-*/
+
+
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
+});
+
+app.get("/", (req, res) => {
+  res.redirect("/dashboard"); 
 });
 
 app.get("/login", (req, res) => {
@@ -205,7 +217,6 @@ app.post("/delete-image", checkAuth, async (req, res) => {
 
 
     if(group!=null){
-      //todo check if user is admin
       const query = `
         UPDATE groups
         SET iLink${spot} = $1,
@@ -305,7 +316,6 @@ app.post("/set-ilink", checkAuth, async (req, res) => {
   try {
 
     if(group!=null){
-      //todo check if user is admin
       const query = `
         UPDATE groups
         SET iLink${x} = $1,
@@ -1778,5 +1788,7 @@ app.post("/api/group-hours", checkAuth, async (req, res) => {
 app.use(express.static("public"));
 
 
-app.listen(3000, () => console.log("Server running on port 3000"));
-console.log("Server running on: http://localhost:3000/dashboard");
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+});
