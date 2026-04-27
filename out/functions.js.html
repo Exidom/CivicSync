@@ -1,4 +1,32 @@
-import { fetchWithAuth } from "/js/auth.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: functions.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: functions.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { fetchWithAuth } from "/js/auth.js";
 import {uploadImage,deleteImage} from "/js/clin.js";
 
 // Handles the current event view on the viewOrganization page
@@ -29,7 +57,7 @@ export async function initUserProfile() {
       }
 
       // If it already has a US country code
-      else if (formattedPhone.length === 11 && formattedPhone.startsWith("1")) {
+      else if (formattedPhone.length === 11 &amp;&amp; formattedPhone.startsWith("1")) {
         formattedPhone = "+" + formattedPhone;
       }
       else {
@@ -82,7 +110,7 @@ export async function loadUserProfile() {
 
       const hoursMap = {};
       const userContributionMap = {};
-      if (groupHours && Array.isArray(groupHours)) {
+      if (groupHours &amp;&amp; Array.isArray(groupHours)) {
         groupHours.forEach(g => {
           hoursMap[g.gid] = g.total;
           userContributionMap[g.gid] = g.user_contribution;
@@ -101,10 +129,10 @@ export async function loadUserProfile() {
         const userContribution = userContributionMap[g.gid] ?? 0;
 
         div.innerHTML = `
-          <h3>${g.group_name}</h3>
-          <p>Total Group Hours: ${totalHours}</p>
-          <p>Your contribution: ${userContribution}</p>
-          <button style="margin-top: 30px;" class="view-group-btn" data-gid="${g.gid}">View Group</button>
+          &lt;h3>${g.group_name}&lt;/h3>
+          &lt;p>Total Group Hours: ${totalHours}&lt;/p>
+          &lt;p>Your contribution: ${userContribution}&lt;/p>
+          &lt;button style="margin-top: 30px;" class="view-group-btn" data-gid="${g.gid}">View Group&lt;/button>
         `;
 
         groupList.appendChild(div);
@@ -137,15 +165,15 @@ export async function loadUserProfile() {
       noEventSection.style.display = "none";
 
       eventList.innerHTML = user.events.map(event => `
-      <div class="event-card">
-        <h3>${event.service_name}</h3>
-        <p>${event.org_name}</p>
-        <p>Start date: ${new Date(event.time_start).toLocaleString()}</p>
-        <p>Description: ${event.info_text || ""}</p>
-        <p>Hours: ${event.estimated_hours}</p>
-        <p>Status: ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}</p>
-        <button class="view-event-btn" data-sid="${event.sid}">View Event</button>
-      </div>
+      &lt;div class="event-card">
+        &lt;h3>${event.service_name}&lt;/h3>
+        &lt;p>${event.org_name}&lt;/p>
+        &lt;p>Start date: ${new Date(event.time_start).toLocaleString()}&lt;/p>
+        &lt;p>Description: ${event.info_text || ""}&lt;/p>
+        &lt;p>Hours: ${event.estimated_hours}&lt;/p>
+        &lt;p>Status: ${event.status.charAt(0).toUpperCase() + event.status.slice(1)}&lt;/p>
+        &lt;button class="view-event-btn" data-sid="${event.sid}">View Event&lt;/button>
+      &lt;/div>
     `).join("");
 
     } else if (user.hasGroup) {
@@ -266,7 +294,7 @@ export async function loadMedals() {
     if (!container) return;
 
     if (!medals || medals.length === 0) {
-      container.innerHTML = "<p>No active medals.</p>";
+      container.innerHTML = "&lt;p>No active medals.&lt;/p>";
       return;
     }
 
@@ -278,21 +306,21 @@ export async function loadMedals() {
       const percent = Math.min((progress / goal) * 100, 100);
 
       return `
-        <div class="card" style="border-radius: 8px; border: 1px solid #086375; max-width: 600px; margin: 0 auto 20px auto;">
-          <h3>${m.group_name}</h3>
+        &lt;div class="card" style="border-radius: 8px; border: 1px solid #086375; max-width: 600px; margin: 0 auto 20px auto;">
+          &lt;h3>${m.group_name}&lt;/h3>
 
-          <p><strong>Goal:</strong> ${goal} hours</p>
-          <p><strong>Group Progress:</strong> ${progress} / ${goal}</p>
-          <p><strong>Your Contribution:</strong> ${m.user_hours}</p>
+          &lt;p>&lt;strong>Goal:&lt;/strong> ${goal} hours&lt;/p>
+          &lt;p>&lt;strong>Group Progress:&lt;/strong> ${progress} / ${goal}&lt;/p>
+          &lt;p>&lt;strong>Your Contribution:&lt;/strong> ${m.user_hours}&lt;/p>
 
-          <p><strong>Deadline:</strong> ${new Date(m.deadline_date).toLocaleDateString()}</p>
-          <p><strong>Streak:</strong> ${m.streak}</p>
-          <p><strong>Status:</strong> ${m.complete ? "Completed!" : "Incomplete"}</p>
+          &lt;p>&lt;strong>Deadline:&lt;/strong> ${new Date(m.deadline_date).toLocaleDateString()}&lt;/p>
+          &lt;p>&lt;strong>Streak:&lt;/strong> ${m.streak}&lt;/p>
+          &lt;p>&lt;strong>Status:&lt;/strong> ${m.complete ? "Completed!" : "Incomplete"}&lt;/p>
 
-          <div style="background:#ddd; height:10px; border-radius:5px;">
-            <div style="width:${percent}%; background:#086375; height:10px; border-radius:5px;"></div>
-          </div>
-        </div>
+          &lt;div style="background:#ddd; height:10px; border-radius:5px;">
+            &lt;div style="width:${percent}%; background:#086375; height:10px; border-radius:5px;">&lt;/div>
+          &lt;/div>
+        &lt;/div>
       `;
     }).join("");
 
@@ -308,7 +336,7 @@ export async function loadLeaderboards() {
     const container = document.getElementById("leaderboardList");
 
     if (!data || data.length === 0) {
-      container.innerHTML = "<p>No leaderboard data yet.</p>";
+      container.innerHTML = "&lt;p>No leaderboard data yet.&lt;/p>";
       return;
     }
 
@@ -328,8 +356,8 @@ export async function loadLeaderboards() {
 
     // render each group leaderboard
     container.innerHTML = Object.values(grouped).map(group => `
-      <div class="card" style="border-radius: 8px; border: 1px solid #086375; max-height: 250px; overflow-y: auto;">
-        <h3>${group.group_name}</h3>
+      &lt;div class="card" style="border-radius: 8px; border: 1px solid #086375; max-height: 250px; overflow-y: auto;">
+        &lt;h3>${group.group_name}&lt;/h3>
 
         ${group.members.map((user, index) => {
           const medal =
@@ -338,13 +366,13 @@ export async function loadLeaderboards() {
             index === 2 ? "🥉" : "";
 
           return `
-            <p>
+            &lt;p>
               ${medal} #${index + 1}: ${user.display_name}
               — ${user.total_hours} hours
-            </p>
+            &lt;/p>
           `;
         }).join("")}
-      </div>
+      &lt;/div>
     `).join("");
 
   } catch (err) {
@@ -463,9 +491,9 @@ export async function fetchOrg(fetchWithAuth) {
   const orgDescEl = document.getElementById("org-description");
   const noOrgSection = document.getElementById("noOrgSection");
 
-  if (data && !data.error) {
+  if (data &amp;&amp; !data.error) {
     orgNameEl.textContent = data.org_name;
-    orgDescEl.innerHTML = `<p>${data.intro_text || ""}</p>`;
+    orgDescEl.innerHTML = `&lt;p>${data.intro_text || ""}&lt;/p>`;
     noOrgSection.style.display = "none";
     document.querySelectorAll('.tab-vertical-buttons button').forEach(btn => {
       btn.disabled = false;
@@ -532,7 +560,7 @@ export async function fetchEvents(fetchWithAuth) {
   const container = document.getElementById("events-container");
 
   if (!events || events.error || events.length === 0) {
-    container.innerHTML = `<div class="event-card placeholder"><p>No events yet.</p></div>`;
+    container.innerHTML = `&lt;div class="event-card placeholder">&lt;p>No events yet.&lt;/p>&lt;/div>`;
     return;
   }
 
@@ -540,40 +568,40 @@ export async function fetchEvents(fetchWithAuth) {
   container.innerHTML = events
     .filter(event => { if (showAllEvents) return true; return new Date(event.time_start) > now; })
     .map(event => `
-      <div class="event-card" data-sid="${event.sid}">
-        <div class="event-view">
-          <h3>${event.service_name}</h3>
-          <p>${new Date(event.time_start).toLocaleString()}</p>
-          <p>${event.info_text || ""}</p>
-          <p>Volunteers needed: ${event.estimated_volunteers} &nbsp;|&nbsp; Hours: ${event.estimated_hours}</p>
-          <p>${event.visibility_public ? "Public" : "Private"} &nbsp;|&nbsp; Applications: ${event.applications_open ? "Open" : "Closed"}</p>
-          <button class="manage-event-btn" data-sid="${event.sid}">Manage Event</button>
-          <button class="edit-event-btn" data-sid="${event.sid}">Edit</button>
-          <button class="delete-event-btn" data-sid="${event.sid}" ${event.has_completed_hours ? "disabled title='Cannot delete: users have completed hours'" : ""}>Delete</button>
-        </div>
+      &lt;div class="event-card" data-sid="${event.sid}">
+        &lt;div class="event-view">
+          &lt;h3>${event.service_name}&lt;/h3>
+          &lt;p>${new Date(event.time_start).toLocaleString()}&lt;/p>
+          &lt;p>${event.info_text || ""}&lt;/p>
+          &lt;p>Volunteers needed: ${event.estimated_volunteers} &amp;nbsp;|&amp;nbsp; Hours: ${event.estimated_hours}&lt;/p>
+          &lt;p>${event.visibility_public ? "Public" : "Private"} &amp;nbsp;|&amp;nbsp; Applications: ${event.applications_open ? "Open" : "Closed"}&lt;/p>
+          &lt;button class="manage-event-btn" data-sid="${event.sid}">Manage Event&lt;/button>
+          &lt;button class="edit-event-btn" data-sid="${event.sid}">Edit&lt;/button>
+          &lt;button class="delete-event-btn" data-sid="${event.sid}" ${event.has_completed_hours ? "disabled title='Cannot delete: users have completed hours'" : ""}>Delete&lt;/button>
+        &lt;/div>
 
-      <div class="event-edit" style="display:none;">
-        <label>Service Name: <input type="text" name="service_name" value="${event.service_name}"></label><br>
-        <label>Description:<br><textarea name="info_text" rows="3">${event.info_text || ""}</textarea></label><br>
-        <label>Start Date/Time: <input type="datetime-local" name="time_start" data-time="${event.time_start}"></label><br>
-        <label>Volunteers Needed: <input type="number" name="estimated_volunteers" value="${event.estimated_volunteers}" min="1"></label><br>
-        <label>Hours: <input type="number" name="estimated_hours" value="${event.estimated_hours}" min="1"></label><br>
-        <label>Visible to Public:
-          <select name="visibility_public">
-            <option value="true" ${event.visibility_public ? "selected" : ""}>Yes</option>
-            <option value="false" ${!event.visibility_public ? "selected" : ""}>No</option>
-          </select>
-        </label><br>
-        <label>Applications Open:
-          <select name="applications_open">
-            <option value="true" ${event.applications_open ? "selected" : ""}>Yes</option>
-            <option value="false" ${!event.applications_open ? "selected" : ""}>No</option>
-          </select>
-        </label><br>
-        <button class="save-event-btn" data-sid="${event.sid}">Save</button>
-        <button class="cancel-edit-btn" data-sid="${event.sid}">Cancel</button>
-      </div>
-    </div>
+      &lt;div class="event-edit" style="display:none;">
+        &lt;label>Service Name: &lt;input type="text" name="service_name" value="${event.service_name}">&lt;/label>&lt;br>
+        &lt;label>Description:&lt;br>&lt;textarea name="info_text" rows="3">${event.info_text || ""}&lt;/textarea>&lt;/label>&lt;br>
+        &lt;label>Start Date/Time: &lt;input type="datetime-local" name="time_start" data-time="${event.time_start}">&lt;/label>&lt;br>
+        &lt;label>Volunteers Needed: &lt;input type="number" name="estimated_volunteers" value="${event.estimated_volunteers}" min="1">&lt;/label>&lt;br>
+        &lt;label>Hours: &lt;input type="number" name="estimated_hours" value="${event.estimated_hours}" min="1">&lt;/label>&lt;br>
+        &lt;label>Visible to Public:
+          &lt;select name="visibility_public">
+            &lt;option value="true" ${event.visibility_public ? "selected" : ""}>Yes&lt;/option>
+            &lt;option value="false" ${!event.visibility_public ? "selected" : ""}>No&lt;/option>
+          &lt;/select>
+        &lt;/label>&lt;br>
+        &lt;label>Applications Open:
+          &lt;select name="applications_open">
+            &lt;option value="true" ${event.applications_open ? "selected" : ""}>Yes&lt;/option>
+            &lt;option value="false" ${!event.applications_open ? "selected" : ""}>No&lt;/option>
+          &lt;/select>
+        &lt;/label>&lt;br>
+        &lt;button class="save-event-btn" data-sid="${event.sid}">Save&lt;/button>
+        &lt;button class="cancel-edit-btn" data-sid="${event.sid}">Cancel&lt;/button>
+      &lt;/div>
+    &lt;/div>
   `).join("");
   // Adjusts edit display for local time
   document.querySelectorAll("input[name='time_start']").forEach(input => {
@@ -655,7 +683,7 @@ export function initEventActions(fetchWithAuth) {
 
       try {
         const res = await fetchWithAuth(`/api/services/${sid}`, "DELETE");
-        if (res && res.error) { alert("Error deleting event: " + res.error); return; }
+        if (res &amp;&amp; res.error) { alert("Error deleting event: " + res.error); return; }
         await fetchEvents(fetchWithAuth);
       } catch (err) {
         console.error("Failed to delete event:", err);
@@ -699,7 +727,7 @@ export function initEditOrg(fetchWithAuth) {
 
       // Update the displayed values
       document.getElementById("org-name").textContent = res.org_name;
-      document.getElementById("org-description").innerHTML = `<p>${res.intro_text || ""}</p>`;
+      document.getElementById("org-description").innerHTML = `&lt;p>${res.intro_text || ""}&lt;/p>`;
 
       editForm.style.display = "none";
       editBtn.style.display = "block";
@@ -717,7 +745,7 @@ export async function fetchApplications(fetchWithAuth) {
   const container = document.getElementById("applications-container");
 
   if (!applications || applications.error || applications.length === 0) {
-    container.innerHTML = `<div class="event-card placeholder"><p>No applications yet.</p></div>`;
+    container.innerHTML = `&lt;div class="event-card placeholder">&lt;p>No applications yet.&lt;/p>&lt;/div>`;
     return;
   }
 
@@ -731,8 +759,8 @@ export async function fetchApplications(fetchWithAuth) {
   }, {});
 
   container.innerHTML = Object.entries(grouped).map(([sid, group]) => `
-    <div class="event-card">
-      <h3>${group.service_name}</h3>
+    &lt;div class="event-card">
+      &lt;h3>${group.service_name}&lt;/h3>
       ${group.applications.map(app => {
         const name = app.first_name
           ? `${app.first_name} ${app.last_name ? app.last_name[0] + "." : ""}`
@@ -741,17 +769,17 @@ export async function fetchApplications(fetchWithAuth) {
         const isPending = app.status === "pending";
 
         return `
-          <div class="application-row" data-sid="${app.sid}" data-uid="${app.uid}">
-            <span>${name}</span>
-            <span class="app-status status-${app.status}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span>
+          &lt;div class="application-row" data-sid="${app.sid}" data-uid="${app.uid}">
+            &lt;span>${name}&lt;/span>
+            &lt;span class="app-status status-${app.status}">${app.status.charAt(0).toUpperCase() + app.status.slice(1)}&lt;/span>
             ${isPending ? `
-              <button class="approve-btn" data-sid="${app.sid}" data-uid="${app.uid}">Approve</button>
-              <button class="reject-btn" data-sid="${app.sid}" data-uid="${app.uid}">Reject</button>
+              &lt;button class="approve-btn" data-sid="${app.sid}" data-uid="${app.uid}">Approve&lt;/button>
+              &lt;button class="reject-btn" data-sid="${app.sid}" data-uid="${app.uid}">Reject&lt;/button>
             ` : ""}
-          </div>
+          &lt;/div>
         `;
       }).join("")}
-    </div>
+    &lt;/div>
   `).join("");
 }
 
@@ -792,7 +820,7 @@ export async function initSignUpEvents() {
     noGroupSection.style.display = "none";
 
     if (!events || events.length === 0) {
-      list.innerHTML = `<div class="event-card placeholder"><p>No events available.</p></div>`;
+      list.innerHTML = `&lt;div class="event-card placeholder">&lt;p>No events available.&lt;/p>&lt;/div>`;
       return;
     }
 
@@ -842,14 +870,14 @@ export async function initSignUpEvents() {
           break;
       }
       list.innerHTML = filtered.map(event => `
-        <div class="event-card">
-          <h3>${event.service_name}</h3>
-          <p>${event.org_name}</p>
-          <p>${new Date(event.time_start).toLocaleString()}</p>
-          <p>${event.info_text || ""}</p>
-          <p>Hours: ${event.estimated_hours}</p>
-          <button class="view-event-btn" data-sid="${event.sid}">View Event</button>
-        </div>
+        &lt;div class="event-card">
+          &lt;h3>${event.service_name}&lt;/h3>
+          &lt;p>${event.org_name}&lt;/p>
+          &lt;p>${new Date(event.time_start).toLocaleString()}&lt;/p>
+          &lt;p>${event.info_text || ""}&lt;/p>
+          &lt;p>Hours: ${event.estimated_hours}&lt;/p>
+          &lt;button class="view-event-btn" data-sid="${event.sid}">View Event&lt;/button>
+        &lt;/div>
       `).join("");
     }
 
@@ -987,7 +1015,7 @@ async function loadParticipants(sid) {
   const container = document.getElementById("participants-container");
 
   if (!participants || participants.error || participants.length === 0) {
-    container.innerHTML = `<div class="card placeholder"><p>No participants yet.</p></div>`;
+    container.innerHTML = `&lt;div class="card placeholder">&lt;p>No participants yet.&lt;/p>&lt;/div>`;
     return;
   }
 
@@ -999,22 +1027,22 @@ async function loadParticipants(sid) {
 
   container.innerHTML = `
     ${approved.length > 0 ? `
-      <h3>Approved (${approved.length}):</h3>
+      &lt;h3>Approved (${approved.length}):&lt;/h3>
       ${approved.map(p => participantCard(p, true)).join("")}
     ` : ""}
 
     ${pending.length > 0 ? `
-      <h3>Pending:</h3>
+      &lt;h3>Pending:&lt;/h3>
       ${pending.map(p => participantCard(p, false)).join("")}
     ` : ""}
 
     ${rejected.length > 0 ? `
-      <h3>Rejected:</h3>
+      &lt;h3>Rejected:&lt;/h3>
       ${rejected.map(p => participantCard(p, false)).join("")}
     ` : ""}
 
     ${completed.length > 0 ? `
-      <h3>Completed:</h3>
+      &lt;h3>Completed:&lt;/h3>
       ${completed.map(p => participantCard(p, false, true)).join("")}
     ` : ""}
   `;
@@ -1070,15 +1098,15 @@ function participantCard(p, showKick, isCompleted = false) {
     : p.display_name;
 
   return `
-    <div class="application-row">
-      <span>${name}</span>
-      <span>Hours: ${p.hours}</span>
-      <span class="app-status status-${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}</span>
+    &lt;div class="application-row">
+      &lt;span>${name}&lt;/span>
+      &lt;span>Hours: ${p.hours}&lt;/span>
+      &lt;span class="app-status status-${p.status}">${p.status.charAt(0).toUpperCase() + p.status.slice(1)}&lt;/span>
       ${showKick ? `
-        <button class="kick-btn" data-uid="${p.uid}">Kick</button>
-        <button class="complete-btn" data-uid="${p.uid}" data-sid="${p.sid}">Complete</button>` : ""}
-      ${isCompleted ? `<span> Hours Credited </span>` : ""}
-    </div>
+        &lt;button class="kick-btn" data-uid="${p.uid}">Kick&lt;/button>
+        &lt;button class="complete-btn" data-uid="${p.uid}" data-sid="${p.sid}">Complete&lt;/button>` : ""}
+      ${isCompleted ? `&lt;span> Hours Credited &lt;/span>` : ""}
+    &lt;/div>
   `;
 }
 
@@ -1115,7 +1143,7 @@ export function initEditGroup(fetchWithAuth,gid) {
 
       // Update the displayed values
       document.getElementById("group-name").textContent = res.group_name;
-      document.getElementById("group-description").innerHTML = `<p>${res.intro_text || ""}</p>`;
+      document.getElementById("group-description").innerHTML = `&lt;p>${res.intro_text || ""}&lt;/p>`;
 
       editForm.style.display = "none";
       editBtn.style.display = "block";
@@ -1256,13 +1284,13 @@ export async function fetchGroup(fetchWithAuth, gid) {
   const orgDescEl = document.getElementById("group-description");
   const editBtn = document.getElementById("editGroupBtn");
 
-  if (data && !data.error) {
+  if (data &amp;&amp; !data.error) {
     // Only show Edit button to admins
     editBtn.style.display = isAdmin ? "block" : "none";
     
     // Add Invite Code display for admins
-    orgNameEl.innerHTML = `${data.group_name} ${isAdmin ? `<br><small style="font-size: 14px; color: #666;">Invite Code: <strong>${data.invite_code || 'N/A'}</strong></small>` : ''}`;
-    orgDescEl.innerHTML = `<p>${data.intro_text || ""}</p>`;
+    orgNameEl.innerHTML = `${data.group_name} ${isAdmin ? `&lt;br>&lt;small style="font-size: 14px; color: #666;">Invite Code: &lt;strong>${data.invite_code || 'N/A'}&lt;/strong>&lt;/small>` : ''}`;
+    orgDescEl.innerHTML = `&lt;p>${data.intro_text || ""}&lt;/p>`;
 
     // Add Leave Button if it doesn't exist
     if (!document.getElementById('leaveGroupBtn')) {
@@ -1346,8 +1374,8 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
   let startActive = '';
   let endActive = '';
   
-  if (dataM && container) {
-    const isActive = dataM[0] && (new Date(dataM[0].deadline_date)).getTime() >= today.getTime();
+  if (dataM &amp;&amp; container) {
+    const isActive = dataM[0] &amp;&amp; (new Date(dataM[0].deadline_date)).getTime() >= today.getTime();
 
     if(isActive){
       startActive=dataM[0].created_date;
@@ -1356,13 +1384,13 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
 
     let fullHTML = '';
 
-    if (permission && !isActive) {
+    if (permission &amp;&amp; !isActive) {
         fullHTML += `
-            <div class="card" id="create-medal-card" style="border-radius: 8px;">
-                <h3>Set New Goal</h3>
-                <input type="number" id="new-medal-hours" placeholder="Hours" style="width: 80px">
-                <button id="submit-medal-btn">Create</button>
-            </div>
+            &lt;div class="card" id="create-medal-card" style="border-radius: 8px;">
+                &lt;h3>Set New Goal&lt;/h3>
+                &lt;input type="number" id="new-medal-hours" placeholder="Hours" style="width: 80px">
+                &lt;button id="submit-medal-btn">Create&lt;/button>
+            &lt;/div>
         `;
     }
 
@@ -1374,20 +1402,20 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
       const percent = Math.min((progress / goal) * 100, 100);
 
       return `
-        <div class="card" style="margin-bottom: 20px; position: relative; border-radius: 8px;">
-          <h3>Group Medal</h3>
-          <p><strong>Goal:</strong> ${goal} hours</p>
-          <p><strong>Group Progress:</strong> ${progress} / ${goal}</p>
-          <p><strong>Deadline:</strong> ${new Date(m.deadline_date).toLocaleDateString()}</p>
-          <p><strong>Streak:</strong> ${m.streak}</p>
-          <p><strong>Status:</strong> ${m.complete ? "Completed!" : "Incomplete"}</p>
+        &lt;div class="card" style="margin-bottom: 20px; position: relative; border-radius: 8px;">
+          &lt;h3>Group Medal&lt;/h3>
+          &lt;p>&lt;strong>Goal:&lt;/strong> ${goal} hours&lt;/p>
+          &lt;p>&lt;strong>Group Progress:&lt;/strong> ${progress} / ${goal}&lt;/p>
+          &lt;p>&lt;strong>Deadline:&lt;/strong> ${new Date(m.deadline_date).toLocaleDateString()}&lt;/p>
+          &lt;p>&lt;strong>Streak:&lt;/strong> ${m.streak}&lt;/p>
+          &lt;p>&lt;strong>Status:&lt;/strong> ${m.complete ? "Completed!" : "Incomplete"}&lt;/p>
 
-          <div style="background:#ddd; height:10px; border-radius:5px; margin: 10px 0;">
-            <div style="width:${percent}%; background:#086375; height:10px; border-radius:5px;"></div>
-          </div>
-          ${(permission && !m.complete && new Date(m.deadline_date) >= today) ? 
-            `<button class="cancel-medal-btn" data-mid="${m.mid}" style="font-size:10px; color:red; border:none; background:none; cursor:pointer;">Cancel Medal</button>` : ''}
-        </div>
+          &lt;div style="background:#ddd; height:10px; border-radius:5px; margin: 10px 0;">
+            &lt;div style="width:${percent}%; background:#086375; height:10px; border-radius:5px;">&lt;/div>
+          &lt;/div>
+          ${(permission &amp;&amp; !m.complete &amp;&amp; new Date(m.deadline_date) >= today) ? 
+            `&lt;button class="cancel-medal-btn" data-mid="${m.mid}" style="font-size:10px; color:red; border:none; background:none; cursor:pointer;">Cancel Medal&lt;/button>` : ''}
+        &lt;/div>
       `;
     });
 
@@ -1412,25 +1440,25 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
     //Members rendering
     const memberData = await fetchWithAuth("/api/getGroupMemberData", "POST", { gid });
     const memContainer = document.getElementById('members-container');
-    if (memberData && memContainer) {
+    if (memberData &amp;&amp; memContainer) {
         memContainer.innerHTML = '';
         const memberHtmlPromises = memberData.map(async(m) => {
             const currentH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:startActive,endTime:endActive})).total;
             const totalH=(await fetchWithAuth("/api/group-hours", "POST", { targetUid:m.uid,gid:gid,startTime:null,endTime:null})).total;
 
             return `
-              <div class="card" style="margin-bottom: 20px; position: relative; border-radius: 8px;">
-              <h4>${m.display_name}</h4>
-              <p>Role: ${m.admin ? 'Admin' : 'Member'}</p>
-              <p>Total hours: ${totalH}</p>
+              &lt;div class="card" style="margin-bottom: 20px; position: relative; border-radius: 8px;">
+              &lt;h4>${m.display_name}&lt;/h4>
+              &lt;p>Role: ${m.admin ? 'Admin' : 'Member'}&lt;/p>
+              &lt;p>Total hours: ${totalH}&lt;/p>
               ${(isActive) ? `
-                <p>Hours for current medal: ${currentH}</p>
+                &lt;p>Hours for current medal: ${currentH}&lt;/p>
               ` : ''}
-              ${(permission && !m.admin) ? `
-                  <button onclick="handleKick('${m.uid}', '${gid}')">Kick</button>
-                  <button onclick="handlePromote('${m.uid}', '${gid}')">Promote</button>
+              ${(permission &amp;&amp; !m.admin) ? `
+                  &lt;button onclick="handleKick('${m.uid}', '${gid}')">Kick&lt;/button>
+                  &lt;button onclick="handlePromote('${m.uid}', '${gid}')">Promote&lt;/button>
               ` : ''}
-              </div>
+              &lt;/div>
             `;
         });
         const memberHtmlArray = await Promise.all(memberHtmlPromises);
@@ -1439,4 +1467,26 @@ export async function fetchMembersMedals(fetchWithAuth, gid) {
     }
   }
 
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#initUserProfile">initUserProfile</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Apr 27 2026 12:05:50 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

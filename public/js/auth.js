@@ -50,7 +50,7 @@ export async function fetchWithAuth(url, method = "GET", body = null) {
     let user = auth.currentUser;
     if (!user) user = await getAuthenticatedUser();
     if (!user) {
-        window.location.href = "/login";
+        window.location.href = "/dashboard";
         return;
     }
 
@@ -60,7 +60,7 @@ export async function fetchWithAuth(url, method = "GET", body = null) {
 
         if (response.status === 401) {
             await signOut(auth);
-            window.location.href = "/login";
+            window.location.href = "/dashboard";
             return;//nothing
         }
 
