@@ -1,5 +1,6 @@
 import {fetchWithAuth} from "/js/auth.js";
 
+/** uploads image via cloudinary for user, group, or organization */
 export async function uploadImage(file,spot,groupName=null) {
 
 
@@ -47,12 +48,12 @@ export async function uploadImage(file,spot,groupName=null) {
     };
 }
 
-
+/** deletes image from cloudinary and database */
 export async function deleteImage(publicId,spot,groupName=null) {
     await fetchWithAuth("/delete-image","POST",{"pid":publicId,"spot":spot,"group":groupName});
 }
 
-
+/** puts the image into a standard size and quality for the website */
 async function normalizeImage(file, size = 1024){
 
     const img = new Image();

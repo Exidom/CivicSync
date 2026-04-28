@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: auth.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: auth.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyBEOnJWtZyxaYacVuzp7D-JYgekrtgOUGU",
+    authDomain: "civicsync-488921.firebaseapp.com",
+    projectId: "civicsync-488921",
+    storageBucket: "civicsync-488921.firebasestorage.app",
+    messagingSenderId: "727350141221",
+    appId: "1:727350141221:web:62386b1a64ee80b05ebacc",
+    measurementId: "G-YNM99SDCLL"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+
+const getAuthenticatedUser = () => {
+    return new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            resolve(user);
+        });
+    });
+};
+
+/** creates and litsens to google log in pop up */
+export async function handleGoogleLogin() {
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const res = await fetchWithAuth("/create-user", "POST");
+        localStorage.setItem('uid', res.uid);
+        return result;
+
+    } catch (error) {
+        throw error;
+    }
+}
+
+const getRequestOptions = (token, method, body) => ({
+    method: method,
+    headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json"
+    },
+    ...(body &amp;&amp; { body: JSON.stringify(body) })
+});
+
+/** allows other functions to get user based on token instead of input when called */
+export async function fetchWithAuth(url, method = "GET", body = null) {
+
+    let user = auth.currentUser;
+    if (!user) user = await getAuthenticatedUser();
+    if (!user) {
+        window.location.href = "/dashboard";
+        return;
+    }
+
+    try {
+        let token = await user.getIdToken();
+        let response = await fetch(url, getRequestOptions(token, method, body));      
+
+        if (response.status === 401) {
+            await signOut(auth);
+            window.location.href = "/dashboard";
+            return;//nothing
+        }
+
+        
+        if (!response.ok) {
+            const errorData = await response.json();//fixed
+            return { error: errorData.error || response.statusText, status: response.status };
+        }
+
+        return await response.json();
+    } catch (error) {
+        throw error;
+    }
+}
+
+/** logs out google account */
+export async function handleLogout() {
+    try {
+        await signOut(auth);
+        localStorage.removeItem('uid');
+    } catch (error) {
+        throw error;
+    }
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#NEWsubmitNewGroup">NEWsubmitNewGroup</a></li><li><a href="global.html#deleteImage">deleteImage</a></li><li><a href="global.html#fetchApplications">fetchApplications</a></li><li><a href="global.html#fetchEvents">fetchEvents</a></li><li><a href="global.html#fetchGroup">fetchGroup</a></li><li><a href="global.html#fetchMembersMedals">fetchMembersMedals</a></li><li><a href="global.html#fetchOrg">fetchOrg</a></li><li><a href="global.html#fetchWithAuth">fetchWithAuth</a></li><li><a href="global.html#handleCreateMedal">handleCreateMedal</a></li><li><a href="global.html#handleGoogleLogin">handleGoogleLogin</a></li><li><a href="global.html#handleLogout">handleLogout</a></li><li><a href="global.html#initApplicationActions">initApplicationActions</a></li><li><a href="global.html#initCreateOrg">initCreateOrg</a></li><li><a href="global.html#initEditGroup">initEditGroup</a></li><li><a href="global.html#initEditOrg">initEditOrg</a></li><li><a href="global.html#initEventActions">initEventActions</a></li><li><a href="global.html#initEventDetails">initEventDetails</a></li><li><a href="global.html#initJoinGroup">initJoinGroup</a></li><li><a href="global.html#initJoinGroupNEW">initJoinGroupNEW</a></li><li><a href="global.html#initManageEvent">initManageEvent</a></li><li><a href="global.html#initSignUpEvents">initSignUpEvents</a></li><li><a href="global.html#initUserProfile">initUserProfile</a></li><li><a href="global.html#loadLeaderboards">loadLeaderboards</a></li><li><a href="global.html#loadMedals">loadMedals</a></li><li><a href="global.html#loadOrganization">loadOrganization</a></li><li><a href="global.html#loadParticipants">loadParticipants</a></li><li><a href="global.html#loadUserProfile">loadUserProfile</a></li><li><a href="global.html#normalizeImage">normalizeImage</a></li><li><a href="global.html#openTab">openTab</a></li><li><a href="global.html#participantCard">participantCard</a></li><li><a href="global.html#submitNewGroup">submitNewGroup</a></li><li><a href="global.html#uploadImage">uploadImage</a></li><li><a href="global.html#uploadImageUser">uploadImageUser</a></li><li><a href="global.html#uploadToSlotGroup">uploadToSlotGroup</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Apr 27 2026 23:08:41 GMT-0500 (Central Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

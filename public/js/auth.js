@@ -24,6 +24,7 @@ const getAuthenticatedUser = () => {
     });
 };
 
+/** creates and litsens to google log in pop up */
 export async function handleGoogleLogin() {
     try {
         const result = await signInWithPopup(auth, provider);
@@ -45,6 +46,7 @@ const getRequestOptions = (token, method, body) => ({
     ...(body && { body: JSON.stringify(body) })
 });
 
+/** allows other functions to get user based on token instead of input when called */
 export async function fetchWithAuth(url, method = "GET", body = null) {
 
     let user = auth.currentUser;
@@ -76,6 +78,7 @@ export async function fetchWithAuth(url, method = "GET", body = null) {
     }
 }
 
+/** logs out google account */
 export async function handleLogout() {
     try {
         await signOut(auth);

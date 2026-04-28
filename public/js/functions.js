@@ -7,7 +7,7 @@ export function setShowAllEvents(value) {
   showAllEvents = value;
 }
 
-/** Loads the user's profile when entering a page, and updates it if submitted */
+/** Loads the user's profile when entering a page, and updates it if an edit is submitted */
 export async function initUserProfile() {
   const user = await loadUserProfile();
   if (!user) return;
@@ -55,7 +55,7 @@ export async function initUserProfile() {
   }
 }
 
-// Loads the users profile from the database
+/** sets up the tabs in the user page. Uses logged in user and fetches groups, past hours, and organization */
 export async function loadUserProfile() {
   try {
     const user = await fetchWithAuth("/api/userProfileData");
@@ -165,7 +165,7 @@ export async function loadUserProfile() {
   }
 }
 
-// Creates organizations
+/** create organization creation form if user has no organization*/
 export function initCreateOrg() {
   const form = document.getElementById("createOrgForm");
   if (!form) return;
@@ -197,7 +197,7 @@ export function initCreateOrg() {
   });
 }
 
-// Handles users joining existing groups
+/** creates the form and functionality for using invite codes to join groups*/
 export function initJoinGroup() {
   const form = document.getElementById("groupInviteForm");
   if (!form) return;
@@ -227,7 +227,7 @@ export function initJoinGroup() {
   });
 }
 
-// Handles NEW users joining existing groups
+/** creates the form and functionality for using invite codes to join groups if user has no memberships*/
 export function initJoinGroupNEW() {
   const form = document.getElementById("newGroupInviteForm");
   if (!form) return;
@@ -257,7 +257,7 @@ export function initJoinGroupNEW() {
   });
 }
 
-// Loads the active medals belonging to a user's groups
+/** loads the medal tab of user page using logged in user*/
 export async function loadMedals() {
   try {
     const medals = await fetchWithAuth("/api/userMedals");
@@ -301,7 +301,7 @@ export async function loadMedals() {
   }
 }
 
-// Loads the users' group's active leaderboards
+/** loads leaderboards of groups logged in user is a member of */
 export async function loadLeaderboards() {
   try {
     const data = await fetchWithAuth("/api/user-leaderboards");
@@ -352,7 +352,7 @@ export async function loadLeaderboards() {
   }
 }
 
-// Creates New Groups  
+/** creates new group creation form and gives it functionality with logged in user as only member/admin */ 
 export function submitNewGroup() {
   const form = document.getElementById("createGroupForm");
   if (!form) return;
@@ -379,7 +379,7 @@ export function submitNewGroup() {
   });
 }
 
-// Creates New Groups FOR NEW USERS 
+/** creates new group creation form and gives it functionality with logged in user as only member/admin if said user has no memberships */
 export function NEWsubmitNewGroup() {
   const form = document.getElementById("newCreateGroupForm");
   if (!form) return;
@@ -407,7 +407,7 @@ export function NEWsubmitNewGroup() {
 }
 
 
-// Loads organization information
+/** displays basic organization properties */
 export async function loadOrganization() {
   try {
     console.log("Fetching org...");
@@ -431,7 +431,7 @@ export async function loadOrganization() {
   }
 }
 
-// Adds additional tab functionality
+/** sets up tab navigation */
 function openTab(tabName, button) {
   const tabContents = document.querySelectorAll(".tabcontent");
   tabContents.forEach(tc => tc.style.display = "none");
@@ -443,6 +443,7 @@ function openTab(tabName, button) {
   button.classList.add("active");
 }
 
+/** sets up tab functionality */
 document.addEventListener('DOMContentLoaded', () => {
   const tabButtons = document.querySelectorAll(".tab-vertical-buttons button");
   tabButtons.forEach(btn => {
@@ -456,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 window.openTab = openTab; // Makes openTab function global
 
+/** creates basic organization page, with images, name, and description of user's org*/
 export async function fetchOrg(fetchWithAuth) {
   const data = await fetchWithAuth("/api/getOrganizationData", "GET");
 
@@ -526,7 +528,7 @@ export async function fetchOrg(fetchWithAuth) {
   }
 }
 
-// Gets current events
+/** creates organization events tab with event details and buttons*/
 export async function fetchEvents(fetchWithAuth) {
   const events = await fetchWithAuth("/api/services", "GET");
   const container = document.getElementById("events-container");
@@ -590,7 +592,7 @@ export async function fetchEvents(fetchWithAuth) {
   });
 }
 
-// Delete and Edit functionality in the current events
+/** add functionality to event buttons (edit and delete) */
 export function initEventActions(fetchWithAuth) {
   const container = document.getElementById("events-container");
 
@@ -665,7 +667,7 @@ export function initEventActions(fetchWithAuth) {
   });
 }
 
-// Edit organizations functionality
+/** add functionality to edit organization */
 export function initEditOrg(fetchWithAuth) {
   const editBtn = document.getElementById("editOrgBtn");
   const editForm = document.getElementById("editOrgForm");
@@ -711,7 +713,7 @@ export function initEditOrg(fetchWithAuth) {
   });
 }
 
-// Gets Applications
+/** displays applications to organization's events */
 export async function fetchApplications(fetchWithAuth) {
   const applications = await fetchWithAuth("/api/applications", "GET");
   const container = document.getElementById("applications-container");
@@ -755,7 +757,7 @@ export async function fetchApplications(fetchWithAuth) {
   `).join("");
 }
 
-// Applications Information
+/** adds ability to aprove or reject applications */
 export function initApplicationActions(fetchWithAuth) {
   const container = document.getElementById("applications-container");
 
@@ -781,6 +783,7 @@ export function initApplicationActions(fetchWithAuth) {
   });
 }
 
+/** creates search bar and sets up rendering based on search type */
 export async function initSignUpEvents() {
   try {
     const events = await fetchWithAuth("/api/public-events", "GET");
@@ -891,6 +894,7 @@ export async function initSignUpEvents() {
   }
 }
 
+/** fetch and display info related to joining an event. Create functionality for making event application */
 export async function initEventDetails() {
   const sid = sessionStorage.getItem("selectedSid");
   if (!sid) { window.location.href = "/signUpEvents"; return; }
@@ -960,6 +964,7 @@ export async function initEventDetails() {
   }
 }
 
+/** display info related to managing an event */
 export async function initManageEvent() {
   const sid = sessionStorage.getItem("selectedOrgSid");
   if (!sid) { window.location.href = "/viewOrganization"; return; }
@@ -982,6 +987,7 @@ export async function initManageEvent() {
   }
 }
 
+/** Load and display the status of all participants of an event. Create functionality for kicking users and marking work as complete */
 async function loadParticipants(sid) {
   const participants = await fetchWithAuth(`/api/manage-event/${sid}/participants`, "GET");
   const container = document.getElementById("participants-container");
@@ -1064,6 +1070,7 @@ async function loadParticipants(sid) {
 
 }
 
+/** generate card to represent participant */
 function participantCard(p, showKick, isCompleted = false) {
   const name = p.first_name
     ? `${p.first_name} ${p.last_name ? p.last_name[0] + "." : ""}`
@@ -1082,7 +1089,7 @@ function participantCard(p, showKick, isCompleted = false) {
   `;
 }
 
-
+/** create form for editing group */
 export function initEditGroup(fetchWithAuth,gid) {
   const editBtn = document.getElementById("editGroupBtn");
   const editForm = document.getElementById("editGroupForm");
@@ -1127,7 +1134,7 @@ export function initEditGroup(fetchWithAuth,gid) {
   });
 }
 
-
+/** upload an image to user or organization image slot */
 async function uploadImageUser(slotNum){
 
     const input=document.createElement("input");
@@ -1157,7 +1164,7 @@ async function uploadImageUser(slotNum){
     input.click();
 }
 
-
+/** upload an image to group image slot */
 async function uploadToSlotGroup(slotNum,gid){
 
     const input=document.createElement("input");
@@ -1188,7 +1195,7 @@ async function uploadToSlotGroup(slotNum,gid){
 }
 
 
-
+/** kick member from group */
 window.handleKick = async function(targetUid,gid) {
   try {
   const res = await fetchWithAuth("/api/groupKick", "PUT", {
@@ -1208,6 +1215,7 @@ window.handleKick = async function(targetUid,gid) {
   }
 }
 
+/** promote member in group */
 window.handlePromote = async function (targetUid,gid) {
    const res = await fetchWithAuth("/api/groupPromote", "PUT",{targetUid,gid});
    if (res.error) {
@@ -1217,6 +1225,7 @@ window.handlePromote = async function (targetUid,gid) {
    location.reload();
 }
 
+/** cancel active medal of group */
 window.handleCancelMedal = async function (mid, gid) {
     if(!confirm("Are you sure you want to cancel this medal?")) return;
     const res = await fetchWithAuth("/api/groupMedalCancel", "POST", { gid, mid });
@@ -1227,6 +1236,7 @@ window.handleCancelMedal = async function (mid, gid) {
     location.reload();
 }
 
+/** create new active medal for group */
 async function handleCreateMedal(gid, hours) {
     try {
         const res = await fetchWithAuth("/api/groupMedalCreate", "POST", { hours, gid });
@@ -1239,6 +1249,7 @@ async function handleCreateMedal(gid, hours) {
     }
 }
 
+/** let member leave group */
 window.handleLeaveGroup = async function (gid) {
     if (!confirm("Are you sure you want to leave this group?")) return;
     const user = await fetchWithAuth("/api/userProfileData");
@@ -1247,6 +1258,7 @@ window.handleLeaveGroup = async function (gid) {
     window.location.href = "/userProfile";
 }
 
+/** fetch and display group info, tabs, and images */
 export async function fetchGroup(fetchWithAuth, gid) {
   const permData = await fetchWithAuth("/api/baseGroupPermissions", "POST", { gid });
   const isAdmin = permData.role === "admin";
@@ -1334,6 +1346,7 @@ export async function fetchGroup(fetchWithAuth, gid) {
   }
 }
 
+/** fetch and display group medals */
 export async function fetchMembersMedals(fetchWithAuth, gid) {
   const permData = await fetchWithAuth("/api/baseGroupPermissions", "POST", { gid });
   const permission = permData.role === "admin";

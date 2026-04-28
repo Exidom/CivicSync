@@ -38,7 +38,7 @@ const cors = require('cors');
 app.use(cors());
 
 
-
+/** sets up the tabs in the user page. Uses logged in user and fetches groups, past hours, and organization */
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke!');
